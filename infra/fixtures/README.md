@@ -19,9 +19,10 @@ stubs per API in that order, pages ascending, then `wiremock/manifest.json`). Th
 deletes `data/` and `wiremock/`, reruns the generator, and requires a clean `git status`
 over `infra/fixtures` — hand-edits to fixture or stub files are gate failures.
 
-> **Freeze warning** (spec #1): once M2's golden CSVs exist these fixtures are frozen.
-> Any later change is a golden-invalidation event requiring explicit justification. That
-> is why every M6 edge case is baked in now.
+> **FROZEN** (spec #1; in force since M2.2, issue #21): the M2 golden CSVs exist
+> (`e2e/golden/delivered/`, computed by `e2e/oracle.mjs`), so these fixtures are frozen.
+> Any change is now a golden-invalidation event requiring explicit justification. That
+> is why every M6 edge case was baked in up front.
 
 ## Vocabulary
 

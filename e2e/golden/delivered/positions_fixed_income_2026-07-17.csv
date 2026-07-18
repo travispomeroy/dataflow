@@ -1,0 +1,20 @@
+clientId,clientName,advisorGroup,symbol,assetClass,quantity,marketValue,currency,orderId,orderSide,orderQuantity,orderStatus,tradeDate
+INV-001,Alice Thornton,Meridian Wealth,CORP-IBM-2029,fixed_income,63000,13104.175,USD,ORD-0013,SELL,53000,NEW,2026-07-16
+INV-001,Alice Thornton,Meridian Wealth,CORP-MSFT-2033,fixed_income,468000,585448.35,USD,ORD-0016,BUY,21000,NEW,2026-07-17
+INV-001,Alice Thornton,Meridian Wealth,MUNI-CA-2036,fixed_income,396000,371235.69,GBP,,,,,
+INV-001,Alice Thornton,Meridian Wealth,T-2027-11,fixed_income,253000,485684.15,GBP,ORD-0018,BUY,81000,FILLED,2026-07-16
+INV-001,Alice Thornton,Meridian Wealth,T-2030-05,fixed_income,0,0,USD,ORD-0019,SELL,45000,FILLED,2026-07-15
+INV-002,Benjamin Okafor,Harbor Point Advisors,CORP-GE-2031,fixed_income,473000,325993.71,USD,ORD-0038,SELL,94000,CANCELLED,2026-07-14
+INV-002,Benjamin Okafor,Harbor Point Advisors,CORP-IBM-2029,fixed_income,170000,287458.98,GBP,ORD-0040,BUY,51000,NEW,2026-07-14
+INV-002,Benjamin Okafor,Harbor Point Advisors,CORP-MSFT-2033,fixed_income,0,0,USD,,,,,
+INV-002,Benjamin Okafor,Harbor Point Advisors,MUNI-CA-2036,fixed_income,103000,67068.71,USD,ORD-0043,BUY,51000,NEW,2026-07-16
+INV-002,Benjamin Okafor,Harbor Point Advisors,MUNI-NY-2033,fixed_income,192000,211353.4,USD,ORD-0044,BUY,72000,NEW,2026-07-17
+INV-002,Benjamin Okafor,Harbor Point Advisors,T-2030-05,fixed_income,319000,33531.455,EUR,ORD-0048,SELL,88000,FILLED,2026-07-16
+INV-002,Benjamin Okafor,Harbor Point Advisors,T-2035-08,fixed_income,410000,205175.78,USD,ORD-0050,BUY,2000,PARTIALLY_FILLED,2026-07-17
+INV-003,Carmen Delgado,XYZ,CORP-GE-2031,fixed_income,261000,4867.442,USD,ORD-0088,BUY,16000,NEW,2026-07-17
+INV-003,Carmen Delgado,XYZ,CORP-MSFT-2033,fixed_income,183000,220912.27,USD,,,,,
+INV-003,Carmen Delgado,XYZ,MUNI-CA-2036,fixed_income,146000,10318.659,EUR,,,,,
+INV-003,Carmen Delgado,XYZ,MUNI-NY-2033,fixed_income,252000,118429.69,USD,,,,,
+INV-003,Carmen Delgado,XYZ,T-2027-11,fixed_income,458000,554538.52,USD,,,,,
+INV-003,Carmen Delgado,XYZ,T-2030-05,fixed_income,403000,142397.2,USD,,,,,
+INV-003,Carmen Delgado,XYZ,T-2035-08,fixed_income,303000,322582.25,USD,ORD-0092,BUY,33000,NEW,2026-07-16

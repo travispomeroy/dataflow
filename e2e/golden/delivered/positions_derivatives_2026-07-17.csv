@@ -1,0 +1,11 @@
+clientId,clientName,advisorGroup,symbol,assetClass,quantity,marketValue,currency,orderId,orderSide,orderQuantity,orderStatus,tradeDate
+INV-001,Alice Thornton,Meridian Wealth,AAPL-C-260-DEC26,derivatives,141,460174.87,USD,ORD-0001,SELL,1894,FILLED,2026-07-06
+INV-001,Alice Thornton,Meridian Wealth,TSLA-P-300-JAN27,derivatives,226,257941.56,USD,ORD-0003,SELL,471,NEW,2026-07-10
+INV-001,Alice Thornton,Meridian Wealth,WTI-CL-AUG26-FUT,derivatives,0,0,USD,ORD-0004,SELL,888,CANCELLED,2026-07-09
+INV-002,Benjamin Okafor,Harbor Point Advisors,ESU26-FUT,derivatives,58,378058.67,USD,,,,,
+INV-002,Benjamin Okafor,Harbor Point Advisors,NVDA-C-220-MAR27,derivatives,196,454357.08,USD,ORD-0028,BUY,288,PARTIALLY_FILLED,2026-07-13
+INV-002,Benjamin Okafor,Harbor Point Advisors,TSLA-P-300-JAN27,derivatives,204,27810.725,USD,,,,,
+INV-003,Carmen Delgado,XYZ,AAPL-C-260-DEC26,derivatives,247,550992.8,USD,ORD-0063,BUY,1401,NEW,2026-07-13
+INV-003,Carmen Delgado,XYZ,ESU26-FUT,derivatives,78,327979.99,USD,ORD-0064,SELL,851,FILLED,2026-07-14
+INV-003,Carmen Delgado,XYZ,SPX-C-6500-DEC26,derivatives,237,19271.77,EUR,ORD-0065,BUY,1163,FILLED,2026-07-13
+INV-003,Carmen Delgado,XYZ,TSLA-P-300-JAN27,derivatives,1,72121.77,USD,ORD-0069,SELL,1042,FILLED,2026-07-17

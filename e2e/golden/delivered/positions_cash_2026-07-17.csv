@@ -1,0 +1,6 @@
+clientId,clientName,advisorGroup,symbol,assetClass,quantity,marketValue,currency,orderId,orderSide,orderQuantity,orderStatus,tradeDate
+INV-001,Alice Thornton,Meridian Wealth,EUR-CASH,cash,46580.02,46580.02,EUR,,,,,
+INV-001,Alice Thornton,Meridian Wealth,USD-CASH,cash,97982.82,97982.82,USD,,,,,
+INV-002,Benjamin Okafor,Harbor Point Advisors,GBP-CASH,cash,40859.99,40859.99,GBP,,,,,
+INV-002,Benjamin Okafor,Harbor Point Advisors,USD-CASH,cash,135192.06,135192.06,USD,,,,,
+INV-003,Carmen Delgado,XYZ,USD-CASH,cash,7723.79,7723.79,USD,,,,,

@@ -10,9 +10,10 @@
 // fixed seed, no wall-clock reads, sorted JSON keys, LF line endings, trailing
 // newline, fixed file emission order. Field contract: README.md beside this file.
 //
-// Fixtures freeze once M2's golden CSVs exist — every downstream edge case
-// (Advisor Group "XYZ", zero-quantity positions, awkward decimals, merge
-// orphans, all five Asset Classes) is baked in here, now.
+// FROZEN since M2.2 (issue #21): the M2 golden CSVs exist, so any change to
+// this generator's output is a golden-invalidation event requiring explicit
+// justification. Every downstream edge case (Advisor Group "XYZ", zero-quantity
+// positions, awkward decimals, merge orphans, all five Asset Classes) is baked in.
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
