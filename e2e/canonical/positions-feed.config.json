@@ -1,0 +1,31 @@
+{
+  "nodes": [
+    {
+      "id": "positions-source",
+      "type": "source",
+      "sourceId": "positions"
+    },
+    {
+      "id": "client-filter",
+      "type": "transform",
+      "kind": "clientFilter",
+      "clientIds": ["INV-001", "INV-002", "INV-003"]
+    },
+    {
+      "id": "pomeroy-delivery",
+      "type": "destination",
+      "destinationId": "pomeroy-provider"
+    }
+  ],
+  "edges": [
+    { "from": "positions-source", "to": "client-filter" },
+    { "from": "client-filter", "to": "pomeroy-delivery" }
+  ],
+  "schedule": {
+    "kind": "daily",
+    "time": "06:30",
+    "timezone": "America/New_York"
+  },
+  "engine": "hop",
+  "executionModel": "batch"
+}

@@ -3,10 +3,12 @@ package dev.pomeroy.dataflow.controlplane.catalog;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
+import dev.pomeroy.dataflow.controlplane.TestcontainersConfiguration;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 
 /**
  * The Catalog module's public Java API — the seam the compiler (M1.3) consumes. This is
@@ -16,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
  * (infra/fixtures/README.md), not from the seeds themselves.
  */
 @SpringBootTest
+@Import(TestcontainersConfiguration.class)
 class CatalogModuleApiTests {
 
 	@Autowired

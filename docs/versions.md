@@ -32,6 +32,7 @@ Digest pinning is deferred to a productionization note, with one exception below
 | Maven wrapper | `3.3.4` (`only-script` type) | `control-plane/.mvn/wrapper/maven-wrapper.properties` `wrapperVersion` (M0.8, applied) | 2026-07-18 |
 | Spring Boot | `4.1.0` | `control-plane/pom.xml` parent (M0.8, applied) | 2026-07-18 |
 | Spring Modulith | `2.1.0` | `control-plane/pom.xml` via `spring-modulith-bom` (M0.8, applied) | 2026-07-18 |
+| Testcontainers | `2.0.5` | `control-plane/pom.xml` via `testcontainers-bom` (M1.2, applied) | 2026-07-18 |
 
 ## How these were researched
 
@@ -65,6 +66,14 @@ index, the Adoptium release API, and context7 for the NiFi docker documentation.
   contributors never need a system Maven.
 - **Spring**: Boot `4.1.0` is the `<release>` in Maven Central metadata (no 4.1.x patch
   yet at research date); Modulith `2.1.0` is the matching GA line for Boot 4.1.
+- **Testcontainers** (applied in M1.2): `2.0.5` is exactly what
+  `spring-boot-testcontainers` 4.1.0 is built against (read from its published pom) —
+  Boot 4 no longer manages Testcontainers versions itself. Note the 2.x module renames:
+  the Postgres module is `testcontainers-postgresql` and the class lives in
+  `org.testcontainers.postgresql`. Tests run it with the same `postgres:18.4` image
+  pinned above, so `./mvnw verify` needs Docker but not the compose world. Other
+  Boot-managed library versions (Flyway, JDBC driver, Jackson) deliberately get no rows
+  here — this table carries headline pins only, and those flow from the Boot parent.
 
 ## Scope notes
 
