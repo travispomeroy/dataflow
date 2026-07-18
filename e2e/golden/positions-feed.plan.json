@@ -1,0 +1,100 @@
+{
+  "slug": "positions-feed",
+  "engine": "hop",
+  "executionModel": "batch",
+  "schedule": {
+    "kind": "daily",
+    "time": "06:30",
+    "timezone": "America/New_York"
+  },
+  "extraction": {
+    "baseUrl": "http://wiremock:8080",
+    "merge": {
+      "key": "investorId"
+    },
+    "apis": [
+      {
+        "name": "positions",
+        "path": "/positions",
+        "joinOn": [],
+        "pagination": {
+          "style": "pageNumber",
+          "pageSize": 50,
+          "termination": "totalPages"
+        },
+        "fields": {
+          "symbol": "symbol",
+          "assetClass": "assetClass",
+          "quantity": "quantity",
+          "marketValue": "marketValue",
+          "currency": "currency"
+        }
+      },
+      {
+        "name": "investors",
+        "path": "/investors",
+        "joinOn": [
+          "investorId"
+        ],
+        "pagination": {
+          "style": "pageNumber",
+          "pageSize": 4,
+          "termination": "totalPages"
+        },
+        "fields": {
+          "investorId": "clientId",
+          "name": "clientName",
+          "advisorGroup": "advisorGroup"
+        }
+      },
+      {
+        "name": "orders",
+        "path": "/orders",
+        "joinOn": [
+          "investorId",
+          "symbol"
+        ],
+        "pagination": {
+          "style": "pageNumber",
+          "pageSize": 75,
+          "termination": "totalPages"
+        },
+        "fields": {
+          "orderId": "orderId",
+          "side": "orderSide",
+          "quantity": "orderQuantity",
+          "status": "orderStatus",
+          "tradeDate": "tradeDate"
+        }
+      }
+    ]
+  },
+  "transforms": [
+    {
+      "kind": "clientFilter",
+      "field": "clientId",
+      "clientIds": [
+        "INV-001",
+        "INV-002",
+        "INV-003"
+      ]
+    }
+  ],
+  "files": [
+    {
+      "fileDefinitionId": "positions-by-asset-class",
+      "namePattern": "positions_{assetClass}_{businessDate}.csv",
+      "splitBy": "assetClass"
+    }
+  ],
+  "staging": {
+    "pathConvention": "positions-feed/{runId}/"
+  },
+  "delivery": {
+    "host": "sftp",
+    "port": 22,
+    "username": "pomeroy",
+    "basePath": "upload/pomeroy",
+    "credentialsRef": "SFTP_POMEROY"
+  }
+}
