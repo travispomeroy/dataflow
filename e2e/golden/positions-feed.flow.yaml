@@ -1,0 +1,48 @@
+id: positions-feed
+namespace: dataflow
+labels:
+  dataflow.version: "1"
+concurrency:
+  behavior: QUEUE
+  limit: 1
+tasks:
+  - id: engine_runner
+    type: io.kestra.plugin.core.log.Log
+    message: Engine runner placeholder (engine hop, execution model batch) — stages nothing, so the staging pull fails until M2 lands a real engine task
+  - id: staging_pull
+    type: io.kestra.plugin.minio.Downloads
+    endpoint: http://minio:9000
+    accessKeyId: "{{ secret('MINIO_ACCESS_KEY') }}"
+    secretKeyId: "{{ secret('MINIO_SECRET_KEY') }}"
+    bucket: staging
+    prefix: "positions-feed/{{ execution.id }}/"
+    action: NONE
+  - id: delivery_hidden_upload
+    type: io.kestra.plugin.core.flow.ForEach
+    values: "{{ outputs.staging_pull.objects }}"
+    tasks:
+      - id: upload_hidden
+        type: io.kestra.plugin.fs.sftp.Upload
+        host: sftp
+        port: "22"
+        username: pomeroy
+        password: "{{ secret('SFTP_POMEROY') }}"
+        from: "{{ fromJson(taskrun.value).uri }}"
+        to: "/upload/pomeroy/.{{ fromJson(taskrun.value).key | substringAfterLast('/') }}.part"
+  - id: delivery_rename
+    type: io.kestra.plugin.core.flow.ForEach
+    values: "{{ outputs.staging_pull.objects }}"
+    tasks:
+      - id: rename_visible
+        type: io.kestra.plugin.fs.sftp.Move
+        host: sftp
+        port: "22"
+        username: pomeroy
+        password: "{{ secret('SFTP_POMEROY') }}"
+        from: "/upload/pomeroy/.{{ fromJson(taskrun.value).key | substringAfterLast('/') }}.part"
+        to: "/upload/pomeroy/{{ fromJson(taskrun.value).key | substringAfterLast('/') }}"
+triggers:
+  - id: schedule
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "30 6 * * *"
+    timezone: America/New_York
