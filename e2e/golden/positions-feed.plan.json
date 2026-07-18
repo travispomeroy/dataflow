@@ -65,6 +65,12 @@
           "quantity": "orderQuantity",
           "status": "orderStatus",
           "tradeDate": "tradeDate"
+        },
+        "collapse": {
+          "latestBy": [
+            "tradeDate",
+            "orderId"
+          ]
         }
       }
     ]
@@ -84,7 +90,22 @@
     {
       "fileDefinitionId": "positions-by-asset-class",
       "namePattern": "positions_{assetClass}_{businessDate}.csv",
-      "splitBy": "assetClass"
+      "splitBy": "assetClass",
+      "columns": [
+        "clientId",
+        "clientName",
+        "advisorGroup",
+        "symbol",
+        "assetClass",
+        "quantity",
+        "marketValue",
+        "currency",
+        "orderId",
+        "orderSide",
+        "orderQuantity",
+        "orderStatus",
+        "tradeDate"
+      ]
     }
   ],
   "staging": {

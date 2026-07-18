@@ -34,6 +34,9 @@ class CatalogSeedConsistencyTests {
 	@Autowired
 	MockMvc mvc;
 
+	@Autowired
+	Catalog catalog;
+
 	ObjectMapper mapper = new ObjectMapper();
 
 	@Test
@@ -56,6 +59,27 @@ class CatalogSeedConsistencyTests {
 		});
 
 		assertThat(served).containsExactlyElementsOf(expectedClients);
+	}
+
+	/**
+	 * A File Definition can only deliver columns its Source actually produces: every
+	 * entry in {@code columns} must be a logical field some upstream API projects.
+	 */
+	@Test
+	void fileDefinitionColumnsAreFieldsTheirSourceProjects() {
+		for (FileDefinition definition : catalog.fileDefinitions()) {
+			Source source = catalog.sources().stream()
+					.filter(candidate -> candidate.id().equals(definition.sourceId()))
+					.findFirst().orElseThrow();
+			List<String> projected = source.physical().apis().stream()
+					.flatMap(api -> api.fields().values().stream())
+					.toList();
+
+			assertThat(definition.columns())
+					.as("columns of file definition %s", definition.id())
+					.isNotEmpty()
+					.isSubsetOf(projected);
+		}
 	}
 
 	/**

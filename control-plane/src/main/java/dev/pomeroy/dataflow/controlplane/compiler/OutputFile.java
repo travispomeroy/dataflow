@@ -1,9 +1,18 @@
 package dev.pomeroy.dataflow.controlplane.compiler;
 
+import java.util.List;
+
 /**
  * One resolved file-production step: the Catalog File Definition the plan will
  * produce. {@code namePattern} keeps its tokens — {@code {businessDate}} and the
  * {@code splitBy} field's values (one file per value) resolve at run time.
+ * {@code columns} is the projection: the logical fields the file carries, in
+ * delivered order — also the CSV header row verbatim.
  */
-public record OutputFile(String fileDefinitionId, String namePattern, String splitBy) {
+public record OutputFile(String fileDefinitionId, String namePattern, String splitBy,
+		List<String> columns) {
+
+	public OutputFile {
+		columns = columns == null ? List.of() : List.copyOf(columns);
+	}
 }

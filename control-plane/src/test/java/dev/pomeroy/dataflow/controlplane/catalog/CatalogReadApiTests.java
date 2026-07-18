@@ -63,7 +63,10 @@ class CatalogReadApiTests {
 				.andExpect(jsonPath("$[0].id").value("positions-by-asset-class"))
 				.andExpect(jsonPath("$[0].sourceId").value("positions"))
 				.andExpect(jsonPath("$[0].namePattern").value("positions_{assetClass}_{businessDate}.csv"))
-				.andExpect(jsonPath("$[0].splitBy").value("assetClass"));
+				.andExpect(jsonPath("$[0].splitBy").value("assetClass"))
+				.andExpect(jsonPath("$[0].columns", hasSize(13)))
+				.andExpect(jsonPath("$[0].columns[0]").value("clientId"))
+				.andExpect(jsonPath("$[0].columns[12]").value("tradeDate"));
 	}
 
 	@Test

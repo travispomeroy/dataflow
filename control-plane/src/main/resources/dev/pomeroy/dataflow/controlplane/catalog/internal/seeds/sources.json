@@ -56,6 +56,9 @@
             "quantity": "orderQuantity",
             "status": "orderStatus",
             "tradeDate": "tradeDate"
+          },
+          "collapse": {
+            "latestBy": ["tradeDate", "orderId"]
           }
         }
       ]

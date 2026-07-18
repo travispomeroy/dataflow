@@ -1,6 +1,7 @@
 package dev.pomeroy.dataflow.controlplane.compiler;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 import dev.pomeroy.dataflow.controlplane.compiler.internal.CatalogResolvingCompiler;
 import dev.pomeroy.dataflow.controlplane.dataflow.DataflowConfig;
@@ -91,8 +92,28 @@ class ExecutionPlanGoldenTests {
 		assertThat(plan.transforms()).containsExactly(new ClientFilterStep("clientFilter",
 				"clientId", List.of("INV-001", "INV-002", "INV-003")));
 		assertThat(plan.files()).containsExactly(new OutputFile("positions-by-asset-class",
-				"positions_{assetClass}_{businessDate}.csv", "assetClass"));
+				"positions_{assetClass}_{businessDate}.csv", "assetClass",
+				List.of("clientId", "clientName", "advisorGroup", "symbol", "assetClass",
+						"quantity", "marketValue", "currency", "orderId", "orderSide",
+						"orderQuantity", "orderStatus", "tradeDate")));
 		assertThat(plan.staging()).isEqualTo(new Staging("positions-feed/{runId}/"));
+	}
+
+	/**
+	 * ADR-0006: the orders extraction carries the latest-order collapse rule so an
+	 * engine compiler can generate the whole position-grain artifact from the plan
+	 * alone; the 1:1 APIs carry none.
+	 */
+	@Test
+	void thePlanCarriesTheLatestOrderCollapseOnTheOrdersExtractionOnly() throws Exception {
+		ExecutionPlan plan = compiler.compile(SLUG, canonicalConfig());
+
+		assertThat(plan.extraction().apis())
+				.extracting(ApiExtraction::name, ApiExtraction::collapse)
+				.containsExactly(
+						tuple("positions", null),
+						tuple("investors", null),
+						tuple("orders", new Collapse(List.of("tradeDate", "orderId"))));
 	}
 
 	private DataflowConfig canonicalConfig() throws Exception {

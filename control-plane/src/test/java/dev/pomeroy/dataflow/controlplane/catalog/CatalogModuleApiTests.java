@@ -59,6 +59,21 @@ class CatalogModuleApiTests {
 						tuple("orders", List.of("investorId", "symbol")));
 	}
 
+	/**
+	 * ADR-0006: the feed is one row per position; the orders API collapses to the
+	 * latest order per join key — max tradeDate, tie-broken by max orderId. The 1:1
+	 * APIs carry no collapse.
+	 */
+	@Test
+	void ordersCollapseToTheLatestOrderPerJoinKey() {
+		assertThat(positions().physical().apis())
+				.extracting(UpstreamApi::name, UpstreamApi::collapse)
+				.containsExactly(
+						tuple("positions", null),
+						tuple("investors", null),
+						tuple("orders", new Collapse(List.of("tradeDate", "orderId"))));
+	}
+
 	@Test
 	void pomeroyProviderPhysicalDefinitionNamesAKestraSecretInsteadOfCarryingOne() {
 		Destination pomeroy = catalog.destinations().stream()
@@ -71,6 +86,21 @@ class CatalogModuleApiTests {
 		assertThat(physical.username()).isEqualTo("pomeroy");
 		assertThat(physical.basePath()).isEqualTo("upload/pomeroy");
 		assertThat(physical.credentialsRef()).isEqualTo("SFTP_POMEROY");
+	}
+
+	/**
+	 * The File Definition's promised columns projection (issue #20): the delivered CSV
+	 * order, headers verbatim in the plan's camelCase vocabulary.
+	 */
+	@Test
+	void positionsFileDefinitionProjectsTheDeliveredColumnsInOrder() {
+		FileDefinition definition = catalog.fileDefinitions().stream()
+				.filter(fileDefinition -> fileDefinition.id().equals("positions-by-asset-class"))
+				.findFirst().orElseThrow();
+
+		assertThat(definition.columns()).containsExactly("clientId", "clientName",
+				"advisorGroup", "symbol", "assetClass", "quantity", "marketValue", "currency",
+				"orderId", "orderSide", "orderQuantity", "orderStatus", "tradeDate");
 	}
 
 	@Test

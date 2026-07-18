@@ -7,6 +7,7 @@ import dev.pomeroy.dataflow.controlplane.catalog.Source;
 import dev.pomeroy.dataflow.controlplane.catalog.SourcePhysical;
 import dev.pomeroy.dataflow.controlplane.compiler.ApiExtraction;
 import dev.pomeroy.dataflow.controlplane.compiler.ClientFilterStep;
+import dev.pomeroy.dataflow.controlplane.compiler.Collapse;
 import dev.pomeroy.dataflow.controlplane.compiler.DataflowCompiler;
 import dev.pomeroy.dataflow.controlplane.compiler.Delivery;
 import dev.pomeroy.dataflow.controlplane.compiler.Engine;
@@ -91,7 +92,8 @@ public class CatalogResolvingCompiler implements DataflowCompiler {
 				catalog.fileDefinitions().stream()
 						.filter(definition -> definition.sourceId().equals(source.id()))
 						.map(definition -> new OutputFile(definition.id(),
-								definition.namePattern(), definition.splitBy()))
+								definition.namePattern(), definition.splitBy(),
+								definition.columns()))
 						.toList(),
 				new Staging(slug + "/{runId}/"),
 				delivery(destination));
@@ -128,7 +130,9 @@ public class CatalogResolvingCompiler implements DataflowCompiler {
 										switch (api.pagination().termination()) {
 											case TOTAL_PAGES -> PaginationTermination.TOTAL_PAGES;
 										}),
-								api.fields()))
+								api.fields(),
+								api.collapse() == null ? null
+										: new Collapse(api.collapse().latestBy())))
 						.toList());
 	}
 
