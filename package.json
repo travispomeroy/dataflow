@@ -1,0 +1,9 @@
+{
+  "name": "dataflow",
+  "private": true,
+  "description": "Toolchain pin for the repo root — the Nx workspace lives in ui/ (M0.7). Versions: docs/versions.md.",
+  "engines": {
+    "node": "24.18.0",
+    "npm": "11.16.0"
+  }
+}
