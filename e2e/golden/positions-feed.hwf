@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow>
+  <name>positions-feed</name>
+  <name_sync_with_filename>Y</name_sync_with_filename>
+  <description>Runs the positions-feed pipeline and stages its files to MinIO (ADR-0001: engines write to Staging)</description>
+  <extended_description/>
+  <workflow_version/>
+  <created_user>-</created_user>
+  <created_date>1970/01/01 00:00:00.000</created_date>
+  <modified_user>-</modified_user>
+  <modified_date>1970/01/01 00:00:00.000</modified_date>
+  <parameters>
+    <parameter>
+      <name>BUSINESS_DATE</name>
+      <default_value/>
+      <description>The Business Date the produced files are as-of; resolved into every file name</description>
+    </parameter>
+    <parameter>
+      <name>OUT_DIR</name>
+      <default_value>/tmp/positions-feed-out</default_value>
+      <description>Local folder the files are produced into before staging (direct minio:// output is broken in Hop 2.18.1)</description>
+    </parameter>
+    <parameter>
+      <name>RUN_ID</name>
+      <default_value/>
+      <description>The Run identifier (the Kestra execution id); names the staging folder</description>
+    </parameter>
+  </parameters>
+  <actions>
+    <action>
+      <name>Start</name>
+      <description/>
+      <type>SPECIAL</type>
+      <attributes/>
+      <DayOfMonth>1</DayOfMonth>
+      <doNotWaitOnFirstExecution>N</doNotWaitOnFirstExecution>
+      <hour>12</hour>
+      <intervalMinutes>60</intervalMinutes>
+      <intervalSeconds>0</intervalSeconds>
+      <minutes>0</minutes>
+      <repeat>N</repeat>
+      <schedulerType>0</schedulerType>
+      <weekDay>1</weekDay>
+      <parallel>N</parallel>
+      <xloc>96</xloc>
+      <yloc>96</yloc>
+      <attributes_hac/>
+    </action>
+    <action>
+      <name>produce the files</name>
+      <description/>
+      <type>PIPELINE</type>
+      <attributes/>
+      <filename>${Internal.Entry.Current.Folder}/positions-feed.hpl</filename>
+      <params_from_previous>N</params_from_previous>
+      <exec_per_row>N</exec_per_row>
+      <clear_rows>N</clear_rows>
+      <clear_files>N</clear_files>
+      <set_logfile>N</set_logfile>
+      <logfile/>
+      <logext/>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <loglevel>Basic</loglevel>
+      <set_append_logfile>N</set_append_logfile>
+      <wait_until_finished>Y</wait_until_finished>
+      <follow_abort_remote>N</follow_abort_remote>
+      <create_parent_folder>N</create_parent_folder>
+      <run_configuration>local</run_configuration>
+      <parameters>
+        <pass_all_parameters>Y</pass_all_parameters>
+      </parameters>
+      <parallel>N</parallel>
+      <xloc>272</xloc>
+      <yloc>96</yloc>
+      <attributes_hac/>
+    </action>
+    <action>
+      <name>stage the files</name>
+      <description/>
+      <type>COPY_FILES</type>
+      <attributes/>
+      <copy_empty_folders>N</copy_empty_folders>
+      <arg_from_previous>N</arg_from_previous>
+      <overwrite_files>Y</overwrite_files>
+      <include_subfolders>N</include_subfolders>
+      <remove_source_files>N</remove_source_files>
+      <add_result_filesname>N</add_result_filesname>
+      <destination_is_a_file>N</destination_is_a_file>
+      <create_destination_folder>Y</create_destination_folder>
+      <fields>
+        <field>
+          <source_filefolder>${OUT_DIR}</source_filefolder>
+          <destination_filefolder>minio://staging/positions-feed/${RUN_ID}</destination_filefolder>
+          <wildcard>.*\.csv</wildcard>
+        </field>
+      </fields>
+      <parallel>N</parallel>
+      <xloc>448</xloc>
+      <yloc>96</yloc>
+      <attributes_hac/>
+    </action>
+  </actions>
+  <hops>
+    <hop>
+      <from>Start</from>
+      <to>produce the files</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>Y</unconditional>
+    </hop>
+    <hop>
+      <from>produce the files</from>
+      <to>stage the files</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+  </hops>
+  <notepads/>
+  <attributes/>
+</workflow>
