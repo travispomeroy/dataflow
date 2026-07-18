@@ -49,7 +49,9 @@ index, the Adoptium release API, and context7 for the NiFi docker documentation.
   deployment would use AWS S3 anyway (the M7 profile flip).
 - **atmoz/sftp**: the repo publishes only rolling tags (`alpine`, `debian`) — there is no
   versioned tag to pin, so this is the one digest pin. Digest captured from the `alpine`
-  tag on the research date.
+  tag on the research date. The digest is the linux/amd64 image; on arm64 hosts Docker
+  runs it under emulation (verified working in M0.5) — a per-arch pin would defeat the
+  point of pinning one immutable identity.
 - **Postgres**: `18.4` is the newest stable (19 was beta-only at research date).
 - **WireMock**: `3.13.2` is the newest stable (4.x was beta-only at research date).
 - **Node**: `24.18.0` is the active LTS. `engines` is exact and `engine-strict=true` is

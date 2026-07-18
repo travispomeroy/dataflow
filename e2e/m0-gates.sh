@@ -41,6 +41,30 @@ fi
 stage "Stage 3: smoke checks (Node built-in fetch)"
 node --env-file=infra/.env e2e/smoke.mjs
 
+stage "Stage 3: SFTP login pinned against the committed host key; upload home writable"
+# Non-interactive password auth via SSH_ASKPASS (no sshpass on clean machines);
+# StrictHostKeyChecking=yes + the committed known_hosts means a changed host
+# identity or failed auth exits non-zero, and no known_hosts outside the repo
+# is ever consulted or written. The put/rm round-trip proves the chrooted
+# upload home is writable.
+sftp_probe=$(mktemp) sftp_batch=$(mktemp)
+# the script's single EXIT trap — later stages must extend it, not re-trap
+trap 'rm -f "$sftp_probe" "$sftp_batch"' EXIT
+printf 'm0-gate sftp probe\n' > "$sftp_probe"
+# -b aborts on the first failing command, so put/ls/rm failures fail the gate
+printf 'cd upload\nput %s probe.txt\nls probe.txt\nrm probe.txt\n' "$sftp_probe" > "$sftp_batch"
+# BatchMode=no must precede -b: -b implies BatchMode=yes, which disables
+# password auth outright, and ssh keeps the first value an option is given
+SFTP_PASSWORD=$(grep '^SFTP_PASSWORD=' infra/.env | cut -d= -f2-) \
+SSH_ASKPASS="$PWD/infra/sftp/askpass.sh" SSH_ASKPASS_REQUIRE=force \
+  sftp -P 2222 \
+    -o BatchMode=no \
+    -o StrictHostKeyChecking=yes \
+    -o UserKnownHostsFile="$PWD/infra/sftp/known_hosts" \
+    -o GlobalKnownHostsFile=/dev/null \
+    -o PreferredAuthentications=password \
+    -b "$sftp_batch" pomeroy@localhost
+
 stage "Stage 3: fixtures and WireMock stubs regenerate byte-identically"
 rm -rf infra/fixtures/data infra/fixtures/wiremock
 node infra/fixtures/generate.ts

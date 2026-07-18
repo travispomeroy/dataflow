@@ -91,6 +91,27 @@ services:
       retries: 24
       start_period: 5s
 
+  sftp:
+    # digest pin: atmoz/sftp publishes no immutable tags (docs/versions.md)
+    image: atmoz/sftp:alpine@sha256:a6cb3eb29202ca7f57e73bb7e527286e66e0e822fff65609207c7e0ef2d135a3
+    # fixed pomeroy user, chrooted home, writable upload/ subdir; the base
+    # delivery path below upload/ belongs to the Destination catalog entry (M1)
+    command: pomeroy:${SFTP_PASSWORD}:1001:100:upload
+    volumes:
+      # committed fixed host keys: identity survives container recreation, so
+      # the gate's pinned known_hosts never fights host-key churn. Not :ro —
+      # the entrypoint chmods them to what sshd requires (git checks out 0644)
+      - ./sftp/ssh_host_ed25519_key:/etc/ssh/ssh_host_ed25519_key
+      - ./sftp/ssh_host_rsa_key:/etc/ssh/ssh_host_rsa_key
+    ports:
+      - "2222:22"
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 22"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+      start_period: 5s
+
   minio:
     image: minio/minio:RELEASE.2025-09-07T16-13-09Z
     command: server /data --console-address ":9001"
