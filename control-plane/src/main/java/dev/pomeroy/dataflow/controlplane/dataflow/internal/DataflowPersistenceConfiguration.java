@@ -25,13 +25,33 @@ class DataflowPersistenceConfiguration {
 	@Bean
 	JdbcCustomConversions jdbcCustomConversions(ObjectMapper mapper) {
 		return new JdbcCustomConversions(List.of(
-				new DataflowConfigToJsonb(mapper), new JsonbToDataflowConfig(mapper)));
+				new DataflowConfigToJsonb(mapper), new JsonbToDataflowConfig(mapper),
+				new PlanSnapshotToJsonb(), new JsonbToPlanSnapshot()));
 	}
 
 	@Bean
 	BeforeConvertCallback<DataflowEntity> serverGeneratedDataflowId() {
 		return entity -> entity.id() != null ? entity
 				: new DataflowEntity(UUID.randomUUID(), entity.slug(), entity.name(), entity.config());
+	}
+
+	@Bean
+	BeforeConvertCallback<DeploymentEntity> serverGeneratedDeploymentId() {
+		return entity -> entity.id() != null ? entity
+				: new DeploymentEntity(UUID.randomUUID(), entity.dataflowId(), entity.version(),
+						entity.config(), entity.plan(), entity.deployedAt(), entity.active());
+	}
+
+	private static PGobject jsonb(String document, String whatItIs) {
+		PGobject jsonb = new PGobject();
+		jsonb.setType("jsonb");
+		try {
+			jsonb.setValue(document);
+		}
+		catch (SQLException e) {
+			throw new IllegalStateException("Unstorable " + whatItIs, e);
+		}
+		return jsonb;
 	}
 
 	@WritingConverter
@@ -45,15 +65,25 @@ class DataflowPersistenceConfiguration {
 
 		@Override
 		public PGobject convert(DataflowConfig config) {
-			PGobject jsonb = new PGobject();
-			jsonb.setType("jsonb");
-			try {
-				jsonb.setValue(mapper.writeValueAsString(config));
-			}
-			catch (SQLException e) {
-				throw new IllegalStateException("Unstorable Dataflow Config", e);
-			}
-			return jsonb;
+			return jsonb(mapper.writeValueAsString(config), "Dataflow Config");
+		}
+	}
+
+	@WritingConverter
+	static class PlanSnapshotToJsonb implements Converter<PlanSnapshot, PGobject> {
+
+		@Override
+		public PGobject convert(PlanSnapshot plan) {
+			return jsonb(plan.json(), "Execution Plan snapshot");
+		}
+	}
+
+	@ReadingConverter
+	static class JsonbToPlanSnapshot implements Converter<PGobject, PlanSnapshot> {
+
+		@Override
+		public PlanSnapshot convert(PGobject jsonb) {
+			return new PlanSnapshot(jsonb.getValue());
 		}
 	}
 

@@ -27,8 +27,9 @@ import tools.jackson.databind.ObjectMapper;
 /**
  * Dataflow draft CRUD. The config arrives as raw JSON and is parsed here, so an
  * unparseable document (unknown node type, malformed shape) lands in the same
- * violations array as the structural checks instead of a bare 400. Deploy, undeploy
- * and run-now are separate seams (M1.6/M1.7).
+ * violations array as the structural checks instead of a bare 400. The lifecycle
+ * endpoints live in {@link DeploymentRestController}; run-now is a separate seam
+ * (M1.7).
  */
 @RestController
 @RequestMapping("/api/dataflows")
@@ -38,12 +39,15 @@ class DataflowRestController {
 
 	private final StructuralValidator validator;
 
+	private final DeploymentService deployments;
+
 	private final ObjectMapper mapper;
 
 	DataflowRestController(DataflowRepository repository, StructuralValidator validator,
-			ObjectMapper mapper) {
+			DeploymentService deployments, ObjectMapper mapper) {
 		this.repository = repository;
 		this.validator = validator;
+		this.deployments = deployments;
 		this.mapper = mapper;
 	}
 
@@ -88,7 +92,14 @@ class DataflowRestController {
 
 	@DeleteMapping("/{id}")
 	ResponseEntity<Void> delete(@PathVariable UUID id) {
-		repository.delete(find(id));
+		DataflowEntity existing = find(id);
+		// Stopping a feed is always an explicit, separate act (spec #10): a deployed
+		// Dataflow must be undeployed before it can be deleted.
+		if (deployments.deployed(existing.id())) {
+			throw problem(HttpStatus.CONFLICT,
+					"Dataflow '%s' is deployed — undeploy it first".formatted(existing.slug()));
+		}
+		repository.delete(existing);
 		return ResponseEntity.noContent().build();
 	}
 
