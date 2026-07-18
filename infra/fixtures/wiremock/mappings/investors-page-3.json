@@ -1,0 +1,38 @@
+{
+  "request": {
+    "method": "GET",
+    "queryParameters": {
+      "page": {
+        "equalTo": "3"
+      },
+      "pageSize": {
+        "equalTo": "4"
+      }
+    },
+    "urlPath": "/investors"
+  },
+  "response": {
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "data": [
+        {
+          "advisorGroup": "Meridian Wealth",
+          "investorId": "INV-009",
+          "name": "Isabelle Fontaine"
+        },
+        {
+          "advisorGroup": "Harbor Point Advisors",
+          "investorId": "INV-010",
+          "name": "Jack Whitfield"
+        }
+      ],
+      "page": 3,
+      "pageSize": 4,
+      "totalItems": 10,
+      "totalPages": 3
+    },
+    "status": 200
+  }
+}

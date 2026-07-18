@@ -1,8 +1,9 @@
 # Fixtures: the canonical mock-world dataset
 
 `generate.ts` deterministically produces the committed dataset in `data/` — the single
-source of truth for what the three mock upstream APIs contain. M1's catalog seed projects
-from the field contract below; M0.4's WireMock stubs serve pages of exactly these records.
+source of truth for what the three mock upstream APIs contain — plus the per-page WireMock
+stubs in `wiremock/` that serve pages of exactly these records. M1's catalog seed projects
+from the field contract below.
 
 ## Regenerating
 
@@ -13,9 +14,10 @@ node infra/fixtures/generate.ts
 Zero dependencies; runs on Node's built-in type stripping (Node pinned in `.nvmrc`).
 Reruns are byte-identical forever: fixed seed, seeded PRNG (mulberry32), no wall-clock
 reads, JSON keys sorted, 2-space indent, LF endings, trailing newline, fixed file emission
-order (`investors.json`, `positions.json`, `orders.json`). The M0 gate deletes `data/`,
-reruns the generator, and requires a clean `git status` over `infra/fixtures` — hand-edits
-to fixture files are gate failures.
+order (`data/investors.json`, `data/positions.json`, `data/orders.json`, then the WireMock
+stubs per API in that order, pages ascending, then `wiremock/manifest.json`). The M0 gate
+deletes `data/` and `wiremock/`, reruns the generator, and requires a clean `git status`
+over `infra/fixtures` — hand-edits to fixture or stub files are gate failures.
 
 > **Freeze warning** (spec #1): once M2's golden CSVs exist these fixtures are frozen.
 > Any later change is a golden-invalidation event requiring explicit justification. That
@@ -63,6 +65,27 @@ At most one position per `(investorId, symbol)` pair.
 | `quantity` | number | Positive integer; `fixed_income` orders in multiples of 1000 |
 | `status` | string | One of `NEW`, `PARTIALLY_FILLED`, `FILLED`, `CANCELLED` |
 | `tradeDate` | string | ISO date, a business day in the fixed window 2026-07-06 … 2026-07-17 |
+
+## Pagination (the WireMock stubs)
+
+The compose WireMock service mounts `wiremock/` read-only and serves the three APIs as
+strict paginated referees (spec #1, issue #5):
+
+- **Page-number style**: `GET /<api>?page=N&pageSize=M`, pages starting at 1.
+- **Full envelope on every page**: `data`, `page`, `pageSize`, `totalPages`, `totalItems`.
+- **Strict matching**: each stub matches `page` AND `pageSize` exactly. A wrong `pageSize`
+  or a `page` past the last matches no stub and falls through to WireMock's no-match 404 —
+  a compiler generating a wrong page loop fails loudly at the mock.
+- **Page sizes differ per API** so no engine compiler can hardcode one, and every API
+  yields ≥ 3 pages so single-page extraction can never be special-cased. Current sizes
+  (`generate.ts` `PAGE_SIZES`): investors 4 (10 records → 3 pages), positions 50
+  (207 → 5 pages), orders 75 (292 → 4 pages).
+
+Layout: `wiremock/mappings/<api>-page-<n>.json` (one stub per page, generator-emitted,
+covered by the same regen gate as `data/`) and `wiremock/manifest.json`, which records
+each API's page size — the one fact the smoke reconciliation cannot derive from the
+dataset itself. The smoke walks every page of every API and asserts the union is exactly
+the committed dataset.
 
 ## Baked-in edge cases (downstream targets)
 

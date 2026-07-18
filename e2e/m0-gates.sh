@@ -41,8 +41,8 @@ fi
 stage "Stage 3: smoke checks (Node built-in fetch)"
 node --env-file=infra/.env e2e/smoke.mjs
 
-stage "Stage 3: fixtures regenerate byte-identically"
-rm -rf infra/fixtures/data
+stage "Stage 3: fixtures and WireMock stubs regenerate byte-identically"
+rm -rf infra/fixtures/data infra/fixtures/wiremock
 node infra/fixtures/generate.ts
 if [[ -n "$(git status --porcelain -- infra/fixtures)" ]]; then
   git status --porcelain -- infra/fixtures >&2

@@ -1,0 +1,48 @@
+{
+  "request": {
+    "method": "GET",
+    "queryParameters": {
+      "page": {
+        "equalTo": "1"
+      },
+      "pageSize": {
+        "equalTo": "4"
+      }
+    },
+    "urlPath": "/investors"
+  },
+  "response": {
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "data": [
+        {
+          "advisorGroup": "Meridian Wealth",
+          "investorId": "INV-001",
+          "name": "Alice Thornton"
+        },
+        {
+          "advisorGroup": "Harbor Point Advisors",
+          "investorId": "INV-002",
+          "name": "Benjamin Okafor"
+        },
+        {
+          "advisorGroup": "XYZ",
+          "investorId": "INV-003",
+          "name": "Carmen Delgado"
+        },
+        {
+          "advisorGroup": "Cascade Capital Partners",
+          "investorId": "INV-004",
+          "name": "Dmitri Volkov"
+        }
+      ],
+      "page": 1,
+      "pageSize": 4,
+      "totalItems": 10,
+      "totalPages": 3
+    },
+    "status": 200
+  }
+}

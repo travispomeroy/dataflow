@@ -1,0 +1,11 @@
+{
+  "investors": {
+    "pageSize": 4
+  },
+  "orders": {
+    "pageSize": 75
+  },
+  "positions": {
+    "pageSize": 50
+  }
+}

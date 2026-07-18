@@ -1,0 +1,478 @@
+{
+  "request": {
+    "method": "GET",
+    "queryParameters": {
+      "page": {
+        "equalTo": "1"
+      },
+      "pageSize": {
+        "equalTo": "50"
+      }
+    },
+    "urlPath": "/positions"
+  },
+  "response": {
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "data": [
+        {
+          "assetClass": "cash",
+          "currency": "EUR",
+          "investorId": "INV-001",
+          "marketValue": 46580.02,
+          "positionId": "POS-0001",
+          "quantity": 46580.02,
+          "symbol": "EUR-CASH"
+        },
+        {
+          "assetClass": "cash",
+          "currency": "USD",
+          "investorId": "INV-001",
+          "marketValue": 97982.82,
+          "positionId": "POS-0002",
+          "quantity": 97982.82,
+          "symbol": "USD-CASH"
+        },
+        {
+          "assetClass": "derivatives",
+          "currency": "USD",
+          "investorId": "INV-001",
+          "marketValue": 460174.87,
+          "positionId": "POS-0003",
+          "quantity": 141,
+          "symbol": "AAPL-C-260-DEC26"
+        },
+        {
+          "assetClass": "derivatives",
+          "currency": "USD",
+          "investorId": "INV-001",
+          "marketValue": 257941.56,
+          "positionId": "POS-0004",
+          "quantity": 226,
+          "symbol": "TSLA-P-300-JAN27"
+        },
+        {
+          "assetClass": "derivatives",
+          "currency": "USD",
+          "investorId": "INV-001",
+          "marketValue": 0,
+          "positionId": "POS-0005",
+          "quantity": 0,
+          "symbol": "WTI-CL-AUG26-FUT"
+        },
+        {
+          "assetClass": "equity",
+          "currency": "USD",
+          "investorId": "INV-001",
+          "marketValue": 191792.65,
+          "positionId": "POS-0006",
+          "quantity": 2734,
+          "symbol": "AAPL"
+        },
+        {
+          "assetClass": "equity",
+          "currency": "USD",
+          "investorId": "INV-001",
+          "marketValue": 4041.28,
+          "positionId": "POS-0007",
+          "quantity": 1042,
+          "symbol": "AMZN"
+        },
+        {
+          "assetClass": "equity",
+          "currency": "USD",
+          "investorId": "INV-001",
+          "marketValue": 3750.955,
+          "positionId": "POS-0008",
+          "quantity": 1381,
+          "symbol": "BRK-B"
+        },
+        {
+          "assetClass": "equity",
+          "currency": "USD",
+          "investorId": "INV-001",
+          "marketValue": 435173.87,
+          "positionId": "POS-0009",
+          "quantity": 4266,
+          "symbol": "GOOGL"
+        },
+        {
+          "assetClass": "equity",
+          "currency": "USD",
+          "investorId": "INV-001",
+          "marketValue": 458951.29,
+          "positionId": "POS-0010",
+          "quantity": 3978,
+          "symbol": "JNJ"
+        },
+        {
+          "assetClass": "equity",
+          "currency": "USD",
+          "investorId": "INV-001",
+          "marketValue": 111383.02,
+          "positionId": "POS-0011",
+          "quantity": 52,
+          "symbol": "MSFT"
+        },
+        {
+          "assetClass": "equity",
+          "currency": "USD",
+          "investorId": "INV-001",
+          "marketValue": 0,
+          "positionId": "POS-0012",
+          "quantity": 0,
+          "symbol": "TSLA"
+        },
+        {
+          "assetClass": "equity",
+          "currency": "USD",
+          "investorId": "INV-001",
+          "marketValue": 49246.96,
+          "positionId": "POS-0013",
+          "quantity": 1583,
+          "symbol": "XOM"
+        },
+        {
+          "assetClass": "fixed_income",
+          "currency": "USD",
+          "investorId": "INV-001",
+          "marketValue": 13104.175,
+          "positionId": "POS-0014",
+          "quantity": 63000,
+          "symbol": "CORP-IBM-2029"
+        },
+        {
+          "assetClass": "fixed_income",
+          "currency": "USD",
+          "investorId": "INV-001",
+          "marketValue": 585448.35,
+          "positionId": "POS-0015",
+          "quantity": 468000,
+          "symbol": "CORP-MSFT-2033"
+        },
+        {
+          "assetClass": "fixed_income",
+          "currency": "GBP",
+          "investorId": "INV-001",
+          "marketValue": 371235.69,
+          "positionId": "POS-0016",
+          "quantity": 396000,
+          "symbol": "MUNI-CA-2036"
+        },
+        {
+          "assetClass": "fixed_income",
+          "currency": "GBP",
+          "investorId": "INV-001",
+          "marketValue": 485684.15,
+          "positionId": "POS-0017",
+          "quantity": 253000,
+          "symbol": "T-2027-11"
+        },
+        {
+          "assetClass": "fixed_income",
+          "currency": "USD",
+          "investorId": "INV-001",
+          "marketValue": 0,
+          "positionId": "POS-0018",
+          "quantity": 0,
+          "symbol": "T-2030-05"
+        },
+        {
+          "assetClass": "other",
+          "currency": "GBP",
+          "investorId": "INV-001",
+          "marketValue": 19553.435,
+          "positionId": "POS-0019",
+          "quantity": 6906.92,
+          "symbol": "ART-FUND-III"
+        },
+        {
+          "assetClass": "other",
+          "currency": "USD",
+          "investorId": "INV-001",
+          "marketValue": 218091.27,
+          "positionId": "POS-0020",
+          "quantity": 7730.26,
+          "symbol": "PE-FUND-VII"
+        },
+        {
+          "assetClass": "other",
+          "currency": "USD",
+          "investorId": "INV-001",
+          "marketValue": 201629,
+          "positionId": "POS-0021",
+          "quantity": 16614.27,
+          "symbol": "TIMBER-LP"
+        },
+        {
+          "assetClass": "cash",
+          "currency": "GBP",
+          "investorId": "INV-002",
+          "marketValue": 40859.99,
+          "positionId": "POS-0022",
+          "quantity": 40859.99,
+          "symbol": "GBP-CASH"
+        },
+        {
+          "assetClass": "cash",
+          "currency": "USD",
+          "investorId": "INV-002",
+          "marketValue": 135192.06,
+          "positionId": "POS-0023",
+          "quantity": 135192.06,
+          "symbol": "USD-CASH"
+        },
+        {
+          "assetClass": "derivatives",
+          "currency": "USD",
+          "investorId": "INV-002",
+          "marketValue": 378058.67,
+          "positionId": "POS-0024",
+          "quantity": 58,
+          "symbol": "ESU26-FUT"
+        },
+        {
+          "assetClass": "derivatives",
+          "currency": "USD",
+          "investorId": "INV-002",
+          "marketValue": 454357.08,
+          "positionId": "POS-0025",
+          "quantity": 196,
+          "symbol": "NVDA-C-220-MAR27"
+        },
+        {
+          "assetClass": "derivatives",
+          "currency": "USD",
+          "investorId": "INV-002",
+          "marketValue": 27810.725,
+          "positionId": "POS-0026",
+          "quantity": 204,
+          "symbol": "TSLA-P-300-JAN27"
+        },
+        {
+          "assetClass": "equity",
+          "currency": "GBP",
+          "investorId": "INV-002",
+          "marketValue": 411357.83,
+          "positionId": "POS-0027",
+          "quantity": 4105,
+          "symbol": "AAPL"
+        },
+        {
+          "assetClass": "equity",
+          "currency": "USD",
+          "investorId": "INV-002",
+          "marketValue": 34872.035,
+          "positionId": "POS-0028",
+          "quantity": 2362,
+          "symbol": "GOOGL"
+        },
+        {
+          "assetClass": "equity",
+          "currency": "EUR",
+          "investorId": "INV-002",
+          "marketValue": 533889.15,
+          "positionId": "POS-0029",
+          "quantity": 4339,
+          "symbol": "JPM"
+        },
+        {
+          "assetClass": "equity",
+          "currency": "USD",
+          "investorId": "INV-002",
+          "marketValue": 336675.76,
+          "positionId": "POS-0030",
+          "quantity": 3546,
+          "symbol": "MSFT"
+        },
+        {
+          "assetClass": "equity",
+          "currency": "USD",
+          "investorId": "INV-002",
+          "marketValue": 468469.89,
+          "positionId": "POS-0031",
+          "quantity": 985,
+          "symbol": "TSLA"
+        },
+        {
+          "assetClass": "equity",
+          "currency": "USD",
+          "investorId": "INV-002",
+          "marketValue": 160744.79,
+          "positionId": "POS-0032",
+          "quantity": 2192,
+          "symbol": "UNH"
+        },
+        {
+          "assetClass": "fixed_income",
+          "currency": "USD",
+          "investorId": "INV-002",
+          "marketValue": 325993.71,
+          "positionId": "POS-0033",
+          "quantity": 473000,
+          "symbol": "CORP-GE-2031"
+        },
+        {
+          "assetClass": "fixed_income",
+          "currency": "GBP",
+          "investorId": "INV-002",
+          "marketValue": 287458.98,
+          "positionId": "POS-0034",
+          "quantity": 170000,
+          "symbol": "CORP-IBM-2029"
+        },
+        {
+          "assetClass": "fixed_income",
+          "currency": "USD",
+          "investorId": "INV-002",
+          "marketValue": 0,
+          "positionId": "POS-0035",
+          "quantity": 0,
+          "symbol": "CORP-MSFT-2033"
+        },
+        {
+          "assetClass": "fixed_income",
+          "currency": "USD",
+          "investorId": "INV-002",
+          "marketValue": 67068.71,
+          "positionId": "POS-0036",
+          "quantity": 103000,
+          "symbol": "MUNI-CA-2036"
+        },
+        {
+          "assetClass": "fixed_income",
+          "currency": "USD",
+          "investorId": "INV-002",
+          "marketValue": 211353.4,
+          "positionId": "POS-0037",
+          "quantity": 192000,
+          "symbol": "MUNI-NY-2033"
+        },
+        {
+          "assetClass": "fixed_income",
+          "currency": "EUR",
+          "investorId": "INV-002",
+          "marketValue": 33531.455,
+          "positionId": "POS-0038",
+          "quantity": 319000,
+          "symbol": "T-2030-05"
+        },
+        {
+          "assetClass": "fixed_income",
+          "currency": "USD",
+          "investorId": "INV-002",
+          "marketValue": 205175.78,
+          "positionId": "POS-0039",
+          "quantity": 410000,
+          "symbol": "T-2035-08"
+        },
+        {
+          "assetClass": "other",
+          "currency": "USD",
+          "investorId": "INV-002",
+          "marketValue": 7140.544,
+          "positionId": "POS-0040",
+          "quantity": 17079.08,
+          "symbol": "ART-FUND-III"
+        },
+        {
+          "assetClass": "other",
+          "currency": "USD",
+          "investorId": "INV-002",
+          "marketValue": 0,
+          "positionId": "POS-0041",
+          "quantity": 0,
+          "symbol": "PE-FUND-VII"
+        },
+        {
+          "assetClass": "other",
+          "currency": "USD",
+          "investorId": "INV-002",
+          "marketValue": 19575.915,
+          "positionId": "POS-0042",
+          "quantity": 1824.31,
+          "symbol": "TIMBER-LP"
+        },
+        {
+          "assetClass": "other",
+          "currency": "USD",
+          "investorId": "INV-002",
+          "marketValue": 30336.065,
+          "positionId": "POS-0043",
+          "quantity": 5434.67,
+          "symbol": "WINE-LP"
+        },
+        {
+          "assetClass": "cash",
+          "currency": "USD",
+          "investorId": "INV-003",
+          "marketValue": 7723.79,
+          "positionId": "POS-0044",
+          "quantity": 7723.79,
+          "symbol": "USD-CASH"
+        },
+        {
+          "assetClass": "derivatives",
+          "currency": "USD",
+          "investorId": "INV-003",
+          "marketValue": 550992.8,
+          "positionId": "POS-0045",
+          "quantity": 247,
+          "symbol": "AAPL-C-260-DEC26"
+        },
+        {
+          "assetClass": "derivatives",
+          "currency": "USD",
+          "investorId": "INV-003",
+          "marketValue": 327979.99,
+          "positionId": "POS-0046",
+          "quantity": 78,
+          "symbol": "ESU26-FUT"
+        },
+        {
+          "assetClass": "derivatives",
+          "currency": "EUR",
+          "investorId": "INV-003",
+          "marketValue": 19271.77,
+          "positionId": "POS-0047",
+          "quantity": 237,
+          "symbol": "SPX-C-6500-DEC26"
+        },
+        {
+          "assetClass": "derivatives",
+          "currency": "USD",
+          "investorId": "INV-003",
+          "marketValue": 72121.77,
+          "positionId": "POS-0048",
+          "quantity": 1,
+          "symbol": "TSLA-P-300-JAN27"
+        },
+        {
+          "assetClass": "equity",
+          "currency": "EUR",
+          "investorId": "INV-003",
+          "marketValue": 41871.81,
+          "positionId": "POS-0049",
+          "quantity": 3404,
+          "symbol": "AAPL"
+        },
+        {
+          "assetClass": "equity",
+          "currency": "GBP",
+          "investorId": "INV-003",
+          "marketValue": 511785.39,
+          "positionId": "POS-0050",
+          "quantity": 1722,
+          "symbol": "AMZN"
+        }
+      ],
+      "page": 1,
+      "pageSize": 50,
+      "totalItems": 207,
+      "totalPages": 5
+    },
+    "status": 200
+  }
+}

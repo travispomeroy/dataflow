@@ -1,0 +1,48 @@
+{
+  "request": {
+    "method": "GET",
+    "queryParameters": {
+      "page": {
+        "equalTo": "2"
+      },
+      "pageSize": {
+        "equalTo": "4"
+      }
+    },
+    "urlPath": "/investors"
+  },
+  "response": {
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "data": [
+        {
+          "advisorGroup": "Meridian Wealth",
+          "investorId": "INV-005",
+          "name": "Evelyn Marsh"
+        },
+        {
+          "advisorGroup": "Harbor Point Advisors",
+          "investorId": "INV-006",
+          "name": "Farid Nassar"
+        },
+        {
+          "advisorGroup": "XYZ",
+          "investorId": "INV-007",
+          "name": "Grace Liu"
+        },
+        {
+          "advisorGroup": "Cascade Capital Partners",
+          "investorId": "INV-008",
+          "name": "Henrik Sorensen"
+        }
+      ],
+      "page": 2,
+      "pageSize": 4,
+      "totalItems": 10,
+      "totalPages": 3
+    },
+    "status": 200
+  }
+}

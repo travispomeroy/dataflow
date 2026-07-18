@@ -1,0 +1,91 @@
+{
+  "request": {
+    "method": "GET",
+    "queryParameters": {
+      "page": {
+        "equalTo": "5"
+      },
+      "pageSize": {
+        "equalTo": "50"
+      }
+    },
+    "urlPath": "/positions"
+  },
+  "response": {
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "data": [
+        {
+          "assetClass": "fixed_income",
+          "currency": "USD",
+          "investorId": "INV-010",
+          "marketValue": 31105.43,
+          "positionId": "POS-0201",
+          "quantity": 432000,
+          "symbol": "CORP-GE-2031"
+        },
+        {
+          "assetClass": "fixed_income",
+          "currency": "USD",
+          "investorId": "INV-010",
+          "marketValue": 325334.61,
+          "positionId": "POS-0202",
+          "quantity": 216000,
+          "symbol": "CORP-IBM-2029"
+        },
+        {
+          "assetClass": "fixed_income",
+          "currency": "USD",
+          "investorId": "INV-010",
+          "marketValue": 2882.995,
+          "positionId": "POS-0203",
+          "quantity": 282000,
+          "symbol": "CORP-MSFT-2033"
+        },
+        {
+          "assetClass": "fixed_income",
+          "currency": "USD",
+          "investorId": "INV-010",
+          "marketValue": 172171.39,
+          "positionId": "POS-0204",
+          "quantity": 88000,
+          "symbol": "MUNI-CA-2036"
+        },
+        {
+          "assetClass": "fixed_income",
+          "currency": "USD",
+          "investorId": "INV-010",
+          "marketValue": 1384.99,
+          "positionId": "POS-0205",
+          "quantity": 115000,
+          "symbol": "MUNI-NY-2033"
+        },
+        {
+          "assetClass": "fixed_income",
+          "currency": "USD",
+          "investorId": "INV-010",
+          "marketValue": 20891.795,
+          "positionId": "POS-0206",
+          "quantity": 78000,
+          "symbol": "T-2027-11"
+        },
+        {
+          "assetClass": "fixed_income",
+          "currency": "USD",
+          "investorId": "INV-010",
+          "marketValue": 350958.54,
+          "positionId": "POS-0207",
+          "quantity": 431000,
+          "symbol": "T-2030-05"
+        }
+      ],
+      "page": 5,
+      "pageSize": 50,
+      "totalItems": 207,
+      "totalPages": 5
+    },
+    "status": 200
+  }
+}

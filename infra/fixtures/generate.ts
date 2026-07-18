@@ -1,6 +1,8 @@
-// Deterministic fixture generator for the mock upstream world (M0.3, issue #4).
-// Emits the canonical committed dataset under infra/fixtures/data/. Zero
-// dependencies; runs on Node's built-in type stripping:
+// Deterministic fixture generator for the mock upstream world (M0.3, issue #4;
+// pagination stubs M0.4, issue #5). Emits the canonical committed dataset under
+// infra/fixtures/data/ and the per-page WireMock stubs + pagination manifest
+// under infra/fixtures/wiremock/. Zero dependencies; runs on Node's built-in
+// type stripping:
 //
 //   node infra/fixtures/generate.ts
 //
@@ -16,6 +18,12 @@ import { join } from "node:path";
 
 const SEED = 0x0da7af10;
 const OUT_DIR = join(import.meta.dirname, "data");
+const WIREMOCK_DIR = join(import.meta.dirname, "wiremock");
+
+// Strict pagination (M0.4, issue #5): deliberately different page sizes per
+// API — investors small so 10 records still yield 3 pages — and every API must
+// yield >= 3 pages so no engine compiler can special-case single-page extraction.
+const PAGE_SIZES = { investors: 4, positions: 50, orders: 75 } as const;
 
 // -- Seeded PRNG (mulberry32) -------------------------------------------------
 
@@ -290,8 +298,63 @@ for (const [name, data] of files) {
   writeFileSync(join(OUT_DIR, name), JSON.stringify(data, sortKeys, 2) + "\n");
 }
 
+// -- WireMock stubs: strict pagination over the canonical dataset -------------
+// One stub file per (API, page); stubs match page AND pageSize exactly, so any
+// other query — wrong pageSize, page past the last — falls through to
+// WireMock's no-match 404. The manifest records each API's page size, the one
+// fact the smoke reconciliation cannot derive from the dataset itself.
+
+const datasets: [keyof typeof PAGE_SIZES, unknown[]][] = [
+  ["investors", INVESTORS],
+  ["positions", positions],
+  ["orders", orders],
+];
+
+const pageSizeValues = Object.values(PAGE_SIZES);
+ensure(new Set(pageSizeValues).size === pageSizeValues.length, "page sizes differ across APIs");
+
+const MAPPINGS_DIR = join(WIREMOCK_DIR, "mappings");
+mkdirSync(MAPPINGS_DIR, { recursive: true });
+
+let stubCount = 0;
+const manifest: Record<string, { pageSize: number }> = {};
+for (const [api, records] of datasets) {
+  const pageSize = PAGE_SIZES[api];
+  const totalPages = Math.ceil(records.length / pageSize);
+  ensure(totalPages >= 3, `/${api} yields >= 3 pages (got ${totalPages})`);
+  manifest[api] = { pageSize };
+
+  for (let page = 1; page <= totalPages; page++) {
+    const stub = {
+      request: {
+        method: "GET",
+        urlPath: `/${api}`,
+        queryParameters: {
+          page: { equalTo: String(page) },
+          pageSize: { equalTo: String(pageSize) },
+        },
+      },
+      response: {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+        jsonBody: {
+          data: records.slice((page - 1) * pageSize, page * pageSize),
+          page,
+          pageSize,
+          totalPages,
+          totalItems: records.length,
+        },
+      },
+    };
+    writeFileSync(join(MAPPINGS_DIR, `${api}-page-${page}.json`), JSON.stringify(stub, sortKeys, 2) + "\n");
+    stubCount++;
+  }
+}
+writeFileSync(join(WIREMOCK_DIR, "manifest.json"), JSON.stringify(manifest, sortKeys, 2) + "\n");
+
 console.log(
   `wrote ${files.map(([n]) => n).join(", ")} to ${OUT_DIR}\n` +
+    `wrote ${stubCount} paginated stubs + manifest.json to ${WIREMOCK_DIR}\n` +
     `investors=${INVESTORS.length} positions=${positions.length} orders=${orders.length} ` +
     `zeroQty=${zeroQuantityCount} awkward=${awkwardCount} ` +
     `orphanOrderPairs=${orphanOrderPairs.length} orphanPositionPairs=${orphanPositionPairs.length}`,
