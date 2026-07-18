@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "out-tsc/check",
+    "rootDir": "../../..",
+    "tsBuildInfoFile": "out-tsc/check/tsconfig.check.tsbuildinfo",
+    "resolveJsonModule": true,
+    "types": []
+  },
+  "include": ["checks/**/*.ts", "../../../e2e/canonical/*.json"],
+  "references": [
+    {
+      "path": "./tsconfig.lib.json"
+    }
+  ]
+}

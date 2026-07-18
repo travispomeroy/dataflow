@@ -1,0 +1,30 @@
+{
+  "name": "dataflow-config",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Hand-written TS mirror of the Dataflow Config schema (control-plane dataflow module records). Types only — held honest by the canonical examples in e2e/canonical/, which tsc type-checks against these types.",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "ui": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.d.ts"
+    }
+  },
+  "nx": {
+    "namedInputs": {
+      "canonicalContract": [
+        "{workspaceRoot}/tsconfig.base.json",
+        { "runtime": "cat ../e2e/canonical/*.json" }
+      ]
+    },
+    "targets": {
+      "typecheck": {
+        "inputs": ["default", "^default", "canonicalContract"]
+      },
+      "build": {
+        "inputs": ["production", "^production", "canonicalContract"]
+      }
+    }
+  }
+}

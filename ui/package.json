@@ -11,7 +11,8 @@
     "build": "nx run-many -t typecheck build"
   },
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "libs/*"
   ],
   "dependencies": {
     "react": "19.2.7",
