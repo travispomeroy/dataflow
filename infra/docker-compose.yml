@@ -1,0 +1,95 @@
+# The mock world. Image versions come from docs/versions.md — never bump here.
+# Credentials come from infra/.env (committed; mock world only) via compose
+# interpolation — run compose with `--project-directory infra` (or from infra/)
+# or every ${VAR} below resolves empty and services fail to start.
+name: dataflow
+
+volumes:
+  postgres-data:
+  kestra-data:
+  minio-data:
+
+services:
+  postgres:
+    image: postgres:18.4
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_SUPERUSER_PASSWORD}
+      KESTRA_DB_PASSWORD: ${KESTRA_DB_PASSWORD}
+      DATAFLOW_DB_PASSWORD: ${DATAFLOW_DB_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql
+      - ./db-init:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      # -h 127.0.0.1 forces TCP, so the socket-only temporary server postgres
+      # runs during first-boot init can never report healthy early
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+
+  kestra:
+    image: kestra/kestra:v1.3.28
+    command: server standalone
+    # root: the image's kestra user cannot write a fresh named volume at /app/storage
+    user: "root"
+    environment:
+      KESTRA_CONFIGURATION: |
+        datasources:
+          postgres:
+            url: jdbc:postgresql://postgres:5432/kestra
+            driverClassName: org.postgresql.Driver
+            username: kestra
+            password: ${KESTRA_DB_PASSWORD}
+        kestra:
+          server:
+            # no `enabled` flag: ignored since 1.x — basic auth is always on,
+            # and invalid/weak credentials silently fall back to the setup page
+            basic-auth:
+              username: "${KESTRA_UI_USER}"
+              password: "${KESTRA_UI_PASSWORD}"
+          repository:
+            type: postgres
+          queue:
+            type: postgres
+          storage:
+            type: local
+            local:
+              base-path: "/app/storage"
+          tutorial-flows:
+            enabled: false
+    volumes:
+      - kestra-data:/app/storage
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      # management /health returns non-2xx until repository + queue are UP
+      test: ["CMD-SHELL", "curl -sf http://localhost:8081/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 20s
+
+  minio:
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio-data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    healthcheck:
+      test: ["CMD-SHELL", "mc ready local"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+      start_period: 5s
