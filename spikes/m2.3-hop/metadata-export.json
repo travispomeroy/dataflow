@@ -1,0 +1,16 @@
+{
+  "MinioConnectionDefinition": [
+    {
+      "accessKey": "${HOP_MINIO_ACCESS_KEY}",
+      "cacheTtlSeconds": "5",
+      "description": "M2.3 spike: MinIO staging endpoint, credentials late-bound from environment",
+      "endPointHostname": "${HOP_MINIO_ENDPOINT_HOSTNAME}",
+      "endPointPort": "${HOP_MINIO_ENDPOINT_PORT}",
+      "endPointSecure": false,
+      "name": "minio",
+      "partSize": "5242880",
+      "region": "us-east-1",
+      "secretKey": "${HOP_MINIO_SECRET_KEY}"
+    }
+  ]
+}
