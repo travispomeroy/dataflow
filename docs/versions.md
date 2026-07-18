@@ -19,7 +19,7 @@ Digest pinning is deferred to a productionization note, with one exception below
 | WireMock | `wiremock/wiremock:3.13.2` | `infra/docker-compose.yml` (M0.4) | 2026-07-18 |
 | SFTP server | `atmoz/sftp:alpine@sha256:a6cb3eb29202ca7f57e73bb7e527286e66e0e822fff65609207c7e0ef2d135a3` | `infra/docker-compose.yml` (M0.5) | 2026-07-18 |
 | Apache NiFi | `apache/nifi:2.10.0` | `infra/docker-compose.yml` (M0.6) | 2026-07-18 |
-| Apache Hop | `apache/hop:2.18.1` | throwaway-container image check in `e2e/` (M0.6); no compose service until M5 | 2026-07-18 |
+| Apache Hop | `apache/hop:2.18.1` | throwaway-container image check in `e2e/` (M0.6); `DeterministicFlowYamlCompiler` `HOP_IMAGE` — the engine-runner container image (M2.5); no compose service until M5 | 2026-07-18 |
 | Node.js | `24.18.0` (LTS "Krypton") | `.nvmrc` + root `package.json` `engines` (M0.1, applied); `ui/package.json` `engines` (M0.7, applied) | 2026-07-18 |
 | npm | `11.16.0` (the version bundled with Node 24.18.0) | root `package.json` `engines` (M0.1, applied); `ui/package.json` (M0.7, applied) | 2026-07-18 |
 | Nx | `23.1.0` | `ui/package.json` (M0.7, applied) | 2026-07-18 |

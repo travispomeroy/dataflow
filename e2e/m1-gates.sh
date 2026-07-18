@@ -75,7 +75,9 @@ fi
 # -- Stage 4: the product surface -----------------------------------------
 # One Dataflow through its whole lifecycle, negative paths included; the
 # walkthrough asserts API responses, Kestra state, and the golden plan only.
-stage "Stage 4: REST walkthrough (draft → invalid deploy → deploy → honest FAILED → undeploy → delete)"
+# M2.5 flipped the walkthrough's terminal state: the placeholder engine's honest
+# FAILED became the real hop × batch runner's SUCCEEDED (anticipated in M1 notes)
+stage "Stage 4: REST walkthrough (draft → invalid deploy → deploy → run to SUCCEEDED → undeploy → delete)"
 node --env-file=infra/.env e2e/m1-walkthrough.mjs
 
 stage "M1 gates: PASS (world left running; control plane stopped)"

@@ -1,8 +1,12 @@
 package dev.pomeroy.dataflow.controlplane.compilerkestra.internal;
 
 import dev.pomeroy.dataflow.controlplane.compiler.Delivery;
+import dev.pomeroy.dataflow.controlplane.compiler.Engine;
+import dev.pomeroy.dataflow.controlplane.compiler.ExecutionModel;
 import dev.pomeroy.dataflow.controlplane.compiler.ExecutionPlan;
 import dev.pomeroy.dataflow.controlplane.compiler.Schedule;
+import dev.pomeroy.dataflow.controlplane.compilerhop.HopArtifact;
+import dev.pomeroy.dataflow.controlplane.compilerhop.HopPipelineCompiler;
 import dev.pomeroy.dataflow.controlplane.compilerkestra.KestraFlowCompiler;
 import java.time.LocalTime;
 import java.util.Locale;
@@ -13,15 +17,62 @@ import org.springframework.stereotype.Component;
  * committed golden stays a valid comparison. Values that are Kestra Pebble
  * expressions are always double-quoted, as are the cron expression and the SFTP port
  * (a string-typed property of the fs plugin); everything else the compiler emits is a
- * plain scalar by construction.
+ * plain scalar or a literal block scalar by construction.
  *
  * <p>Platform conventions live here, not in the plan: the Staging store (the compose
  * MinIO, bucket {@code staging}, credentials as Kestra secrets), the hidden-upload
- * name shape ({@code .name.part} → {@code name}, ADR-0001), and the cron translation
- * of the structured daily Schedule.
+ * name shape ({@code .name.part} → {@code name}, ADR-0001), the cron translation
+ * of the structured daily Schedule, and the engine-runner shape per engine matrix
+ * cell — for {@code hop × batch} the pinned Hop image as an ephemeral sibling
+ * container carrying the embedded engine artifact (M2.5).
  */
 @Component
 public class DeterministicFlowYamlCompiler implements KestraFlowCompiler {
+
+	/** The pinned engine image (docs/versions.md) — bump only via that registry. */
+	static final String HOP_IMAGE = "apache/hop:2.18.1";
+
+	/**
+	 * The compose network the sibling engine container joins: the compose project
+	 * name is pinned ({@code name: dataflow} in infra/docker-compose.yml), so the
+	 * default network name is deterministic.
+	 */
+	static final String COMPOSE_NETWORK = "dataflow_default";
+
+	/**
+	 * Where the shipped {@code MinioConnectionDefinition} must land inside the Hop
+	 * container: the image's active project is {@code default}, and only an object in
+	 * the project's metadata folder registers the {@code minio://} VFS scheme (#22).
+	 */
+	static final String HOP_MINIO_METADATA_FOLDER =
+			"/opt/hop/config/projects/default/metadata/MinioConnectionDefinition";
+
+	/**
+	 * The MinIO connection metadata shipped to the engine container (spike #22
+	 * reference JSON): the object's {@code name} registers the scheme; credential
+	 * fields are {@code ${HOP_MINIO_*}} expressions late-bound from JVM system
+	 * properties, so the artifact carries no secret material (ADR-0002).
+	 */
+	static final String MINIO_CONNECTION_DEFINITION = """
+			{
+			  "accessKey": "${HOP_MINIO_ACCESS_KEY}",
+			  "cacheTtlSeconds": "5",
+			  "description": "Platform Staging store (ADR-0001); credentials late-bound from HOP_MINIO_* system properties (ADR-0002)",
+			  "endPointHostname": "${HOP_MINIO_ENDPOINT_HOSTNAME}",
+			  "endPointPort": "${HOP_MINIO_ENDPOINT_PORT}",
+			  "endPointSecure": false,
+			  "name": "minio",
+			  "partSize": "5242880",
+			  "region": "us-east-1",
+			  "secretKey": "${HOP_MINIO_SECRET_KEY}"
+			}
+			""";
+
+	private final HopPipelineCompiler hopCompiler;
+
+	public DeterministicFlowYamlCompiler(HopPipelineCompiler hopCompiler) {
+		this.hopCompiler = hopCompiler;
+	}
 
 	@Override
 	public String compile(ExecutionPlan plan, int deploymentVersion) {
@@ -47,16 +98,79 @@ public class DeterministicFlowYamlCompiler implements KestraFlowCompiler {
 	}
 
 	/**
-	 * M1's engine task is a placeholder that stages nothing, so the staging pull that
-	 * follows fails — the honest failure the M1 gate asserts. M2 replaces this one
-	 * task with a real engine runner and the same flow goes green.
+	 * One engine-runner task per engine matrix cell. {@code hop × batch} is real
+	 * since M2.5; every other cell keeps the honest placeholder — it stages nothing,
+	 * so the staging pull that follows fails — until its milestone lands the runner
+	 * (M4 {@code nifi × server}, M5 {@code hop × server}).
 	 */
 	private String engineRunner(ExecutionPlan plan) {
+		if (plan.engine() == Engine.HOP && plan.executionModel() == ExecutionModel.BATCH) {
+			return hopBatchRunner(plan);
+		}
 		return """
 				  - id: engine_runner
 				    type: io.kestra.plugin.core.log.Log
-				    message: Engine runner placeholder (engine %s, execution model %s) — stages nothing, so the staging pull fails until M2 lands a real engine task
+				    message: Engine runner placeholder (engine %s, execution model %s) — stages nothing, so the staging pull fails until this engine matrix cell lands its real runner
 				""".formatted(lower(plan.engine()), lower(plan.executionModel()));
+	}
+
+	/**
+	 * The {@code hop × batch} Runner (M2.5): a script task on the Docker task runner
+	 * launches the pinned Hop image as an ephemeral sibling container on the compose
+	 * network — per-Run freshness by construction, no registry pull at run time. The
+	 * compiled artifact pair rides as {@code inputFiles} so the flow pushed to Kestra
+	 * stays the single self-contained Deployment artifact, and the workflow resolves
+	 * the pipeline from the same folder.
+	 *
+	 * <p>The MinIO VFS scaffold is the spike's finding (#22): the {@code minio://}
+	 * scheme registers only through a {@code MinioConnectionDefinition} object named
+	 * {@code minio} in the active project's metadata folder ({@code --metadata-export}
+	 * silently resolves such paths as local files), so the runner copies the shipped
+	 * definition into place before {@code hop-run}. Its credential fields are
+	 * {@code ${HOP_MINIO_*}} expressions resolved from JVM system properties, injected
+	 * via {@code HOP_OPTIONS} from Kestra secrets — the flow names secrets, never
+	 * values (ADR-0002). {@code -XX:+AggressiveHeap} is the image's stock
+	 * {@code HOP_OPTIONS} value, preserved because setting the variable replaces it.
+	 *
+	 * <p>{@code BUSINESS_DATE} is the run date (UTC) for now; the Schedule-timezone
+	 * default and the run-now override are M2.6.
+	 */
+	private String hopBatchRunner(ExecutionPlan plan) {
+		HopArtifact artifact = hopCompiler.compile(plan);
+		return """
+				  - id: engine_runner
+				    type: io.kestra.plugin.scripts.shell.Commands
+				    taskRunner:
+				      type: io.kestra.plugin.scripts.runner.docker.Docker
+				      networkMode: %s
+				      pullPolicy: IF_NOT_PRESENT
+				    containerImage: %s
+				    env:
+				      RUN_ID: "{{ execution.id }}"
+				      BUSINESS_DATE: "{{ execution.startDate | date('yyyy-MM-dd') }}"
+				      HOP_OPTIONS: "-XX:+AggressiveHeap -DHOP_MINIO_ENDPOINT_HOSTNAME=minio -DHOP_MINIO_ENDPOINT_PORT=9000 -DHOP_MINIO_ACCESS_KEY={{ secret('MINIO_ACCESS_KEY') }} -DHOP_MINIO_SECRET_KEY={{ secret('MINIO_SECRET_KEY') }}"
+				    inputFiles:
+				""".formatted(COMPOSE_NETWORK, HOP_IMAGE)
+				+ inputFile(artifact.pipelineFileName(), artifact.pipelineXml())
+				+ inputFile(artifact.workflowFileName(), artifact.workflowXml())
+				+ inputFile("minio.json", MINIO_CONNECTION_DEFINITION)
+				+ """
+				    commands:
+				      - mkdir -p %1$s
+				      - cp minio.json %1$s/minio.json
+				      - WORKDIR="$PWD" && cd /opt/hop && ./hop-run.sh --file="$WORKDIR/%2$s" --runconfig=local --level=Basic --parameters=RUN_ID="$RUN_ID",BUSINESS_DATE="$BUSINESS_DATE"
+				""".formatted(HOP_MINIO_METADATA_FOLDER, artifact.workflowFileName());
+	}
+
+	/**
+	 * One embedded input file as a literal block scalar — content lines indented
+	 * under the key, empty lines left empty so no line ever carries trailing spaces.
+	 */
+	private String inputFile(String name, String content) {
+		StringBuilder yaml = new StringBuilder("      ").append(name).append(": |\n");
+		content.lines().forEach(
+				line -> yaml.append(line.isEmpty() ? "" : "        " + line).append('\n'));
+		return yaml.toString();
 	}
 
 	/**

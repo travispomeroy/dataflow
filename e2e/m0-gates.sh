@@ -95,6 +95,22 @@ if ! grep -qx "$hop_pin" <<<"$hop_reported"; then
   exit 1
 fi
 
+stage "Stage 3: Kestra secret encodings in infra/.env match the plain values they derive from"
+# Kestra OSS reads secrets as base64-encoded SECRET_* env vars; compose cannot
+# encode, so infra/.env commits each value twice (plain + *_B64, M2.5). Comments
+# alone cannot stop the pair drifting apart — this check can.
+env_value() { grep "^$1=" infra/.env | cut -d= -f2-; }
+for pair in \
+  MINIO_ROOT_USER:KESTRA_SECRET_MINIO_ACCESS_KEY_B64 \
+  MINIO_ROOT_PASSWORD:KESTRA_SECRET_MINIO_SECRET_KEY_B64 \
+  SFTP_PASSWORD:KESTRA_SECRET_SFTP_POMEROY_B64; do
+  plain=${pair%%:*} b64=${pair#*:}
+  if [[ "$(printf %s "$(env_value "$plain")" | base64)" != "$(env_value "$b64")" ]]; then
+    echo "FAIL: $b64 is not the base64 of $plain — regenerate with: printf %s '<value>' | base64" >&2
+    exit 1
+  fi
+done
+
 stage "Stage 3: fixtures and WireMock stubs regenerate byte-identically"
 rm -rf infra/fixtures/data infra/fixtures/wiremock
 node infra/fixtures/generate.ts

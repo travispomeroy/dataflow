@@ -214,7 +214,7 @@ const runId = await step('run-now answers synchronously with a Run (202)', async
   return res.body.id;
 });
 
-await step('the Run reaches terminal FAILED — honestly — with timing and execution id', async () => {
+await step('the Run reaches terminal SUCCEEDED with timing and execution id', async () => {
   const deadline = Date.now() + 240_000;
   let run;
   for (;;) {
@@ -225,10 +225,11 @@ await step('the Run reaches terminal FAILED — honestly — with timing and exe
     assert(Date.now() < deadline, `run still ${run.status} after 240s`);
     await sleep(3000);
   }
-  // Do not "fix" a SUCCEEDED here by weakening the assertion: M1's placeholder
-  // engine stages nothing, so success would mean the failure was rigged away.
-  // M2 swaps in a real engine task and flips this expectation to SUCCEEDED.
-  assert(run.status === 'FAILED', `run ended ${run.status}, but M1 must fail at staging pull`);
+  // M1 asserted an honest FAILED here (the placeholder engine staged nothing, so
+  // the staging pull had to fail). M2.5 replaced the placeholder with the real
+  // hop × batch runner — the same lifecycle walk now proves the green path:
+  // engine run, staged files, hidden upload, atomic rename, all succeeded.
+  assert(run.status === 'SUCCEEDED', `run ended ${run.status}, but M2's engine must deliver`);
   assert(run.kestraExecutionId, 'expected a Kestra execution id');
   assert(run.detail, 'expected the raw Kestra state in detail');
   assert(run.startedAt && run.endedAt, `expected timing, got ${run.startedAt}..${run.endedAt}`);
@@ -242,8 +243,8 @@ await step('run history shows the Run', async () => {
   const res = await call('GET', `${api}/dataflows/${dataflowId}/runs`);
   expectStatus(res, 200);
   assert(
-    res.body.some((r) => r.id === runId && r.status === 'FAILED'),
-    'the FAILED run is missing from history',
+    res.body.some((r) => r.id === runId && r.status === 'SUCCEEDED'),
+    'the SUCCEEDED run is missing from history',
   );
 });
 

@@ -2,11 +2,16 @@ package dev.pomeroy.dataflow.controlplane.compilerkestra;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import dev.pomeroy.dataflow.controlplane.compiler.Engine;
+import dev.pomeroy.dataflow.controlplane.compiler.ExecutionModel;
 import dev.pomeroy.dataflow.controlplane.compiler.ExecutionPlan;
 import dev.pomeroy.dataflow.controlplane.compiler.ExecutionPlanJson;
+import dev.pomeroy.dataflow.controlplane.compilerhop.HopArtifact;
+import dev.pomeroy.dataflow.controlplane.compilerhop.internal.DeterministicHopXmlCompiler;
 import dev.pomeroy.dataflow.controlplane.compilerkestra.internal.DeterministicFlowYamlCompiler;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -26,7 +31,7 @@ class KestraFlowGoldenTests {
 
 	static final int VERSION = 1;
 
-	KestraFlowCompiler compiler = new DeterministicFlowYamlCompiler();
+	KestraFlowCompiler compiler = new DeterministicFlowYamlCompiler(new DeterministicHopXmlCompiler());
 
 	@Test
 	void theCanonicalPlanCompilesToTheCommittedGoldenByteForByte() throws Exception {
@@ -112,20 +117,123 @@ class KestraFlowGoldenTests {
 
 	/**
 	 * ADR-0002 as amended: the flow names secrets, never their values. The mock
-	 * world's one delivery secret is committed in infra/.env, so the test can grep for
-	 * it literally.
+	 * world's credentials are committed in infra/.env, so the test can grep for
+	 * them literally.
 	 */
 	@Test
-	void theFlowNamesTheDeliverySecretButNeverItsValue() throws Exception {
-		String sftpPassword = Files.readAllLines(Path.of("../infra/.env")).stream()
-				.filter(line -> line.startsWith("SFTP_PASSWORD="))
-				.map(line -> line.substring("SFTP_PASSWORD=".length()))
-				.findFirst().orElseThrow();
-
+	void theFlowNamesSecretsButNeverTheirValues() throws Exception {
 		String yaml = compiler.compile(canonicalPlan(), VERSION);
 
 		assertThat(yaml).contains("{{ secret('SFTP_POMEROY') }}")
-				.doesNotContain(sftpPassword);
+				.contains("{{ secret('MINIO_ACCESS_KEY') }}")
+				.contains("{{ secret('MINIO_SECRET_KEY') }}");
+		for (String key : new String[] { "SFTP_PASSWORD", "MINIO_ROOT_USER",
+				"MINIO_ROOT_PASSWORD" }) {
+			assertThat(yaml).doesNotContain(envValue(key));
+		}
+	}
+
+	/**
+	 * M2.5: the engine runner is real — the pinned Hop image as an ephemeral sibling
+	 * container on the compose network, resolved without a registry pull (spec #19).
+	 */
+	@Test
+	void theEngineRunnerRunsThePinnedHopImageAsAnEphemeralSiblingContainer()
+			throws Exception {
+		String yaml = compiler.compile(canonicalPlan(), VERSION);
+
+		assertThat(yaml).contains("type: io.kestra.plugin.scripts.shell.Commands")
+				.contains("type: io.kestra.plugin.scripts.runner.docker.Docker")
+				.contains("containerImage: apache/hop:2.18.1")
+				.contains("networkMode: dataflow_default")
+				.contains("pullPolicy: IF_NOT_PRESENT")
+				.doesNotContain("placeholder");
+	}
+
+	/**
+	 * The flow pushed to Kestra is the single, self-contained Deployment artifact
+	 * (spec #19): both compiled Hop files ride as {@code inputFiles}, byte-identical
+	 * to what the Hop compiler produces.
+	 */
+	@Test
+	void theFlowEmbedsBothHopArtifactFilesVerbatimAsInputFiles() throws Exception {
+		HopArtifact artifact = new DeterministicHopXmlCompiler().compile(canonicalPlan());
+
+		String yaml = compiler.compile(canonicalPlan(), VERSION);
+
+		assertThat(yaml).contains("      " + artifact.pipelineFileName() + ": |\n"
+				+ blockScalar(artifact.pipelineXml()));
+		assertThat(yaml).contains("      " + artifact.workflowFileName() + ": |\n"
+				+ blockScalar(artifact.workflowXml()));
+	}
+
+	/**
+	 * The spike-mandated scaffold (#22): {@code minio://} resolves only when a
+	 * {@code MinioConnectionDefinition} named {@code minio} sits in the active
+	 * project's metadata folder — the runner ships it as an input file and copies it
+	 * into place before {@code hop-run}.
+	 */
+	@Test
+	void theEngineRunnerInstallsTheMinioVfsScaffoldBeforeRunningTheWorkflow()
+			throws Exception {
+		String yaml = compiler.compile(canonicalPlan(), VERSION);
+
+		assertThat(yaml).contains("minio.json: |")
+				.contains("\"name\": \"minio\"")
+				.contains("${HOP_MINIO_ACCESS_KEY}")
+				.contains(
+						"cp minio.json /opt/hop/config/projects/default/metadata/MinioConnectionDefinition/minio.json")
+				.contains("./hop-run.sh --file=\"$WORKDIR/positions-feed.hwf\" --runconfig=local");
+		assertThat(yaml.indexOf("cp minio.json")).isLessThan(yaml.indexOf("./hop-run.sh"));
+	}
+
+	/**
+	 * The artifact's runtime contract: {@code RUN_ID} is the Kestra execution id
+	 * (Run maps 1:1), {@code BUSINESS_DATE} the run date for now (the M2.6 override
+	 * arrives later), and MinIO credentials late-bind as {@code HOP_MINIO_*} system
+	 * properties from Kestra secrets.
+	 */
+	@Test
+	void theEngineRunnerCarriesRunIdentityAndMinioCredentialsInEnv() throws Exception {
+		String yaml = compiler.compile(canonicalPlan(), VERSION);
+
+		assertThat(yaml).contains("RUN_ID: \"{{ execution.id }}\"")
+				.contains("BUSINESS_DATE: \"{{ execution.startDate | date('yyyy-MM-dd') }}\"")
+				.contains("-DHOP_MINIO_ACCESS_KEY={{ secret('MINIO_ACCESS_KEY') }}")
+				.contains("-DHOP_MINIO_SECRET_KEY={{ secret('MINIO_SECRET_KEY') }}")
+				.contains("--parameters=RUN_ID=\"$RUN_ID\",BUSINESS_DATE=\"$BUSINESS_DATE\"");
+	}
+
+	/**
+	 * Only the {@code hop × batch} cell of the engine matrix is real (M2); every
+	 * other cell keeps the honest placeholder until its milestone lands it
+	 * (M4 nifi × server, M5 hop × server).
+	 */
+	@Test
+	void aNonHopBatchPlanKeepsThePlaceholderEngineRunner() throws Exception {
+		ExecutionPlan hop = canonicalPlan();
+		ExecutionPlan nifi = new ExecutionPlan(hop.slug(), Engine.NIFI,
+				ExecutionModel.SERVER, hop.schedule(), hop.extraction(), hop.transforms(),
+				hop.files(), hop.staging(), hop.delivery());
+
+		String yaml = compiler.compile(nifi, VERSION);
+
+		assertThat(yaml).contains("- id: engine_runner")
+				.contains("type: io.kestra.plugin.core.log.Log").contains("placeholder")
+				.doesNotContain("io.kestra.plugin.scripts.runner.docker.Docker");
+	}
+
+	/** The YAML block-scalar shape the compiler embeds file content with. */
+	private String blockScalar(String content) {
+		return content.lines()
+				.map(line -> line.isEmpty() ? "" : "        " + line)
+				.collect(Collectors.joining("\n", "", "\n"));
+	}
+
+	private String envValue(String key) throws Exception {
+		return Files.readAllLines(Path.of("../infra/.env")).stream()
+				.filter(line -> line.startsWith(key + "="))
+				.map(line -> line.substring(key.length() + 1)).findFirst().orElseThrow();
 	}
 
 	private ExecutionPlan canonicalPlan() throws Exception {
