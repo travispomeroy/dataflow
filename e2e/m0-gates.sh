@@ -41,4 +41,14 @@ fi
 stage "Stage 3: smoke checks (Node built-in fetch)"
 node --env-file=infra/.env e2e/smoke.mjs
 
+stage "Stage 3: fixtures regenerate byte-identically"
+rm -rf infra/fixtures/data
+node infra/fixtures/generate.ts
+if [[ -n "$(git status --porcelain -- infra/fixtures)" ]]; then
+  git status --porcelain -- infra/fixtures >&2
+  git --no-pager diff -- infra/fixtures | head -60 >&2
+  echo "FAIL: regenerated fixtures are not byte-identical to the committed ones" >&2
+  exit 1
+fi
+
 stage "M0 gates: PASS (world left running)"

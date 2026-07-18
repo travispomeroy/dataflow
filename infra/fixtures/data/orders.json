@@ -1,0 +1,2630 @@
+[
+  {
+    "investorId": "INV-001",
+    "orderId": "ORD-0001",
+    "quantity": 1894,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "AAPL-C-260-DEC26",
+    "tradeDate": "2026-07-06"
+  },
+  {
+    "investorId": "INV-001",
+    "orderId": "ORD-0002",
+    "quantity": 1638,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "TSLA-P-300-JAN27",
+    "tradeDate": "2026-07-07"
+  },
+  {
+    "investorId": "INV-001",
+    "orderId": "ORD-0003",
+    "quantity": 471,
+    "side": "SELL",
+    "status": "NEW",
+    "symbol": "TSLA-P-300-JAN27",
+    "tradeDate": "2026-07-10"
+  },
+  {
+    "investorId": "INV-001",
+    "orderId": "ORD-0004",
+    "quantity": 888,
+    "side": "SELL",
+    "status": "CANCELLED",
+    "symbol": "WTI-CL-AUG26-FUT",
+    "tradeDate": "2026-07-09"
+  },
+  {
+    "investorId": "INV-001",
+    "orderId": "ORD-0005",
+    "quantity": 702,
+    "side": "BUY",
+    "status": "NEW",
+    "symbol": "AAPL",
+    "tradeDate": "2026-07-07"
+  },
+  {
+    "investorId": "INV-001",
+    "orderId": "ORD-0006",
+    "quantity": 856,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "BRK-B",
+    "tradeDate": "2026-07-09"
+  },
+  {
+    "investorId": "INV-001",
+    "orderId": "ORD-0007",
+    "quantity": 1453,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "GOOGL",
+    "tradeDate": "2026-07-14"
+  },
+  {
+    "investorId": "INV-001",
+    "orderId": "ORD-0008",
+    "quantity": 1355,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "GOOGL",
+    "tradeDate": "2026-07-08"
+  },
+  {
+    "investorId": "INV-001",
+    "orderId": "ORD-0009",
+    "quantity": 1962,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "JNJ",
+    "tradeDate": "2026-07-09"
+  },
+  {
+    "investorId": "INV-001",
+    "orderId": "ORD-0010",
+    "quantity": 590,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "JNJ",
+    "tradeDate": "2026-07-14"
+  },
+  {
+    "investorId": "INV-001",
+    "orderId": "ORD-0011",
+    "quantity": 249,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "TSLA",
+    "tradeDate": "2026-07-10"
+  },
+  {
+    "investorId": "INV-001",
+    "orderId": "ORD-0012",
+    "quantity": 1268,
+    "side": "BUY",
+    "status": "NEW",
+    "symbol": "XOM",
+    "tradeDate": "2026-07-09"
+  },
+  {
+    "investorId": "INV-001",
+    "orderId": "ORD-0013",
+    "quantity": 53000,
+    "side": "SELL",
+    "status": "NEW",
+    "symbol": "CORP-IBM-2029",
+    "tradeDate": "2026-07-16"
+  },
+  {
+    "investorId": "INV-001",
+    "orderId": "ORD-0014",
+    "quantity": 48000,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "CORP-MSFT-2033",
+    "tradeDate": "2026-07-16"
+  },
+  {
+    "investorId": "INV-001",
+    "orderId": "ORD-0015",
+    "quantity": 20000,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "CORP-MSFT-2033",
+    "tradeDate": "2026-07-15"
+  },
+  {
+    "investorId": "INV-001",
+    "orderId": "ORD-0016",
+    "quantity": 21000,
+    "side": "BUY",
+    "status": "NEW",
+    "symbol": "CORP-MSFT-2033",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-001",
+    "orderId": "ORD-0017",
+    "quantity": 90000,
+    "side": "BUY",
+    "status": "NEW",
+    "symbol": "T-2027-11",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-001",
+    "orderId": "ORD-0018",
+    "quantity": 81000,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "T-2027-11",
+    "tradeDate": "2026-07-16"
+  },
+  {
+    "investorId": "INV-001",
+    "orderId": "ORD-0019",
+    "quantity": 45000,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "T-2030-05",
+    "tradeDate": "2026-07-15"
+  },
+  {
+    "investorId": "INV-001",
+    "orderId": "ORD-0020",
+    "quantity": 100000,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "T-2030-05",
+    "tradeDate": "2026-07-06"
+  },
+  {
+    "investorId": "INV-001",
+    "orderId": "ORD-0021",
+    "quantity": 193,
+    "side": "BUY",
+    "status": "NEW",
+    "symbol": "ART-FUND-III",
+    "tradeDate": "2026-07-15"
+  },
+  {
+    "investorId": "INV-001",
+    "orderId": "ORD-0022",
+    "quantity": 1203,
+    "side": "SELL",
+    "status": "NEW",
+    "symbol": "ART-FUND-III",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-001",
+    "orderId": "ORD-0023",
+    "quantity": 650,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "PE-FUND-VII",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-001",
+    "orderId": "ORD-0024",
+    "quantity": 1260,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "TIMBER-LP",
+    "tradeDate": "2026-07-06"
+  },
+  {
+    "investorId": "INV-001",
+    "orderId": "ORD-0025",
+    "quantity": 1602,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "MSFT-P-480-SEP26",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0026",
+    "quantity": 1399,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "NVDA-C-220-MAR27",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0027",
+    "quantity": 478,
+    "side": "BUY",
+    "status": "NEW",
+    "symbol": "NVDA-C-220-MAR27",
+    "tradeDate": "2026-07-07"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0028",
+    "quantity": 288,
+    "side": "BUY",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "NVDA-C-220-MAR27",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0029",
+    "quantity": 971,
+    "side": "SELL",
+    "status": "CANCELLED",
+    "symbol": "AAPL",
+    "tradeDate": "2026-07-06"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0030",
+    "quantity": 1721,
+    "side": "BUY",
+    "status": "NEW",
+    "symbol": "GOOGL",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0031",
+    "quantity": 1221,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "JPM",
+    "tradeDate": "2026-07-08"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0032",
+    "quantity": 1600,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "MSFT",
+    "tradeDate": "2026-07-14"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0033",
+    "quantity": 615,
+    "side": "BUY",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "TSLA",
+    "tradeDate": "2026-07-06"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0034",
+    "quantity": 826,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "TSLA",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0035",
+    "quantity": 404,
+    "side": "SELL",
+    "status": "CANCELLED",
+    "symbol": "TSLA",
+    "tradeDate": "2026-07-07"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0036",
+    "quantity": 1803,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "UNH",
+    "tradeDate": "2026-07-09"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0037",
+    "quantity": 81000,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "CORP-GE-2031",
+    "tradeDate": "2026-07-14"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0038",
+    "quantity": 94000,
+    "side": "SELL",
+    "status": "CANCELLED",
+    "symbol": "CORP-GE-2031",
+    "tradeDate": "2026-07-14"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0039",
+    "quantity": 48000,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "CORP-GE-2031",
+    "tradeDate": "2026-07-06"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0040",
+    "quantity": 51000,
+    "side": "BUY",
+    "status": "NEW",
+    "symbol": "CORP-IBM-2029",
+    "tradeDate": "2026-07-14"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0041",
+    "quantity": 99000,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "CORP-IBM-2029",
+    "tradeDate": "2026-07-07"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0042",
+    "quantity": 3000,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "MUNI-CA-2036",
+    "tradeDate": "2026-07-08"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0043",
+    "quantity": 51000,
+    "side": "BUY",
+    "status": "NEW",
+    "symbol": "MUNI-CA-2036",
+    "tradeDate": "2026-07-16"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0044",
+    "quantity": 72000,
+    "side": "BUY",
+    "status": "NEW",
+    "symbol": "MUNI-NY-2033",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0045",
+    "quantity": 99000,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "MUNI-NY-2033",
+    "tradeDate": "2026-07-08"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0046",
+    "quantity": 51000,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "MUNI-NY-2033",
+    "tradeDate": "2026-07-06"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0047",
+    "quantity": 12000,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "T-2030-05",
+    "tradeDate": "2026-07-06"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0048",
+    "quantity": 88000,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "T-2030-05",
+    "tradeDate": "2026-07-16"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0049",
+    "quantity": 89000,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "T-2030-05",
+    "tradeDate": "2026-07-14"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0050",
+    "quantity": 2000,
+    "side": "BUY",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "T-2035-08",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0051",
+    "quantity": 59000,
+    "side": "SELL",
+    "status": "CANCELLED",
+    "symbol": "T-2035-08",
+    "tradeDate": "2026-07-09"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0052",
+    "quantity": 6000,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "T-2035-08",
+    "tradeDate": "2026-07-10"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0053",
+    "quantity": 1391,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "ART-FUND-III",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0054",
+    "quantity": 1189,
+    "side": "SELL",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "ART-FUND-III",
+    "tradeDate": "2026-07-10"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0055",
+    "quantity": 1430,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "PE-FUND-VII",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0056",
+    "quantity": 155,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "PE-FUND-VII",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0057",
+    "quantity": 1535,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "PE-FUND-VII",
+    "tradeDate": "2026-07-10"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0058",
+    "quantity": 497,
+    "side": "BUY",
+    "status": "NEW",
+    "symbol": "TIMBER-LP",
+    "tradeDate": "2026-07-16"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0059",
+    "quantity": 898,
+    "side": "SELL",
+    "status": "NEW",
+    "symbol": "WINE-LP",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0060",
+    "quantity": 501,
+    "side": "SELL",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "WINE-LP",
+    "tradeDate": "2026-07-09"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0061",
+    "quantity": 522,
+    "side": "SELL",
+    "status": "CANCELLED",
+    "symbol": "AMZN",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-002",
+    "orderId": "ORD-0062",
+    "quantity": 159,
+    "side": "BUY",
+    "status": "NEW",
+    "symbol": "REIT-VNQ",
+    "tradeDate": "2026-07-16"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0063",
+    "quantity": 1401,
+    "side": "BUY",
+    "status": "NEW",
+    "symbol": "AAPL-C-260-DEC26",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0064",
+    "quantity": 851,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "ESU26-FUT",
+    "tradeDate": "2026-07-14"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0065",
+    "quantity": 1163,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "SPX-C-6500-DEC26",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0066",
+    "quantity": 1341,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "SPX-C-6500-DEC26",
+    "tradeDate": "2026-07-10"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0067",
+    "quantity": 880,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "TSLA-P-300-JAN27",
+    "tradeDate": "2026-07-07"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0068",
+    "quantity": 509,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "TSLA-P-300-JAN27",
+    "tradeDate": "2026-07-08"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0069",
+    "quantity": 1042,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "TSLA-P-300-JAN27",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0070",
+    "quantity": 1875,
+    "side": "SELL",
+    "status": "NEW",
+    "symbol": "AAPL",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0071",
+    "quantity": 1352,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "AAPL",
+    "tradeDate": "2026-07-10"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0072",
+    "quantity": 258,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "AMZN",
+    "tradeDate": "2026-07-09"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0073",
+    "quantity": 1818,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "BRK-B",
+    "tradeDate": "2026-07-10"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0074",
+    "quantity": 1838,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "BRK-B",
+    "tradeDate": "2026-07-10"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0075",
+    "quantity": 65,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "BRK-B",
+    "tradeDate": "2026-07-15"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0076",
+    "quantity": 314,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "GOOGL",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0077",
+    "quantity": 588,
+    "side": "BUY",
+    "status": "NEW",
+    "symbol": "GOOGL",
+    "tradeDate": "2026-07-16"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0078",
+    "quantity": 907,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "GOOGL",
+    "tradeDate": "2026-07-14"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0079",
+    "quantity": 292,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "JNJ",
+    "tradeDate": "2026-07-06"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0080",
+    "quantity": 1936,
+    "side": "SELL",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "JNJ",
+    "tradeDate": "2026-07-07"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0081",
+    "quantity": 22,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "JPM",
+    "tradeDate": "2026-07-16"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0082",
+    "quantity": 1345,
+    "side": "SELL",
+    "status": "NEW",
+    "symbol": "JPM",
+    "tradeDate": "2026-07-08"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0083",
+    "quantity": 1741,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "JPM",
+    "tradeDate": "2026-07-15"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0084",
+    "quantity": 1384,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "MSFT",
+    "tradeDate": "2026-07-09"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0085",
+    "quantity": 1442,
+    "side": "SELL",
+    "status": "NEW",
+    "symbol": "TSLA",
+    "tradeDate": "2026-07-15"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0086",
+    "quantity": 447,
+    "side": "SELL",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "TSLA",
+    "tradeDate": "2026-07-10"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0087",
+    "quantity": 945,
+    "side": "BUY",
+    "status": "NEW",
+    "symbol": "UNH",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0088",
+    "quantity": 16000,
+    "side": "BUY",
+    "status": "NEW",
+    "symbol": "CORP-GE-2031",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0089",
+    "quantity": 31000,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "CORP-GE-2031",
+    "tradeDate": "2026-07-14"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0090",
+    "quantity": 77000,
+    "side": "SELL",
+    "status": "NEW",
+    "symbol": "CORP-GE-2031",
+    "tradeDate": "2026-07-10"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0091",
+    "quantity": 75000,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "T-2035-08",
+    "tradeDate": "2026-07-07"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0092",
+    "quantity": 33000,
+    "side": "BUY",
+    "status": "NEW",
+    "symbol": "T-2035-08",
+    "tradeDate": "2026-07-16"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0093",
+    "quantity": 97000,
+    "side": "BUY",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "T-2035-08",
+    "tradeDate": "2026-07-06"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0094",
+    "quantity": 1126,
+    "side": "BUY",
+    "status": "CANCELLED",
+    "symbol": "GLD-ETF",
+    "tradeDate": "2026-07-07"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0095",
+    "quantity": 1585,
+    "side": "BUY",
+    "status": "NEW",
+    "symbol": "GLD-ETF",
+    "tradeDate": "2026-07-15"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0096",
+    "quantity": 335,
+    "side": "SELL",
+    "status": "NEW",
+    "symbol": "PE-FUND-VII",
+    "tradeDate": "2026-07-06"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0097",
+    "quantity": 1690,
+    "side": "SELL",
+    "status": "NEW",
+    "symbol": "PE-FUND-VII",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0098",
+    "quantity": 883,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "PE-FUND-VII",
+    "tradeDate": "2026-07-08"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0099",
+    "quantity": 721,
+    "side": "SELL",
+    "status": "NEW",
+    "symbol": "REIT-VNQ",
+    "tradeDate": "2026-07-10"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0100",
+    "quantity": 613,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "TIMBER-LP",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0101",
+    "quantity": 610,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "MSFT-P-480-SEP26",
+    "tradeDate": "2026-07-09"
+  },
+  {
+    "investorId": "INV-003",
+    "orderId": "ORD-0102",
+    "quantity": 560,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "WINE-LP",
+    "tradeDate": "2026-07-16"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0103",
+    "quantity": 1028,
+    "side": "SELL",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "NVDA-C-220-MAR27",
+    "tradeDate": "2026-07-06"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0104",
+    "quantity": 299,
+    "side": "SELL",
+    "status": "NEW",
+    "symbol": "SPX-C-6500-DEC26",
+    "tradeDate": "2026-07-07"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0105",
+    "quantity": 1129,
+    "side": "BUY",
+    "status": "NEW",
+    "symbol": "SPX-C-6500-DEC26",
+    "tradeDate": "2026-07-15"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0106",
+    "quantity": 381,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "AAPL",
+    "tradeDate": "2026-07-07"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0107",
+    "quantity": 1977,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "AAPL",
+    "tradeDate": "2026-07-10"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0108",
+    "quantity": 813,
+    "side": "SELL",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "JNJ",
+    "tradeDate": "2026-07-15"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0109",
+    "quantity": 1203,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "JNJ",
+    "tradeDate": "2026-07-08"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0110",
+    "quantity": 82,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "JPM",
+    "tradeDate": "2026-07-08"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0111",
+    "quantity": 753,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "JPM",
+    "tradeDate": "2026-07-10"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0112",
+    "quantity": 464,
+    "side": "SELL",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "JPM",
+    "tradeDate": "2026-07-14"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0113",
+    "quantity": 1151,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "MSFT",
+    "tradeDate": "2026-07-08"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0114",
+    "quantity": 176,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "MSFT",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0115",
+    "quantity": 538,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "MSFT",
+    "tradeDate": "2026-07-10"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0116",
+    "quantity": 482,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "NVDA",
+    "tradeDate": "2026-07-15"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0117",
+    "quantity": 432,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "TSLA",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0118",
+    "quantity": 312,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "UNH",
+    "tradeDate": "2026-07-10"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0119",
+    "quantity": 351,
+    "side": "SELL",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "XOM",
+    "tradeDate": "2026-07-14"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0120",
+    "quantity": 599,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "XOM",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0121",
+    "quantity": 61000,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "CORP-GE-2031",
+    "tradeDate": "2026-07-10"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0122",
+    "quantity": 97000,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "MUNI-NY-2033",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0123",
+    "quantity": 80000,
+    "side": "BUY",
+    "status": "NEW",
+    "symbol": "MUNI-NY-2033",
+    "tradeDate": "2026-07-09"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0124",
+    "quantity": 72000,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "T-2027-11",
+    "tradeDate": "2026-07-07"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0125",
+    "quantity": 100000,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "T-2027-11",
+    "tradeDate": "2026-07-06"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0126",
+    "quantity": 42000,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "T-2027-11",
+    "tradeDate": "2026-07-14"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0127",
+    "quantity": 503,
+    "side": "SELL",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "GLD-ETF",
+    "tradeDate": "2026-07-08"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0128",
+    "quantity": 1475,
+    "side": "BUY",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "REIT-VNQ",
+    "tradeDate": "2026-07-06"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0129",
+    "quantity": 1767,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "TIMBER-LP",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0130",
+    "quantity": 41,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "WINE-LP",
+    "tradeDate": "2026-07-08"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0131",
+    "quantity": 382,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "WINE-LP",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0132",
+    "quantity": 1911,
+    "side": "BUY",
+    "status": "CANCELLED",
+    "symbol": "WINE-LP",
+    "tradeDate": "2026-07-08"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0133",
+    "quantity": 1603,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "AMZN",
+    "tradeDate": "2026-07-10"
+  },
+  {
+    "investorId": "INV-004",
+    "orderId": "ORD-0134",
+    "quantity": 449,
+    "side": "BUY",
+    "status": "NEW",
+    "symbol": "PE-FUND-VII",
+    "tradeDate": "2026-07-10"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0135",
+    "quantity": 980,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "AAPL-C-260-DEC26",
+    "tradeDate": "2026-07-14"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0136",
+    "quantity": 1449,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "AAPL-C-260-DEC26",
+    "tradeDate": "2026-07-15"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0137",
+    "quantity": 1146,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "ESU26-FUT",
+    "tradeDate": "2026-07-09"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0138",
+    "quantity": 1005,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "ESU26-FUT",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0139",
+    "quantity": 882,
+    "side": "SELL",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "MSFT-P-480-SEP26",
+    "tradeDate": "2026-07-09"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0140",
+    "quantity": 533,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "TSLA-P-300-JAN27",
+    "tradeDate": "2026-07-07"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0141",
+    "quantity": 278,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "BRK-B",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0142",
+    "quantity": 467,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "BRK-B",
+    "tradeDate": "2026-07-07"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0143",
+    "quantity": 1715,
+    "side": "SELL",
+    "status": "NEW",
+    "symbol": "GOOGL",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0144",
+    "quantity": 174,
+    "side": "SELL",
+    "status": "CANCELLED",
+    "symbol": "GOOGL",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0145",
+    "quantity": 1638,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "GOOGL",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0146",
+    "quantity": 569,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "JNJ",
+    "tradeDate": "2026-07-08"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0147",
+    "quantity": 1227,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "JPM",
+    "tradeDate": "2026-07-07"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0148",
+    "quantity": 416,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "MSFT",
+    "tradeDate": "2026-07-09"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0149",
+    "quantity": 1449,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "MSFT",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0150",
+    "quantity": 509,
+    "side": "BUY",
+    "status": "CANCELLED",
+    "symbol": "PG",
+    "tradeDate": "2026-07-09"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0151",
+    "quantity": 56,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "TSLA",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0152",
+    "quantity": 607,
+    "side": "BUY",
+    "status": "NEW",
+    "symbol": "TSLA",
+    "tradeDate": "2026-07-09"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0153",
+    "quantity": 1956,
+    "side": "SELL",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "TSLA",
+    "tradeDate": "2026-07-15"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0154",
+    "quantity": 55000,
+    "side": "SELL",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "CORP-GE-2031",
+    "tradeDate": "2026-07-15"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0155",
+    "quantity": 11000,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "CORP-IBM-2029",
+    "tradeDate": "2026-07-06"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0156",
+    "quantity": 81000,
+    "side": "BUY",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "CORP-IBM-2029",
+    "tradeDate": "2026-07-10"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0157",
+    "quantity": 97000,
+    "side": "BUY",
+    "status": "NEW",
+    "symbol": "MUNI-CA-2036",
+    "tradeDate": "2026-07-16"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0158",
+    "quantity": 56000,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "MUNI-NY-2033",
+    "tradeDate": "2026-07-10"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0159",
+    "quantity": 43000,
+    "side": "SELL",
+    "status": "CANCELLED",
+    "symbol": "T-2027-11",
+    "tradeDate": "2026-07-08"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0160",
+    "quantity": 53000,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "T-2027-11",
+    "tradeDate": "2026-07-06"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0161",
+    "quantity": 88000,
+    "side": "BUY",
+    "status": "CANCELLED",
+    "symbol": "T-2035-08",
+    "tradeDate": "2026-07-15"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0162",
+    "quantity": 74000,
+    "side": "BUY",
+    "status": "CANCELLED",
+    "symbol": "T-2035-08",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0163",
+    "quantity": 100000,
+    "side": "BUY",
+    "status": "CANCELLED",
+    "symbol": "T-2035-08",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0164",
+    "quantity": 1101,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "ART-FUND-III",
+    "tradeDate": "2026-07-16"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0165",
+    "quantity": 825,
+    "side": "BUY",
+    "status": "CANCELLED",
+    "symbol": "ART-FUND-III",
+    "tradeDate": "2026-07-08"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0166",
+    "quantity": 392,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "GLD-ETF",
+    "tradeDate": "2026-07-16"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0167",
+    "quantity": 1788,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "PE-FUND-VII",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0168",
+    "quantity": 867,
+    "side": "SELL",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "PE-FUND-VII",
+    "tradeDate": "2026-07-10"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0169",
+    "quantity": 210,
+    "side": "SELL",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "PE-FUND-VII",
+    "tradeDate": "2026-07-15"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0170",
+    "quantity": 1918,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "REIT-VNQ",
+    "tradeDate": "2026-07-06"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0171",
+    "quantity": 499,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "REIT-VNQ",
+    "tradeDate": "2026-07-07"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0172",
+    "quantity": 1716,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "TIMBER-LP",
+    "tradeDate": "2026-07-09"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0173",
+    "quantity": 1218,
+    "side": "SELL",
+    "status": "NEW",
+    "symbol": "TIMBER-LP",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-005",
+    "orderId": "ORD-0174",
+    "quantity": 391,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "XOM",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-006",
+    "orderId": "ORD-0175",
+    "quantity": 1920,
+    "side": "BUY",
+    "status": "CANCELLED",
+    "symbol": "AAPL",
+    "tradeDate": "2026-07-10"
+  },
+  {
+    "investorId": "INV-006",
+    "orderId": "ORD-0176",
+    "quantity": 992,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "AMZN",
+    "tradeDate": "2026-07-08"
+  },
+  {
+    "investorId": "INV-006",
+    "orderId": "ORD-0177",
+    "quantity": 278,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "JPM",
+    "tradeDate": "2026-07-07"
+  },
+  {
+    "investorId": "INV-006",
+    "orderId": "ORD-0178",
+    "quantity": 702,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "NVDA",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-006",
+    "orderId": "ORD-0179",
+    "quantity": 340,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "NVDA",
+    "tradeDate": "2026-07-06"
+  },
+  {
+    "investorId": "INV-006",
+    "orderId": "ORD-0180",
+    "quantity": 1376,
+    "side": "SELL",
+    "status": "NEW",
+    "symbol": "NVDA",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-006",
+    "orderId": "ORD-0181",
+    "quantity": 490,
+    "side": "SELL",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "TSLA",
+    "tradeDate": "2026-07-08"
+  },
+  {
+    "investorId": "INV-006",
+    "orderId": "ORD-0182",
+    "quantity": 1670,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "TSLA",
+    "tradeDate": "2026-07-16"
+  },
+  {
+    "investorId": "INV-006",
+    "orderId": "ORD-0183",
+    "quantity": 171,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "UNH",
+    "tradeDate": "2026-07-06"
+  },
+  {
+    "investorId": "INV-006",
+    "orderId": "ORD-0184",
+    "quantity": 380,
+    "side": "SELL",
+    "status": "NEW",
+    "symbol": "XOM",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-006",
+    "orderId": "ORD-0185",
+    "quantity": 62000,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "CORP-GE-2031",
+    "tradeDate": "2026-07-06"
+  },
+  {
+    "investorId": "INV-006",
+    "orderId": "ORD-0186",
+    "quantity": 72000,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "CORP-GE-2031",
+    "tradeDate": "2026-07-06"
+  },
+  {
+    "investorId": "INV-006",
+    "orderId": "ORD-0187",
+    "quantity": 64000,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "CORP-IBM-2029",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-006",
+    "orderId": "ORD-0188",
+    "quantity": 59000,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "CORP-MSFT-2033",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-006",
+    "orderId": "ORD-0189",
+    "quantity": 35000,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "T-2027-11",
+    "tradeDate": "2026-07-14"
+  },
+  {
+    "investorId": "INV-006",
+    "orderId": "ORD-0190",
+    "quantity": 43000,
+    "side": "BUY",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "T-2027-11",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-006",
+    "orderId": "ORD-0191",
+    "quantity": 94000,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "T-2030-05",
+    "tradeDate": "2026-07-15"
+  },
+  {
+    "investorId": "INV-006",
+    "orderId": "ORD-0192",
+    "quantity": 56000,
+    "side": "BUY",
+    "status": "NEW",
+    "symbol": "T-2030-05",
+    "tradeDate": "2026-07-09"
+  },
+  {
+    "investorId": "INV-006",
+    "orderId": "ORD-0193",
+    "quantity": 11000,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "T-2030-05",
+    "tradeDate": "2026-07-15"
+  },
+  {
+    "investorId": "INV-006",
+    "orderId": "ORD-0194",
+    "quantity": 98000,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "T-2035-08",
+    "tradeDate": "2026-07-07"
+  },
+  {
+    "investorId": "INV-006",
+    "orderId": "ORD-0195",
+    "quantity": 1907,
+    "side": "SELL",
+    "status": "CANCELLED",
+    "symbol": "REIT-VNQ",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-006",
+    "orderId": "ORD-0196",
+    "quantity": 242,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "GOOGL",
+    "tradeDate": "2026-07-15"
+  },
+  {
+    "investorId": "INV-006",
+    "orderId": "ORD-0197",
+    "quantity": 1208,
+    "side": "SELL",
+    "status": "NEW",
+    "symbol": "MUNI-CA-2036",
+    "tradeDate": "2026-07-08"
+  },
+  {
+    "investorId": "INV-007",
+    "orderId": "ORD-0198",
+    "quantity": 1814,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "BRK-B",
+    "tradeDate": "2026-07-14"
+  },
+  {
+    "investorId": "INV-007",
+    "orderId": "ORD-0199",
+    "quantity": 1600,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "JNJ",
+    "tradeDate": "2026-07-16"
+  },
+  {
+    "investorId": "INV-007",
+    "orderId": "ORD-0200",
+    "quantity": 839,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "JNJ",
+    "tradeDate": "2026-07-07"
+  },
+  {
+    "investorId": "INV-007",
+    "orderId": "ORD-0201",
+    "quantity": 1905,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "JNJ",
+    "tradeDate": "2026-07-09"
+  },
+  {
+    "investorId": "INV-007",
+    "orderId": "ORD-0202",
+    "quantity": 1878,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "JPM",
+    "tradeDate": "2026-07-16"
+  },
+  {
+    "investorId": "INV-007",
+    "orderId": "ORD-0203",
+    "quantity": 1051,
+    "side": "BUY",
+    "status": "NEW",
+    "symbol": "MSFT",
+    "tradeDate": "2026-07-06"
+  },
+  {
+    "investorId": "INV-007",
+    "orderId": "ORD-0204",
+    "quantity": 1638,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "NVDA",
+    "tradeDate": "2026-07-16"
+  },
+  {
+    "investorId": "INV-007",
+    "orderId": "ORD-0205",
+    "quantity": 1125,
+    "side": "SELL",
+    "status": "CANCELLED",
+    "symbol": "NVDA",
+    "tradeDate": "2026-07-15"
+  },
+  {
+    "investorId": "INV-007",
+    "orderId": "ORD-0206",
+    "quantity": 672,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "UNH",
+    "tradeDate": "2026-07-06"
+  },
+  {
+    "investorId": "INV-007",
+    "orderId": "ORD-0207",
+    "quantity": 39,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "UNH",
+    "tradeDate": "2026-07-16"
+  },
+  {
+    "investorId": "INV-007",
+    "orderId": "ORD-0208",
+    "quantity": 71000,
+    "side": "SELL",
+    "status": "CANCELLED",
+    "symbol": "CORP-GE-2031",
+    "tradeDate": "2026-07-14"
+  },
+  {
+    "investorId": "INV-007",
+    "orderId": "ORD-0209",
+    "quantity": 64000,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "MUNI-NY-2033",
+    "tradeDate": "2026-07-10"
+  },
+  {
+    "investorId": "INV-007",
+    "orderId": "ORD-0210",
+    "quantity": 65000,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "T-2027-11",
+    "tradeDate": "2026-07-10"
+  },
+  {
+    "investorId": "INV-007",
+    "orderId": "ORD-0211",
+    "quantity": 35000,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "T-2027-11",
+    "tradeDate": "2026-07-08"
+  },
+  {
+    "investorId": "INV-007",
+    "orderId": "ORD-0212",
+    "quantity": 32000,
+    "side": "BUY",
+    "status": "NEW",
+    "symbol": "T-2030-05",
+    "tradeDate": "2026-07-16"
+  },
+  {
+    "investorId": "INV-007",
+    "orderId": "ORD-0213",
+    "quantity": 422,
+    "side": "SELL",
+    "status": "NEW",
+    "symbol": "PE-FUND-VII",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-007",
+    "orderId": "ORD-0214",
+    "quantity": 1614,
+    "side": "BUY",
+    "status": "NEW",
+    "symbol": "TIMBER-LP",
+    "tradeDate": "2026-07-07"
+  },
+  {
+    "investorId": "INV-007",
+    "orderId": "ORD-0215",
+    "quantity": 538,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "TIMBER-LP",
+    "tradeDate": "2026-07-16"
+  },
+  {
+    "investorId": "INV-007",
+    "orderId": "ORD-0216",
+    "quantity": 625,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "TIMBER-LP",
+    "tradeDate": "2026-07-15"
+  },
+  {
+    "investorId": "INV-007",
+    "orderId": "ORD-0217",
+    "quantity": 1220,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "SPX-C-6500-DEC26",
+    "tradeDate": "2026-07-14"
+  },
+  {
+    "investorId": "INV-008",
+    "orderId": "ORD-0218",
+    "quantity": 1185,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "AMZN",
+    "tradeDate": "2026-07-16"
+  },
+  {
+    "investorId": "INV-008",
+    "orderId": "ORD-0219",
+    "quantity": 651,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "AMZN",
+    "tradeDate": "2026-07-09"
+  },
+  {
+    "investorId": "INV-008",
+    "orderId": "ORD-0220",
+    "quantity": 819,
+    "side": "BUY",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "AMZN",
+    "tradeDate": "2026-07-15"
+  },
+  {
+    "investorId": "INV-008",
+    "orderId": "ORD-0221",
+    "quantity": 1013,
+    "side": "SELL",
+    "status": "CANCELLED",
+    "symbol": "BRK-B",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-008",
+    "orderId": "ORD-0222",
+    "quantity": 1089,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "BRK-B",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-008",
+    "orderId": "ORD-0223",
+    "quantity": 1675,
+    "side": "BUY",
+    "status": "CANCELLED",
+    "symbol": "GOOGL",
+    "tradeDate": "2026-07-15"
+  },
+  {
+    "investorId": "INV-008",
+    "orderId": "ORD-0224",
+    "quantity": 1580,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "GOOGL",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-008",
+    "orderId": "ORD-0225",
+    "quantity": 884,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "JNJ",
+    "tradeDate": "2026-07-07"
+  },
+  {
+    "investorId": "INV-008",
+    "orderId": "ORD-0226",
+    "quantity": 1373,
+    "side": "BUY",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "JNJ",
+    "tradeDate": "2026-07-06"
+  },
+  {
+    "investorId": "INV-008",
+    "orderId": "ORD-0227",
+    "quantity": 1830,
+    "side": "SELL",
+    "status": "CANCELLED",
+    "symbol": "JPM",
+    "tradeDate": "2026-07-15"
+  },
+  {
+    "investorId": "INV-008",
+    "orderId": "ORD-0228",
+    "quantity": 1062,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "JPM",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-008",
+    "orderId": "ORD-0229",
+    "quantity": 1970,
+    "side": "SELL",
+    "status": "NEW",
+    "symbol": "PG",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-008",
+    "orderId": "ORD-0230",
+    "quantity": 1694,
+    "side": "SELL",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "PG",
+    "tradeDate": "2026-07-06"
+  },
+  {
+    "investorId": "INV-008",
+    "orderId": "ORD-0231",
+    "quantity": 980,
+    "side": "BUY",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "PG",
+    "tradeDate": "2026-07-06"
+  },
+  {
+    "investorId": "INV-008",
+    "orderId": "ORD-0232",
+    "quantity": 125,
+    "side": "SELL",
+    "status": "CANCELLED",
+    "symbol": "TSLA",
+    "tradeDate": "2026-07-14"
+  },
+  {
+    "investorId": "INV-008",
+    "orderId": "ORD-0233",
+    "quantity": 171,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "TSLA",
+    "tradeDate": "2026-07-06"
+  },
+  {
+    "investorId": "INV-008",
+    "orderId": "ORD-0234",
+    "quantity": 34000,
+    "side": "SELL",
+    "status": "NEW",
+    "symbol": "CORP-IBM-2029",
+    "tradeDate": "2026-07-10"
+  },
+  {
+    "investorId": "INV-008",
+    "orderId": "ORD-0235",
+    "quantity": 6000,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "CORP-IBM-2029",
+    "tradeDate": "2026-07-09"
+  },
+  {
+    "investorId": "INV-008",
+    "orderId": "ORD-0236",
+    "quantity": 68000,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "CORP-IBM-2029",
+    "tradeDate": "2026-07-15"
+  },
+  {
+    "investorId": "INV-008",
+    "orderId": "ORD-0237",
+    "quantity": 36000,
+    "side": "SELL",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "MUNI-CA-2036",
+    "tradeDate": "2026-07-16"
+  },
+  {
+    "investorId": "INV-008",
+    "orderId": "ORD-0238",
+    "quantity": 57000,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "MUNI-CA-2036",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-008",
+    "orderId": "ORD-0239",
+    "quantity": 38000,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "T-2030-05",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-008",
+    "orderId": "ORD-0240",
+    "quantity": 61000,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "T-2030-05",
+    "tradeDate": "2026-07-10"
+  },
+  {
+    "investorId": "INV-008",
+    "orderId": "ORD-0241",
+    "quantity": 66000,
+    "side": "SELL",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "T-2030-05",
+    "tradeDate": "2026-07-09"
+  },
+  {
+    "investorId": "INV-008",
+    "orderId": "ORD-0242",
+    "quantity": 37000,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "T-2035-08",
+    "tradeDate": "2026-07-09"
+  },
+  {
+    "investorId": "INV-008",
+    "orderId": "ORD-0243",
+    "quantity": 664,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "ART-FUND-III",
+    "tradeDate": "2026-07-14"
+  },
+  {
+    "investorId": "INV-008",
+    "orderId": "ORD-0244",
+    "quantity": 110,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "GLD-ETF",
+    "tradeDate": "2026-07-07"
+  },
+  {
+    "investorId": "INV-008",
+    "orderId": "ORD-0245",
+    "quantity": 1104,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "WINE-LP",
+    "tradeDate": "2026-07-08"
+  },
+  {
+    "investorId": "INV-009",
+    "orderId": "ORD-0246",
+    "quantity": 669,
+    "side": "BUY",
+    "status": "NEW",
+    "symbol": "ESU26-FUT",
+    "tradeDate": "2026-07-16"
+  },
+  {
+    "investorId": "INV-009",
+    "orderId": "ORD-0247",
+    "quantity": 1436,
+    "side": "BUY",
+    "status": "NEW",
+    "symbol": "ESU26-FUT",
+    "tradeDate": "2026-07-09"
+  },
+  {
+    "investorId": "INV-009",
+    "orderId": "ORD-0248",
+    "quantity": 1297,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "NVDA-C-220-MAR27",
+    "tradeDate": "2026-07-16"
+  },
+  {
+    "investorId": "INV-009",
+    "orderId": "ORD-0249",
+    "quantity": 24,
+    "side": "SELL",
+    "status": "NEW",
+    "symbol": "SPX-C-6500-DEC26",
+    "tradeDate": "2026-07-16"
+  },
+  {
+    "investorId": "INV-009",
+    "orderId": "ORD-0250",
+    "quantity": 1459,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "SPX-C-6500-DEC26",
+    "tradeDate": "2026-07-14"
+  },
+  {
+    "investorId": "INV-009",
+    "orderId": "ORD-0251",
+    "quantity": 1879,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "SPX-C-6500-DEC26",
+    "tradeDate": "2026-07-14"
+  },
+  {
+    "investorId": "INV-009",
+    "orderId": "ORD-0252",
+    "quantity": 90,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "TSLA-P-300-JAN27",
+    "tradeDate": "2026-07-09"
+  },
+  {
+    "investorId": "INV-009",
+    "orderId": "ORD-0253",
+    "quantity": 606,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "TSLA-P-300-JAN27",
+    "tradeDate": "2026-07-10"
+  },
+  {
+    "investorId": "INV-009",
+    "orderId": "ORD-0254",
+    "quantity": 1987,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "AAPL",
+    "tradeDate": "2026-07-06"
+  },
+  {
+    "investorId": "INV-009",
+    "orderId": "ORD-0255",
+    "quantity": 302,
+    "side": "SELL",
+    "status": "NEW",
+    "symbol": "AAPL",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-009",
+    "orderId": "ORD-0256",
+    "quantity": 690,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "BRK-B",
+    "tradeDate": "2026-07-08"
+  },
+  {
+    "investorId": "INV-009",
+    "orderId": "ORD-0257",
+    "quantity": 1830,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "GOOGL",
+    "tradeDate": "2026-07-10"
+  },
+  {
+    "investorId": "INV-009",
+    "orderId": "ORD-0258",
+    "quantity": 395,
+    "side": "SELL",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "GOOGL",
+    "tradeDate": "2026-07-07"
+  },
+  {
+    "investorId": "INV-009",
+    "orderId": "ORD-0259",
+    "quantity": 1116,
+    "side": "BUY",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "MSFT",
+    "tradeDate": "2026-07-09"
+  },
+  {
+    "investorId": "INV-009",
+    "orderId": "ORD-0260",
+    "quantity": 510,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "TSLA",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-009",
+    "orderId": "ORD-0261",
+    "quantity": 1299,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "XOM",
+    "tradeDate": "2026-07-07"
+  },
+  {
+    "investorId": "INV-009",
+    "orderId": "ORD-0262",
+    "quantity": 1871,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "XOM",
+    "tradeDate": "2026-07-14"
+  },
+  {
+    "investorId": "INV-009",
+    "orderId": "ORD-0263",
+    "quantity": 502,
+    "side": "SELL",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "XOM",
+    "tradeDate": "2026-07-16"
+  },
+  {
+    "investorId": "INV-009",
+    "orderId": "ORD-0264",
+    "quantity": 1704,
+    "side": "BUY",
+    "status": "CANCELLED",
+    "symbol": "ART-FUND-III",
+    "tradeDate": "2026-07-08"
+  },
+  {
+    "investorId": "INV-009",
+    "orderId": "ORD-0265",
+    "quantity": 496,
+    "side": "BUY",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "ART-FUND-III",
+    "tradeDate": "2026-07-16"
+  },
+  {
+    "investorId": "INV-009",
+    "orderId": "ORD-0266",
+    "quantity": 1256,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "GLD-ETF",
+    "tradeDate": "2026-07-15"
+  },
+  {
+    "investorId": "INV-009",
+    "orderId": "ORD-0267",
+    "quantity": 1493,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "GLD-ETF",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-009",
+    "orderId": "ORD-0268",
+    "quantity": 1312,
+    "side": "SELL",
+    "status": "CANCELLED",
+    "symbol": "GLD-ETF",
+    "tradeDate": "2026-07-09"
+  },
+  {
+    "investorId": "INV-009",
+    "orderId": "ORD-0269",
+    "quantity": 666,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "PE-FUND-VII",
+    "tradeDate": "2026-07-08"
+  },
+  {
+    "investorId": "INV-009",
+    "orderId": "ORD-0270",
+    "quantity": 546,
+    "side": "SELL",
+    "status": "CANCELLED",
+    "symbol": "T-2035-08",
+    "tradeDate": "2026-07-14"
+  },
+  {
+    "investorId": "INV-010",
+    "orderId": "ORD-0271",
+    "quantity": 1674,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "AAPL-C-260-DEC26",
+    "tradeDate": "2026-07-07"
+  },
+  {
+    "investorId": "INV-010",
+    "orderId": "ORD-0272",
+    "quantity": 1154,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "AAPL-C-260-DEC26",
+    "tradeDate": "2026-07-14"
+  },
+  {
+    "investorId": "INV-010",
+    "orderId": "ORD-0273",
+    "quantity": 1680,
+    "side": "BUY",
+    "status": "CANCELLED",
+    "symbol": "ESU26-FUT",
+    "tradeDate": "2026-07-09"
+  },
+  {
+    "investorId": "INV-010",
+    "orderId": "ORD-0274",
+    "quantity": 346,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "ESU26-FUT",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-010",
+    "orderId": "ORD-0275",
+    "quantity": 560,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "MSFT-P-480-SEP26",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-010",
+    "orderId": "ORD-0276",
+    "quantity": 830,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "SPX-C-6500-DEC26",
+    "tradeDate": "2026-07-16"
+  },
+  {
+    "investorId": "INV-010",
+    "orderId": "ORD-0277",
+    "quantity": 499,
+    "side": "BUY",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "SPX-C-6500-DEC26",
+    "tradeDate": "2026-07-08"
+  },
+  {
+    "investorId": "INV-010",
+    "orderId": "ORD-0278",
+    "quantity": 1480,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "WTI-CL-AUG26-FUT",
+    "tradeDate": "2026-07-15"
+  },
+  {
+    "investorId": "INV-010",
+    "orderId": "ORD-0279",
+    "quantity": 1365,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "WTI-CL-AUG26-FUT",
+    "tradeDate": "2026-07-06"
+  },
+  {
+    "investorId": "INV-010",
+    "orderId": "ORD-0280",
+    "quantity": 1001,
+    "side": "BUY",
+    "status": "CANCELLED",
+    "symbol": "WTI-CL-AUG26-FUT",
+    "tradeDate": "2026-07-08"
+  },
+  {
+    "investorId": "INV-010",
+    "orderId": "ORD-0281",
+    "quantity": 35000,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "CORP-GE-2031",
+    "tradeDate": "2026-07-17"
+  },
+  {
+    "investorId": "INV-010",
+    "orderId": "ORD-0282",
+    "quantity": 9000,
+    "side": "BUY",
+    "status": "FILLED",
+    "symbol": "CORP-GE-2031",
+    "tradeDate": "2026-07-13"
+  },
+  {
+    "investorId": "INV-010",
+    "orderId": "ORD-0283",
+    "quantity": 96000,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "CORP-IBM-2029",
+    "tradeDate": "2026-07-09"
+  },
+  {
+    "investorId": "INV-010",
+    "orderId": "ORD-0284",
+    "quantity": 91000,
+    "side": "SELL",
+    "status": "PARTIALLY_FILLED",
+    "symbol": "CORP-MSFT-2033",
+    "tradeDate": "2026-07-09"
+  },
+  {
+    "investorId": "INV-010",
+    "orderId": "ORD-0285",
+    "quantity": 2000,
+    "side": "BUY",
+    "status": "NEW",
+    "symbol": "CORP-MSFT-2033",
+    "tradeDate": "2026-07-06"
+  },
+  {
+    "investorId": "INV-010",
+    "orderId": "ORD-0286",
+    "quantity": 85000,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "MUNI-CA-2036",
+    "tradeDate": "2026-07-08"
+  },
+  {
+    "investorId": "INV-010",
+    "orderId": "ORD-0287",
+    "quantity": 98000,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "MUNI-NY-2033",
+    "tradeDate": "2026-07-15"
+  },
+  {
+    "investorId": "INV-010",
+    "orderId": "ORD-0288",
+    "quantity": 31000,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "MUNI-NY-2033",
+    "tradeDate": "2026-07-16"
+  },
+  {
+    "investorId": "INV-010",
+    "orderId": "ORD-0289",
+    "quantity": 4000,
+    "side": "BUY",
+    "status": "NEW",
+    "symbol": "MUNI-NY-2033",
+    "tradeDate": "2026-07-16"
+  },
+  {
+    "investorId": "INV-010",
+    "orderId": "ORD-0290",
+    "quantity": 14000,
+    "side": "BUY",
+    "status": "CANCELLED",
+    "symbol": "T-2027-11",
+    "tradeDate": "2026-07-09"
+  },
+  {
+    "investorId": "INV-010",
+    "orderId": "ORD-0291",
+    "quantity": 73000,
+    "side": "SELL",
+    "status": "NEW",
+    "symbol": "T-2027-11",
+    "tradeDate": "2026-07-06"
+  },
+  {
+    "investorId": "INV-010",
+    "orderId": "ORD-0292",
+    "quantity": 337,
+    "side": "SELL",
+    "status": "FILLED",
+    "symbol": "MSFT",
+    "tradeDate": "2026-07-16"
+  }
+]
