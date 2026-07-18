@@ -34,3 +34,17 @@ delivers CSVs over SFTP. Full pitch and architecture: `docs/PLAN.md`.
 - Versions are pinned in `docs/versions.md` (created in M0); don't bump casually.
 - Mock APIs are paginated (≥3 pages each); pagination handling is part of every engine
   compiler's extraction contract — never special-case single-page.
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in GitHub Issues (travispomeroy/dataflow) via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default vocabulary — the five canonical labels, names as-is. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
