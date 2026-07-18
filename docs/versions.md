@@ -20,11 +20,11 @@ Digest pinning is deferred to a productionization note, with one exception below
 | SFTP server | `atmoz/sftp:alpine@sha256:a6cb3eb29202ca7f57e73bb7e527286e66e0e822fff65609207c7e0ef2d135a3` | `infra/docker-compose.yml` (M0.5) | 2026-07-18 |
 | Apache NiFi | `apache/nifi:2.10.0` | `infra/docker-compose.yml` (M0.6) | 2026-07-18 |
 | Apache Hop | `apache/hop:2.18.1` | throwaway-container image check in `e2e/` (M0.6); no compose service until M5 | 2026-07-18 |
-| Node.js | `24.18.0` (LTS "Krypton") | `.nvmrc` + root `package.json` `engines` (M0.1, applied); replicate in `ui/package.json` (M0.7) | 2026-07-18 |
-| npm | `11.16.0` (the version bundled with Node 24.18.0) | root `package.json` `engines` (M0.1, applied); `ui/package.json` (M0.7) | 2026-07-18 |
-| Nx | `23.1.0` | `ui/package.json` (M0.7) | 2026-07-18 |
-| Vite | `8.1.5` | `ui/package.json` (M0.7) | 2026-07-18 |
-| React / react-dom | `19.2.7` | `ui/package.json` (M0.7) | 2026-07-18 |
+| Node.js | `24.18.0` (LTS "Krypton") | `.nvmrc` + root `package.json` `engines` (M0.1, applied); `ui/package.json` `engines` (M0.7, applied) | 2026-07-18 |
+| npm | `11.16.0` (the version bundled with Node 24.18.0) | root `package.json` `engines` (M0.1, applied); `ui/package.json` (M0.7, applied) | 2026-07-18 |
+| Nx | `23.1.0` | `ui/package.json` (M0.7, applied) | 2026-07-18 |
+| Vite | `8.1.5` | `ui/package.json` (M0.7, applied) | 2026-07-18 |
+| React / react-dom | `19.2.7` | `ui/package.json` (M0.7, applied) | 2026-07-18 |
 | MUI (`@mui/material`) | `9.2.0` | **pinned in M0, installed in M3** — enters `ui/package.json` only in M3 | 2026-07-18 |
 | React Flow (`@xyflow/react`) | `12.11.2` | **pinned in M0, installed in M3** — enters `ui/package.json` only in M3 | 2026-07-18 |
 | JDK | Temurin `25.0.3+9` (compiler release `25`) | `control-plane/pom.xml` `<maven.compiler.release>25</maven.compiler.release>` (M0.8) | 2026-07-18 |

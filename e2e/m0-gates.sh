@@ -19,7 +19,14 @@ if (( running_node_major < required_node_major )); then
 fi
 
 # -- Stage 1: scaffold builds -------------------------------------------------
-# (M0.7 adds the Nx build of the empty app; M0.8 adds ./mvnw verify.)
+# (M0.8 adds ./mvnw verify.)
+stage "Stage 1: UI installs from lockfile; empty app typechecks and builds"
+# npm ci = clean, lockfile-exact install; ui/.npmrc engine-strict + exact
+# engines make a wrong Node/npm toolchain fail here rather than build oddly.
+# The build script runs typecheck + vite build — vite alone only strips types,
+# so without typecheck a type-broken app would still "build".
+npm --prefix ui ci
+npm --prefix ui run build
 
 # -- Stage 2: the world comes up ----------------------------------------------
 stage "Stage 2: recreate the world from nothing; healthchecks are the assertion"

@@ -1,0 +1,36 @@
+{
+  "name": "ui",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Dataflow UI — Nx workspace (npm). Headline versions: docs/versions.md; everything else: this file + lockfile, exact only.",
+  "engines": {
+    "node": "24.18.0",
+    "npm": "11.16.0"
+  },
+  "scripts": {
+    "build": "nx run-many -t typecheck build"
+  },
+  "workspaces": [
+    "apps/*"
+  ],
+  "dependencies": {
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
+  },
+  "devDependencies": {
+    "@nx/js": "23.1.0",
+    "@nx/react": "23.1.0",
+    "@nx/vite": "23.1.0",
+    "@nx/web": "23.1.0",
+    "@swc/helpers": "0.5.18",
+    "@types/node": "24.13.3",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "6.0.3",
+    "jiti": "2.4.2",
+    "nx": "23.1.0",
+    "tslib": "2.8.1",
+    "typescript": "6.0.3",
+    "vite": "8.1.5"
+  }
+}
