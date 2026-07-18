@@ -47,7 +47,7 @@ index, the Adoptium release API, and context7 for the NiFi docker documentation.
   compiled flows will need plugin tasks (SFTP delivery, S3/MinIO staging, docker).
 - **MinIO**: `RELEASE.2025-09-07T16-13-09Z` is the last community release published to
   Docker Hub (MinIO stopped shipping newer community images). Fine for POC staging; a real
-  deployment would use AWS S3 anyway (the M7 profile flip).
+  deployment would use AWS S3 anyway (the M8 profile flip).
 - **atmoz/sftp**: the repo publishes only rolling tags (`alpine`, `debian`) — there is no
   versioned tag to pin, so this is the one digest pin. Digest captured from the `alpine`
   tag on the research date. The digest is the linux/amd64 image; on arm64 hosts Docker
@@ -75,7 +75,7 @@ index, the Adoptium release API, and context7 for the NiFi docker documentation.
   with the Nx scaffold in M0.7; Nx-generated dev tooling is pinned by that ticket's
   committed lockfile rather than rows here — this table carries the headline libraries
   only.
-- **Stretch components** (Kafka M8, Relic Reporting M9, DuckDB M10) get rows added here
+- **Stretch components** (Kafka M9, Relic Reporting M10, DuckDB M11) get rows added here
   when their milestones start, not before.
 
 ## NiFi 2.x single-user credentials (recorded for M0.6, the engines ticket)

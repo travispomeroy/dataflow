@@ -21,6 +21,11 @@ precisely, forever — the audit requirement of a financial feed.
 
 - Engine compilers read Execution Plans only — they never touch the Catalog or logical
   config. That seam is what makes adding engine #3 tractable.
+- "Physically complete" means complete **except secret material**: the plan (and every
+  compiled artifact) carries credential *references*; values live only in the executing
+  layer's secret store and are late-bound at run time. Snapshots, goldens, and flow
+  definitions never contain secrets. Corollary: rotating a secret *value* changes a live
+  feed with no redeploy — deliberately; only renaming the *reference* requires one.
 - A live Deployment does not auto-heal on Catalog change: it keeps running its frozen plan
   (possibly failing) until redeployed. Deliberate — no silent behavior change to a live
   feed. A production version should flag stale Deployments; noted for productionization.

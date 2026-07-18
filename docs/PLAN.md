@@ -39,11 +39,11 @@ gates green.
 |---|---|---|
 | UI | React + Vite + MUI + React Flow (latest; pin in M0), Nx workspace | 3 views: dataflow list, builder canvas, run history; live config JSON preview |
 | Control plane | Java 25, Spring Boot 4.1.0, Spring Modulith, **Maven**, Postgres | Modules: `catalog`, `dataflow` (configs, draft→deploy lifecycle, versions), `compiler` (config→Execution Plan), `compiler-kestra`, `compiler-nifi`, `compiler-hop`, `runner` (4 strategies), `runs` (tracking) |
-| Orchestrator | Kestra | One compiled flow per dataflow version; owns schedules, engine invocation, staging pickup, SFTP delivery |
+| Orchestrator | Kestra | One compiled flow definition per Deployment, one live flow per Dataflow; owns schedules, engine invocation, staging pickup, SFTP delivery |
 | Engines | Apache NiFi, Apache Hop | Each in `server` and `batch` execution models → 4 runners, 2 compilers (ADR-0003) |
 | Mock world | WireMock (3 paginated REST APIs), atmoz/sftp (Pomeroy Provider), MinIO (staging), Postgres | All docker-compose; deterministic committed fixtures, ≥3 pages per API |
-| Event backbone (M8) | Kafka + CloudEvents | Run lifecycle events; replaces run-status polling |
-| Fake legacy tool (M9) | Small Spring app ("Relic Reporting") | Own API + own delivery; walks the integration ladder |
+| Event backbone (M9) | Kafka + CloudEvents | Run lifecycle events; replaces run-status polling |
+| Fake legacy tool (M10) | Small Spring app ("Relic Reporting") | Own API + own delivery; walks the integration ladder |
 
 ### Key decisions (settled during grilling)
 
@@ -51,7 +51,15 @@ gates green.
 - **Delivery**: platform-owned via Kestra; engines stop at staging (ADR-0001). Hidden
   upload → rename all files atomically; never a visible partial feed.
 - **Config**: logical only; Execution Plan snapshot frozen per Deployment (ADR-0002).
-- **Lifecycle**: Draft → Deploy (versioned, linear); undeploy pauses schedule.
+- **Dataflows are DAGs**: the config schema is nodes + edges from M1; deploy-time
+  validation restricts compilable shapes to linear until M7 lifts it (ADR-0005). Fan-out
+  is broadcast — every branch sees all rows.
+- **Secrets are late-bound**: Execution Plans and compiled artifacts carry credential
+  *references*, never values; the executing layer's secret store resolves them at run
+  time (ADR-0002).
+- **Lifecycle**: one mutable Draft + immutable numbered Deployments (versioned, linear);
+  undeploy removes the Kestra flow; delete requires undeploy first; run-now executes the
+  active Deployment's frozen plan, never the Draft.
 - **Concurrency**: per-dataflow limit 1; second trigger queues.
 - **File naming**: catalog-owned token patterns (`positions_{assetClass}_{businessDate}.csv`);
   Destination owns base path; Business Date defaults to run date.
@@ -75,8 +83,9 @@ gates green.
 
 ### Adopted defaults
 
-Canvas enforces a connected Source→…→Destination graph before Deploy enables; Phase-1
-graphs are linear (one source, one destination); undeploy removes the Kestra flow; NiFi
+Canvas enforces a connected Source→…→Destination graph before Deploy enables (a courtesy
+preview of the control plane's deploy-time validation, which is the only authority);
+undeploy removes the Kestra flow; NiFi
 2.x HTTPS/single-user auth handled in infra; all container/library versions pinned during
 M0 doc research (use context7 for current docs: React Flow/@xyflow/react, MUI, Nx, Vite,
 Kestra, NiFi 2.x, Hop, Spring Boot 4.1, Spring Modulith).
@@ -96,7 +105,7 @@ docs/            this plan, ADRs, event schemas, comparison writeups, demo scrip
 ## Milestones
 
 Business-phase mapping: the user-facing "phase 1 pass-through" = M2–M4; "phase 2 complex
-ETL" = M6. Stretch = M8–M10. Engine landscape rationale: [`engine-survey.md`](./engine-survey.md).
+ETL" = M6–M7. Stretch = M9–M11. Engine landscape rationale: [`engine-survey.md`](./engine-survey.md).
 
 ### M0 — Scaffold: the world exists
 
@@ -134,20 +143,48 @@ login against the committed host key, fixtures regenerate byte-identically
 
 ### M1 — Domain core: config → Kestra-isms
 
-- `catalog` module + seeds (Positions source with 3-API projection/merge definition
-  **including per-API pagination config**; Pomeroy Provider destination with base path +
-  credentials ref; File Definitions with token patterns). Execution Plans carry resolved
-  pagination so engine compilers can generate page loops.
-- `dataflow` module: Dataflow Config schema (Java + mirrored TS types), CRUD, Draft→Deploy
-  versioned lifecycle, Execution Plan snapshot per Deployment.
-- `compiler` module: config + catalog → Execution Plan.
-- `compiler-kestra`: plan → per-dataflow Kestra flow YAML (schedule trigger, concurrency 1,
+- `catalog` module, **file-backed and in-memory**: committed seed resources inside the
+  module (no catalog tables, no `infra/seeds`) — Positions source with 3-API
+  projection/merge definition **including per-API pagination config**; Pomeroy Provider
+  destination with base path + `credentialsRef` naming a Kestra secret; File Definitions
+  with token patterns. Execution Plans carry resolved pagination so engine compilers can
+  generate page loops.
+- `dataflow` module: the Config schema is a **DAG** — nodes (source / transform /
+  destination; transform nodes carry a `kind`) + edges, optional Schedule
+  (`{kind: "daily", time, timezone}`; `null` = manual-only; `daily` is the only POC
+  kind — cron is a Kestra-compiler detail), operator-set Engine/Execution Model fields.
+  Java records + hand-written TS types (Nx lib in `ui/`), kept honest by canonical
+  config example JSONs that Java round-trips and `tsc` type-checks. Save validates
+  **structure** only (well-formed, refs resolve); Deploy validates **semantics**
+  (connected, acyclic, one Delivery, compilable-now = linear until M7) and returns
+  RFC 9457 problem details with a structured violations array.
+- Lifecycle: one mutable Draft + immutable numbered Deployments (frozen config copy +
+  Execution Plan snapshot per ADR-0002); the Draft may drift ahead of the active
+  Deployment. Undeploy removes the Kestra flow; delete requires undeploy first.
+- Persistence: `jsonb` documents on a thin relational spine (`dataflow`, `deployment`,
+  `run`), Flyway migrations, Spring Data JDBC, server UUIDs + an immutable unique slug
+  minted from the initial name.
+- `compiler` module: config + catalog → Execution Plan — physically complete **except
+  secret material** (credential references only).
+- `compiler-kestra`: plan → Kestra flow YAML (schedule trigger, concurrency 1,
   engine-runner task placeholder, staging pull, hidden-upload+rename SFTP delivery).
-- REST API: catalog read, dataflow CRUD, deploy, run-now, run history.
-- `runs` module: poll Kestra executions API → run records (status, timing, delivered files).
+  **Stable flow identity**: namespace `dataflow`, flow ID = slug, overwritten on deploy,
+  Deployment version as a Kestra label. Nothing nondeterministic in the YAML.
+- REST API under `/api`: catalog read, clients reference data, dataflow CRUD, deploy,
+  undeploy, run-now, run + deployment history (deployments expose their frozen plan).
+- `runs` module: namespace-wide **idempotent-upsert** poller (5s fixed delay) over the
+  Kestra executions API — discovers scheduled runs and updates known ones through one
+  path; run-now writes its record eagerly. Run status is a closed four-state enum
+  (`QUEUED → RUNNING → SUCCEEDED | FAILED`) with the raw Kestra state kept in a detail
+  field. `runs` reaches `dataflow` only via its public module API.
+- M1 talks to a **live** Kestra: deploy pushes the flow, run-now creates a real
+  execution that **fails at staging pull** (the placeholder engine stages nothing) —
+  the honest gate. M2 swaps the placeholder and the same loop goes green.
 
-**Exit gates**: golden snapshot tests green — Positions Feed config → expected Execution
-Plan JSON and Kestra YAML; full API walkthrough scripted via curl.
+**Exit gates**: `e2e/m1-gates.sh` — golden snapshot tests green (Positions Feed config →
+expected Execution Plan JSON and Kestra YAML, goldens in `e2e/golden/`); scripted curl
+walkthrough (create → deploy → run-now → poll to `FAILED` with timing + execution ID →
+run history shows it); chains `m0-gates.sh` so previous gates stay proven.
 
 ### M2 — Hop batch path: first end-to-end feed
 
@@ -166,7 +203,9 @@ poll → 5 CSVs on SFTP byte-match golden files; run history API shows the run w
 - Dataflow list (cards, status, last run), builder (React Flow canvas; palette from
   catalog API; property panel with client multi-select; Deploy + Run Now), run history
   view (status, timings, delivered files), collapsible live Dataflow Config JSON preview.
-- Canvas validation: Deploy enabled only for a connected linear graph.
+- Canvas validation: Deploy enabled only for a graph that passes the control plane's
+  deploy-time rules (linear until M7) — a courtesy preview; the control plane is the
+  authority.
 
 **Exit gates**: scripted browser test (Playwright) — build the Positions Feed on the
 canvas from scratch → deploy → run → delivered files visible in run history; M2 e2e still
@@ -210,7 +249,34 @@ writeup complete.
 **Exit gates**: rules-on and rules-off e2e green on both engines; snapshot goldens updated;
 UI toggle drives the difference.
 
-### M7 — Polish: the pitch
+### M7 — DAG: the diamond feed
+
+DAG support is a product conviction, not a stretch goal (ADR-0005). The schema has
+allowed DAGs since M1; this milestone lifts the linear-only deploy validation and proves
+the platform compiles and runs real graph shapes on both engines.
+
+- Deploy-time validation relaxed: fan-out (broadcast) and convergence become compilable.
+- Two new user-visible Transform kinds: **Aggregate** (group-by + measures) and **Join**
+  (named keys) — with an explicit rounding spec for derived measures so goldens stay
+  byte-comparable.
+- **Client Exposure Feed** (existing frozen fixtures only — no new APIs, no golden
+  invalidation): Positions fans out into a detail branch (filter by Clients) and an
+  aggregate branch (total market value per Client); Join on Client; derive
+  exposure % = position MV / client total; filter exposure ≥ 20%; Join Orders on
+  (Client, symbol) for a pending-order flag; deliver `exposure_{businessDate}.csv` to
+  Pomeroy Provider. One feed exercises fan-out, split-rejoin convergence (the diamond),
+  and independent-source fan-in.
+- Both engine compilers generate the diamond. NiFi's split-rejoin (flowfile model) is
+  the expected pain point — findings feed `engine-comparison.md` and stress ADR-0003
+  exactly where it is weakest.
+- Parity check: the user-composed exposure computation vs the M6 concentration Business
+  Rule output for the same Business Date — same logic, two authoring modes (demo gold).
+
+**Exit gates**: diamond feed e2e green on both engines against byte-golden
+`exposure_{businessDate}.csv`; compiler snapshot goldens for both generated artifacts;
+parity-check script green; all previous milestones' gates still pass.
+
+### M8 — Polish: the pitch
 
 - `docs/DEMO.md` demo runbook (clean machine → full demo).
 - AWS S3 staging profile (endpoint + creds swap; same code path).
@@ -222,7 +288,7 @@ UI toggle drives the difference.
 **Exit gates**: demo runbook executed start-to-finish on a clean checkout; all test layers
 green.
 
-### M8 — Event backbone (stretch): Kafka + CloudEvents
+### M9 — Event backbone (stretch): Kafka + CloudEvents
 
 - Kafka in compose; CloudEvents schemas published in `docs/events/`: `run.started`,
   `files.staged`, `run.delivered`, `run.failed`.
@@ -232,10 +298,10 @@ green.
 **Exit gates**: polling code deleted; e2e passes with event-driven tracking; UI updates
 live during a run without refresh; event schema docs published.
 
-### M9 — Integrated Tools (stretch): the adoption ladder
+### M10 — Integrated Tools (stretch): the adoption ladder
 
 - Spike → `docs/integration-contract.md`: the tiered contract (required endpoints per
-  tier; Tier 2 events = the M8 CloudEvents contract, versioned).
+  tier; Tier 2 events = the M9 CloudEvents contract, versioned).
 - Build fake legacy tool **"Relic Reporting"**: small Spring app with its own nice API
   (list feeds, run job, job status) and its own SFTP delivery; ships a feed the old way.
 - **Tier 3 — Wrapped**: Relic's feeds appear in the Dataflow UI (browse + trigger via its
@@ -248,7 +314,7 @@ live during a run without refresh; event schema docs published.
 **Exit gates**: all three tiers demoable in sequence; Parity Proof script green; contract
 doc complete and versioned.
 
-### M10 — Third engine experiment (stretch): DuckDB SQL codegen
+### M11 — Third engine experiment (stretch): DuckDB SQL codegen
 
 Rationale in [`engine-survey.md`](./engine-survey.md). Deliberately cheap, two payoffs:
 the artifact is plain SQL (readable by anyone — demo gold), and DuckDB is **batch-only**,
@@ -265,8 +331,9 @@ of ADR-0003).
   error at deploy time.
 
 **Exit gates**: full e2e green with `engine: duckdb` against the same golden files
-(rules-on and rules-off); capability-matrix validation test green; engine-survey updated
-with findings.
+(rules-on and rules-off, plus the M7 diamond feed — SQL CTEs handle the split-rejoin
+naturally, which is itself a survey finding); capability-matrix validation test green;
+engine-survey updated with findings.
 
 ---
 

@@ -34,7 +34,7 @@ canvases coworkers can peek behind, and both pass all five tests.
 
 ## Serious candidates
 
-### DuckDB (SQL codegen) — ⭐ recommended third-engine experiment (M10)
+### DuckDB (SQL codegen) — ⭐ recommended third-engine experiment (M11)
 
 - **Artifact**: a generated SQL script — readable by anyone who knows SQL, which makes the
   artifact itself demo material ("the engine can even be plain SQL").
@@ -42,7 +42,7 @@ canvases coworkers can peek behind, and both pass all five tests.
 - **Extraction**: v1.5.x reads JSON REST endpoints over HTTPS (`httpfs` + `json`
   extensions) with auth-header support via secrets — but **GET-only and no native
   pagination looping**. Under the firm's paginated-API constraint, pure-SQL extraction
-  isn't viable. M10 therefore splits the runner: a generated fetch step pulls pages to
+  isn't viable. M11 therefore splits the runner: a generated fetch step pulls pages to
   staged JSON files, and the SQL artifact owns transform + file production. (An all-SQL
   `UNION` over page URLs is possible only when page counts are known — a fragile hack;
   rejected.)
@@ -52,7 +52,7 @@ canvases coworkers can peek behind, and both pass all five tests.
 - **License/status**: MIT, DuckDB Foundation, very active (1.5.4 Jun 2026; LTS line
   exists).
 
-### Apache Camel — reserved for M9 (integration adapters), not an engine slot
+### Apache Camel — reserved for M10 (integration adapters), not an engine slot
 
 - **Artifact**: YAML DSL is first-class; `camel-jbang` runs YAML routes directly
   (supported, documented path); **Karavan** visual designer is alive and tracks Camel
@@ -61,7 +61,7 @@ canvases coworkers can peek behind, and both pass all five tests.
   join means enricher chains with custom aggregation strategies; the generated artifact
   gets ugly, and the artifact is the demo.
 - **Superpower**: protocol adaptation. Legacy tools with old API layers (auth quirks,
-  SOAP corners, retries) are exactly Camel's home turf. If M9's real-world sequel meets a
+  SOAP corners, retries) are exactly Camel's home turf. If M10's real-world sequel meets a
   tool too weird to integrate directly, a thin Camel layer implementing the Tier 2/3
   adapters (tool API ⇄ Platform Events) is the natural move.
 - **Status**: very active; two LTS releases/year (current LTS 4.18).
@@ -101,7 +101,7 @@ No declarative artifact — Temporal workflows are code; using it as an engine m
 codegen (fragile) or building a generic plan-interpreting worker (i.e., building our own
 ETL engine — explicitly out of scope). Where it *would* earn a place: control-plane
 durability — the deploy saga, Tier-1 migration dual-runs, anything that must survive a
-restart mid-operation. Recorded in productionization notes (M7). Not a Kestra
+restart mid-operation. Recorded in productionization notes (M8). Not a Kestra
 replacement here: Kestra's declarative YAML is precisely what makes "compile the
 Kestra-isms" a clean generation step; Temporal would turn that into code deployment.
 
@@ -135,12 +135,12 @@ Kestra-isms" a clean generation step; Temporal would turn that into code deploym
 
 | Candidate | Verdict |
 |---|---|
-| NiFi, Hop | POC engines (M2–M6) — unchanged |
-| DuckDB SQL codegen | Third-engine experiment — **M10** |
-| Camel | M9 toolbox: legacy-tool adapters |
+| NiFi, Hop | POC engines (M2–M7) — unchanged |
+| DuckDB SQL codegen | Third-engine experiment — **M11** |
+| Camel | M10 toolbox: legacy-tool adapters |
 | Spark + Declarative Pipelines | The documented at-scale path; no POC work |
 | Redpanda Connect / Bento, SeaTunnel | Honorable mentions; join-weak / sync-centric |
-| Temporal | Control-plane durability note (M7); not an engine |
+| Temporal | Control-plane durability note (M8); not an engine |
 | Airbyte, Meltano, dlt, dbt | Wrong shape (platform / code-first / transform-only) |
 | Flink, Embulk, Talend, Kettle, SCDF | No |
 

@@ -9,8 +9,9 @@ engines do the work, and the platform delivers the files.
 ### Core
 
 **Dataflow**:
-A user-authored definition of data movement: one Source, zero or more Transforms, and one
-Delivery to a Destination, on a Schedule. The central aggregate of the system.
+A user-authored DAG of data movement: one or more Sources, Transforms that may fan out
+and converge, and one Delivery to a Destination, on a Schedule. The central aggregate of
+the system.
 _Avoid_: pipeline, job, workflow
 
 **Dataflow Config**:
@@ -20,9 +21,22 @@ details (endpoints, credentials, merge mechanics).
 _Avoid_: flow definition (that's a compiled NiFi artifact)
 
 **Transform**:
-A user-visible operation applied to a Source's data within a Dataflow (e.g., "filter by
+A user-visible operation applied to data flowing through a Dataflow (e.g., "filter by
 Clients", "apply a Business Rule"). User-facing vocabulary stays simple even when the
 underlying logic is not.
+
+**Aggregate**:
+A Transform that groups the rows on its branch by a key and derives measures (e.g.,
+total market value per Client).
+
+**Join**:
+A Transform that converges two branches of a Dataflow into one by matching rows on named
+keys.
+_Avoid_: merge (that's the hidden composition inside a Source)
+
+**Fan-out**:
+A node feeding two or more downstream branches. Every branch sees all rows (broadcast),
+never a partition.
 
 **Business Rule**:
 An admin-authored, named piece of complex transform logic stored in the Catalog. Users add

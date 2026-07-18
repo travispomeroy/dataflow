@@ -8,8 +8,8 @@ delivers CSVs over SFTP. Full pitch and architecture: `docs/PLAN.md`.
 
 1. `CONTEXT.md` — the ubiquitous language. Use these exact terms in code, config, UI copy,
    and docs. Respect the `_Avoid_` lists.
-2. `docs/PLAN.md` — system overview, settled decisions, milestones M0–M10 with exit gates.
-3. `docs/adr/` — four binding decisions. Do not re-litigate them; propose a superseding
+2. `docs/PLAN.md` — system overview, settled decisions, milestones M0–M11 with exit gates.
+3. `docs/adr/` — five binding decisions. Do not re-litigate them; propose a superseding
    ADR if one must change.
 4. `docs/milestones/` — as-built notes from completed milestones (deviations from plan,
    gotchas, mid-flight decisions). Read the notes for all completed milestones before
