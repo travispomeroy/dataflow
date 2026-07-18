@@ -1,5 +1,7 @@
 package dev.pomeroy.dataflow.controlplane.compilerkestra;
 
+import java.util.List;
+
 /**
  * The Kestra API client (issue #16): flow registration in the one {@code dataflow}
  * namespace, speaking the basic-auth dance the M0 compose world established. Built
@@ -23,4 +25,17 @@ public interface KestraClient {
 	 * call asserts.
 	 */
 	void deleteFlow(String flowId);
+
+	/**
+	 * Starts an execution of the flow right now — run-now (issue #17). Returns the
+	 * freshly created execution (raw state {@code CREATED}), so the caller can record
+	 * it synchronously.
+	 */
+	KestraExecution createExecution(String flowId);
+
+	/**
+	 * Every execution in the one dataflow namespace, paged through exhaustively — the
+	 * runs poller's single discovery path for triggered and scheduled runs alike.
+	 */
+	List<KestraExecution> listExecutions();
 }

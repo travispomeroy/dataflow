@@ -1,9 +1,13 @@
 package dev.pomeroy.dataflow.controlplane.compilerkestra.internal;
 
 import dev.pomeroy.dataflow.controlplane.compilerkestra.KestraClient;
+import dev.pomeroy.dataflow.controlplane.compilerkestra.KestraExecution;
 import dev.pomeroy.dataflow.controlplane.compilerkestra.KestraFlowCompiler;
 import java.net.http.HttpClient;
 import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
@@ -27,6 +31,8 @@ import org.springframework.web.client.RestClient;
 class RestKestraClient implements KestraClient {
 
 	private static final MediaType APPLICATION_YAML = MediaType.parseMediaType("application/x-yaml");
+
+	private static final int EXECUTION_PAGE_SIZE = 100;
 
 	private final RestClient client;
 
@@ -73,5 +79,45 @@ class RestKestraClient implements KestraClient {
 		catch (HttpClientErrorException.NotFound e) {
 			// Already absent — the goal state holds.
 		}
+	}
+
+	@Override
+	public KestraExecution createExecution(String flowId) {
+		// A bodiless POST: the compiled flows take no inputs, and Kestra accepts the
+		// trigger without a multipart form.
+		return client.post()
+				.uri("/api/v1/main/executions/{namespace}/{id}", KestraFlowCompiler.NAMESPACE, flowId)
+				.retrieve().body(ExecutionDocument.class)
+				.toExecution();
+	}
+
+	@Override
+	public List<KestraExecution> listExecutions() {
+		List<KestraExecution> executions = new ArrayList<>();
+		for (int page = 1;; page++) {
+			ExecutionPage result = client.get()
+					.uri("/api/v1/main/executions/search?namespace={namespace}&page={page}&size={size}",
+							KestraFlowCompiler.NAMESPACE, page, EXECUTION_PAGE_SIZE)
+					.retrieve().body(ExecutionPage.class);
+			result.results().forEach(document -> executions.add(document.toExecution()));
+			if (executions.size() >= result.total() || result.results().isEmpty()) {
+				return executions;
+			}
+		}
+	}
+
+	/** The slice of Kestra's execution document the control plane reads. */
+	record ExecutionDocument(String id, String flowId, ExecutionState state) {
+
+		KestraExecution toExecution() {
+			return new KestraExecution(id, flowId, state.current(), state.startDate(),
+					state.endDate());
+		}
+	}
+
+	record ExecutionState(String current, Instant startDate, Instant endDate) {
+	}
+
+	record ExecutionPage(long total, List<ExecutionDocument> results) {
 	}
 }
