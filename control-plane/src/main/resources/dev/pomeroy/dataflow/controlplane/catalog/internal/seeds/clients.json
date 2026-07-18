@@ -1,0 +1,52 @@
+[
+  {
+    "id": "INV-001",
+    "name": "Alice Thornton",
+    "advisorGroup": "Meridian Wealth"
+  },
+  {
+    "id": "INV-002",
+    "name": "Benjamin Okafor",
+    "advisorGroup": "Harbor Point Advisors"
+  },
+  {
+    "id": "INV-003",
+    "name": "Carmen Delgado",
+    "advisorGroup": "XYZ"
+  },
+  {
+    "id": "INV-004",
+    "name": "Dmitri Volkov",
+    "advisorGroup": "Cascade Capital Partners"
+  },
+  {
+    "id": "INV-005",
+    "name": "Evelyn Marsh",
+    "advisorGroup": "Meridian Wealth"
+  },
+  {
+    "id": "INV-006",
+    "name": "Farid Nassar",
+    "advisorGroup": "Harbor Point Advisors"
+  },
+  {
+    "id": "INV-007",
+    "name": "Grace Liu",
+    "advisorGroup": "XYZ"
+  },
+  {
+    "id": "INV-008",
+    "name": "Henrik Sorensen",
+    "advisorGroup": "Cascade Capital Partners"
+  },
+  {
+    "id": "INV-009",
+    "name": "Isabelle Fontaine",
+    "advisorGroup": "Meridian Wealth"
+  },
+  {
+    "id": "INV-010",
+    "name": "Jack Whitfield",
+    "advisorGroup": "Harbor Point Advisors"
+  }
+]

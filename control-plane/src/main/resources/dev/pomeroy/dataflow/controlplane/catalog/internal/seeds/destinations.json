@@ -1,0 +1,14 @@
+[
+  {
+    "id": "pomeroy-provider",
+    "name": "Pomeroy Provider",
+    "description": "The Pomeroy Provider file drop, receiving delivered feed files.",
+    "physical": {
+      "host": "sftp",
+      "port": 22,
+      "username": "pomeroy",
+      "basePath": "upload/pomeroy",
+      "credentialsRef": "SFTP_POMEROY"
+    }
+  }
+]

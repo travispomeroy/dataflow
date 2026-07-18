@@ -1,0 +1,9 @@
+[
+  {
+    "id": "positions-by-asset-class",
+    "name": "Positions by Asset Class",
+    "sourceId": "positions",
+    "namePattern": "positions_{assetClass}_{businessDate}.csv",
+    "splitBy": "assetClass"
+  }
+]

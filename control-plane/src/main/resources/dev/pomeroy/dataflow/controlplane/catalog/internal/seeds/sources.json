@@ -1,0 +1,64 @@
+[
+  {
+    "id": "positions",
+    "name": "Positions",
+    "description": "Client position holdings as of a Business Date, carrying Advisor Group.",
+    "physical": {
+      "baseUrl": "http://wiremock:8080",
+      "merge": {
+        "key": "investorId"
+      },
+      "apis": [
+        {
+          "name": "positions",
+          "path": "/positions",
+          "joinOn": [],
+          "pagination": {
+            "style": "pageNumber",
+            "pageSize": 50,
+            "termination": "totalPages"
+          },
+          "fields": {
+            "symbol": "symbol",
+            "assetClass": "assetClass",
+            "quantity": "quantity",
+            "marketValue": "marketValue",
+            "currency": "currency"
+          }
+        },
+        {
+          "name": "investors",
+          "path": "/investors",
+          "joinOn": ["investorId"],
+          "pagination": {
+            "style": "pageNumber",
+            "pageSize": 4,
+            "termination": "totalPages"
+          },
+          "fields": {
+            "investorId": "clientId",
+            "name": "clientName",
+            "advisorGroup": "advisorGroup"
+          }
+        },
+        {
+          "name": "orders",
+          "path": "/orders",
+          "joinOn": ["investorId", "symbol"],
+          "pagination": {
+            "style": "pageNumber",
+            "pageSize": 75,
+            "termination": "totalPages"
+          },
+          "fields": {
+            "orderId": "orderId",
+            "side": "orderSide",
+            "quantity": "orderQuantity",
+            "status": "orderStatus",
+            "tradeDate": "tradeDate"
+          }
+        }
+      ]
+    }
+  }
+]
