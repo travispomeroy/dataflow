@@ -18,8 +18,8 @@ delivers CSVs over SFTP. Full pitch and architecture: `docs/PLAN.md`.
 
 ## Current status
 
-- **Completed**: planning (glossary, plan, ADRs, engine survey)
-- **Next**: M0 — Scaffold
+- **Completed**: planning (glossary, plan, ADRs, engine survey); M0 — Scaffold
+- **Next**: M1 — Domain core
 - Update this section at every milestone close-out.
 
 ## Standing rules

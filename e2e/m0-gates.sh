@@ -10,11 +10,12 @@ cd "$(dirname "$0")/.."
 compose() { docker compose --project-directory infra "$@"; }
 stage() { printf '\n== %s\n' "$*"; }
 
-# Fail with a clear message on a too-old Node instead of a confusing flag error
-required_node_major=$(cut -d. -f1 .nvmrc)
-running_node_major=$(node --version | tr -d v | cut -d. -f1)
-if (( running_node_major < required_node_major )); then
-  echo "FAIL: Node $(node --version) is older than the pinned major in .nvmrc ($(cat .nvmrc))" >&2
+# Fail with a clear message on the wrong Node instead of a confusing flag error.
+# Exact match, not just the major: engine-strict only guards the npm path, so
+# this is what pins the Node that runs the smoke script and fixture generator.
+required_node=$(cat .nvmrc)
+if [[ "$(node --version)" != "v$required_node" ]]; then
+  echo "FAIL: running Node $(node --version) but .nvmrc pins $required_node" >&2
   exit 1
 fi
 
