@@ -1,9 +1,10 @@
 // M0 smoke checks — the behavior stage of e2e/m0-gates.sh.
-// Node built-ins only (fetch); credentials come from infra/.env, injected by
+// Node built-ins only (fetch, node:https); credentials come from infra/.env, injected by
 // the gate script via node --env-file. Later M0 tickets append check() calls.
 
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { request as httpsRequest } from "node:https";
 
 const env = (name) => {
   const value = process.env[name];
@@ -106,6 +107,64 @@ for (const api of apis) {
     }
   });
 }
+
+// -- Engines (M0.6): NiFi token dance over TLS --------------------------------
+// NiFi 2.x serves HTTPS with a certificate it generates at first boot, so the
+// identity churns every `compose down --volumes`. The checks therefore accept
+// any certificate (the TLS path is still exercised end-to-end) but everything
+// else is strict: creds must mint a bearer token and the token must be honored.
+
+const nifiBase = 'https://localhost:8443';
+
+// Node's built-in fetch offers no per-request escape hatch for a self-signed
+// cert, so these two calls go through node:https instead
+const nifiRequest = (path, { method = 'GET', headers = {}, body } = {}) =>
+  new Promise((resolve, reject) => {
+    const req = httpsRequest(
+      `${nifiBase}${path}`,
+      { method, headers, rejectUnauthorized: false },
+      (res) => {
+        let text = '';
+        res.setEncoding('utf8');
+        res.on('data', (chunk) => { text += chunk; });
+        res.on('end', () => resolve({ status: res.statusCode, text }));
+      },
+    );
+    req.on('error', reject);
+    if (body !== undefined) req.write(body);
+    req.end();
+  });
+
+const nifiToken = (username, password) =>
+  nifiRequest('/nifi-api/access/token', {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ username, password }).toString(),
+  });
+
+check('NiFi mints a bearer token over TLS and honors it on an authenticated call', async () => {
+  const token = await nifiToken(env('NIFI_USER'), env('NIFI_PASSWORD'));
+  if (token.status !== 201 || !token.text) {
+    throw new Error(`token endpoint: expected 201 with a token, got ${token.status}`);
+  }
+  const me = await nifiRequest('/nifi-api/flow/current-user', {
+    headers: { authorization: `Bearer ${token.text}` },
+  });
+  if (me.status !== 200) throw new Error(`current-user: expected 200, got ${me.status}`);
+  const { identity } = JSON.parse(me.text);
+  if (identity !== env('NIFI_USER')) {
+    throw new Error(`current-user identity is ${identity}, expected ${env('NIFI_USER')}`);
+  }
+});
+
+// guards the configured credentials actually took effect: NiFi silently
+// discards a <12-char single-user password and generates random credentials
+check('NiFi rejects wrong credentials at the token endpoint', async () => {
+  const res = await nifiToken(env('NIFI_USER'), `wrong-${env('NIFI_PASSWORD')}`);
+  if (res.status < 400 || res.status >= 500) {
+    throw new Error(`expected a 4xx rejection, got ${res.status}`);
+  }
+});
 
 check('the three APIs use three different page sizes', async () => {
   if (walkedPageSizes.size !== apis.length) {

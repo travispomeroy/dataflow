@@ -65,6 +65,23 @@ SSH_ASKPASS="$PWD/infra/sftp/askpass.sh" SSH_ASKPASS_REQUIRE=force \
     -o PreferredAuthentications=password \
     -b "$sftp_batch" pomeroy@localhost
 
+stage "Stage 3: Hop image runs and reports its pinned version (throwaway container)"
+# Deliberately NO compose service — nothing needs a long-running Hop until M5
+# (docs/PLAN.md). The pinned image is proven by running its CLI to completion
+# in a throwaway container; a missing/broken image or wrong version exits 1.
+hop_image=apache/hop:2.18.1   # version pinned in docs/versions.md
+hop_pin=${hop_image#*:}
+# Hop's CLIs exit 1 by design after printing the version (verified against
+# 2.18.1), so the exit code proves nothing — the assertion is on the output:
+# some line must be exactly the pinned version. A missing/broken image emits a
+# docker error (or nothing) instead and fails the same grep.
+hop_reported=$(docker run --rm --entrypoint /bin/bash "$hop_image" \
+  -c 'cd /opt/hop && ./hop-run.sh --version' 2>&1 | tr -d '\r') || true
+if ! grep -qx "$hop_pin" <<<"$hop_reported"; then
+  echo "FAIL: expected version $hop_pin from $hop_image, got: ${hop_reported:-<no output>}" >&2
+  exit 1
+fi
+
 stage "Stage 3: fixtures and WireMock stubs regenerate byte-identically"
 rm -rf infra/fixtures/data infra/fixtures/wiremock
 node infra/fixtures/generate.ts

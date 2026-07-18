@@ -112,6 +112,28 @@ services:
       retries: 24
       start_period: 5s
 
+  nifi:
+    image: apache/nifi:2.10.0
+    environment:
+      SINGLE_USER_CREDENTIALS_USERNAME: ${NIFI_USER}
+      SINGLE_USER_CREDENTIALS_PASSWORD: ${NIFI_PASSWORD}
+      # default bind is the container hostname (a random id) — bind everywhere
+      # so both the in-container healthcheck and the host reach it as localhost
+      NIFI_WEB_HTTPS_HOST: 0.0.0.0
+    # no volume: NiFi state is ephemeral until M4 gives the runner real flows;
+    # HTTPS with the boot-generated self-signed cert is NiFi 2.x's default
+    ports:
+      - "8443:8443"
+    healthcheck:
+      # -k: self-signed cert. The authentication configuration endpoint is the
+      # unauthenticated JSON the login page itself uses — it answers 200 only
+      # once the web server and REST API are actually serving
+      test: ["CMD-SHELL", "curl -skf https://localhost:8443/nifi-api/authentication/configuration"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 30s
+
   minio:
     image: minio/minio:RELEASE.2025-09-07T16-13-09Z
     command: server /data --console-address ":9001"
