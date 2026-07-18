@@ -27,10 +27,11 @@ Digest pinning is deferred to a productionization note, with one exception below
 | React / react-dom | `19.2.7` | `ui/package.json` (M0.7, applied) | 2026-07-18 |
 | MUI (`@mui/material`) | `9.2.0` | **pinned in M0, installed in M3** — enters `ui/package.json` only in M3 | 2026-07-18 |
 | React Flow (`@xyflow/react`) | `12.11.2` | **pinned in M0, installed in M3** — enters `ui/package.json` only in M3 | 2026-07-18 |
-| JDK | Temurin `25.0.3+9` (compiler release `25`) | `control-plane/pom.xml` `<maven.compiler.release>25</maven.compiler.release>` (M0.8) | 2026-07-18 |
-| Maven | `3.9.16` | `control-plane/` Maven wrapper `distributionUrl` (M0.8) | 2026-07-18 |
-| Spring Boot | `4.1.0` | `control-plane/pom.xml` parent (M0.8) | 2026-07-18 |
-| Spring Modulith | `2.1.0` | `control-plane/pom.xml` via `spring-modulith-bom` (M0.8) | 2026-07-18 |
+| JDK | Temurin `25.0.3+9` (compiler release `25`) | `control-plane/pom.xml` `<maven.compiler.release>25</maven.compiler.release>` (M0.8, applied) | 2026-07-18 |
+| Maven | `3.9.16` | `control-plane/` Maven wrapper `distributionUrl` (M0.8, applied) | 2026-07-18 |
+| Maven wrapper | `3.3.4` (`only-script` type) | `control-plane/.mvn/wrapper/maven-wrapper.properties` `wrapperVersion` (M0.8, applied) | 2026-07-18 |
+| Spring Boot | `4.1.0` | `control-plane/pom.xml` parent (M0.8, applied) | 2026-07-18 |
+| Spring Modulith | `2.1.0` | `control-plane/pom.xml` via `spring-modulith-bom` (M0.8, applied) | 2026-07-18 |
 
 ## How these were researched
 
@@ -58,7 +59,7 @@ index, the Adoptium release API, and context7 for the NiFi docker documentation.
   set in the root `.npmrc`, so a wrong toolchain fails at `npm install` time rather than
   producing subtly different builds. `ui/` gets its own copies of both in M0.7 (npm does
   not inherit project config across nested package roots).
-- **JDK/Maven** (for M0.8 to apply): Temurin `25.0.3+9` is the newest JDK 25 GA; compile
+- **JDK/Maven** (applied in M0.8): Temurin `25.0.3+9` is the newest JDK 25 GA; compile
   with `<maven.compiler.release>25</maven.compiler.release>`. Maven `3.9.16` is the newest
   stable (3.10 / 4.0 were RC-only), pinned via the wrapper's `distributionUrl` so
   contributors never need a system Maven.

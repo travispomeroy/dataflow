@@ -1,0 +1,3 @@
+# Windows batch scripts need CRLF (goto/label parsing breaks on LF-only files);
+# the Maven wrapper's mvnw.cmd is the one .cmd we commit.
+*.cmd text eol=crlf
