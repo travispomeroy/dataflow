@@ -100,19 +100,37 @@ ETL" = M6. Stretch = M8–M10. Engine landscape rationale: [`engine-survey.md`](
 
 ### M0 — Scaffold: the world exists
 
-- Repo layout above; Nx workspace with empty React app; Maven Spring Modulith skeleton.
+- Repo layout above; Nx workspace (npm) with empty React app; **single-module** Maven
+  Spring Modulith skeleton (packages as module boundaries) with an
+  `ApplicationModules.verify()` boundary test committed before any real code exists.
 - Doc research: pin current versions of every framework/container; record in
-  `docs/versions.md`.
-- Compose stack boots healthy: Postgres (2 DBs), Kestra, MinIO, WireMock, SFTP, NiFi, Hop.
-- Fixture generator script (committed) → deterministic fixtures (committed): ~10 clients
-  across ~4 advisor groups, 5 asset classes, a few hundred positions/orders, investors
-  with `advisor_group`. WireMock serves `/positions`, `/orders`, `/investors` as
-  **paginated** responses (generator emits per-page stub files; page size chosen so every
-  API returns ≥3 pages).
+  `docs/versions.md` — exact immutable tags/versions only (no `latest`, no ranges),
+  toolchain pinned too (`.nvmrc`/`engines`, pom release flag). UI libs (MUI, React Flow)
+  are pinned in M0 but installed in M3.
+- Compose stack boots healthy: Postgres (2 DBs with per-DB users via init script),
+  Kestra, MinIO, WireMock, SFTP (`atmoz/sftp`, committed fixed host keys), NiFi (fixed
+  single-user creds via env vars, HTTPS kept, token auth). **No Hop service** — nothing
+  needs a long-running Hop until M5; M0 pins the Hop image and smoke-verifies it via a
+  throwaway container.
+- Fixture generator script (TypeScript in `infra/fixtures/`, committed, zero data-gen
+  deps, seeded PRNG, no wall-clock reads, sorted keys/LF) → deterministic fixtures
+  (committed): ~10 clients across 4 advisor groups (one literally **"XYZ"** — the M6
+  negate target), 5 asset classes, a few hundred positions/orders **including
+  zero-quantity positions, awkward decimals, and merge orphans** (edge cases baked in
+  now because fixtures freeze once M2 goldens exist), investors with `advisor_group`.
+  WireMock serves `/positions`, `/orders`, `/investors` as **paginated** responses with
+  strict stubs: full envelope (`data`, `page`, `pageSize`, `totalPages`, `totalItems`),
+  match on `page` **and** `pageSize`, 404 past the last page, deliberately different
+  per-API page sizes, ≥3 pages each. Field contract documented in
+  `infra/fixtures/README.md`.
 
-**Exit gates**: `docker compose up` → all containers healthy; smoke script curls all three
-mock APIs (verifying page envelopes and that walking all pages yields the full dataset),
-MinIO, Kestra API, SFTP login; fixtures regenerate byte-identically.
+**Exit gates**: single seam — `e2e/m0-gates.sh`: (1) scaffold builds: `./mvnw verify`
+(incl. Modulith boundary test) + Nx build of the empty app; (2) `docker compose up
+--wait` (healthchecks are the assertion); (3) behavior: Node smoke script (walks **all**
+pages of all three mock APIs and reconciles the union against the committed fixtures,
+MinIO health, Kestra API, NiFi token fetch, throwaway-container Hop image check), SFTP
+login against the committed host key, fixtures regenerate byte-identically
+(`git diff --exit-code`). Clean-machine prerequisites: Docker, Node, git, JDK.
 
 ### M1 — Domain core: config → Kestra-isms
 
