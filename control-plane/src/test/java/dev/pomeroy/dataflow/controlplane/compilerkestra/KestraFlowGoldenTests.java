@@ -9,6 +9,7 @@ import dev.pomeroy.dataflow.controlplane.compiler.ExecutionPlanJson;
 import dev.pomeroy.dataflow.controlplane.compilerhop.HopArtifact;
 import dev.pomeroy.dataflow.controlplane.compilerhop.internal.DeterministicHopXmlCompiler;
 import dev.pomeroy.dataflow.controlplane.compilerkestra.internal.DeterministicFlowYamlCompiler;
+import dev.pomeroy.dataflow.controlplane.compilerkestra.internal.HopBatchRunner;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Collectors;
@@ -31,7 +32,8 @@ class KestraFlowGoldenTests {
 
 	static final int VERSION = 1;
 
-	KestraFlowCompiler compiler = new DeterministicFlowYamlCompiler(new DeterministicHopXmlCompiler());
+	KestraFlowCompiler compiler = new DeterministicFlowYamlCompiler(
+			new HopBatchRunner(new DeterministicHopXmlCompiler()));
 
 	@Test
 	void theCanonicalPlanCompilesToTheCommittedGoldenByteForByte() throws Exception {

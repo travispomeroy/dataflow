@@ -4,12 +4,9 @@ import dev.pomeroy.dataflow.controlplane.compilerkestra.KestraClient;
 import dev.pomeroy.dataflow.controlplane.compilerkestra.KestraExecution;
 import dev.pomeroy.dataflow.controlplane.compilerkestra.KestraFlowCompiler;
 import dev.pomeroy.dataflow.controlplane.runs.RunStatus;
-import dev.pomeroy.dataflow.controlplane.runs.internal.DeliveredFiles.DeliveredFile;
-import java.util.List;
 import java.util.UUID;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
-import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
 /**
@@ -79,9 +76,6 @@ class RunRecorder {
 		if (captured == null) {
 			return DeliveredFiles.none();
 		}
-		List<DeliveredFile> files = mapper.convertValue(captured,
-				new TypeReference<List<DeliveredFile>>() {
-				});
-		return new DeliveredFiles(files);
+		return DeliveredFiles.fromDocument(mapper, captured);
 	}
 }

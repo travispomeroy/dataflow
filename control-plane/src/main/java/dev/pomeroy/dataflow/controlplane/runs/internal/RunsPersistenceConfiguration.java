@@ -1,8 +1,6 @@
 package dev.pomeroy.dataflow.controlplane.runs.internal;
 
-import dev.pomeroy.dataflow.controlplane.runs.internal.DeliveredFiles.DeliveredFile;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.UUID;
 import org.postgresql.util.PGobject;
 import org.springframework.context.annotation.Bean;
@@ -11,7 +9,6 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.ReadingConverter;
 import org.springframework.data.convert.WritingConverter;
 import org.springframework.data.relational.core.mapping.event.BeforeConvertCallback;
-import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
 /**
@@ -73,10 +70,7 @@ class RunsPersistenceConfiguration {
 
 		@Override
 		public DeliveredFiles convert(PGobject jsonb) {
-			List<DeliveredFile> files = mapper.readValue(jsonb.getValue(),
-					new TypeReference<List<DeliveredFile>>() {
-					});
-			return new DeliveredFiles(files);
+			return DeliveredFiles.fromJson(mapper, jsonb.getValue());
 		}
 	}
 }

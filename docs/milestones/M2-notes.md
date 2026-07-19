@@ -65,6 +65,10 @@ study — the pin is **not** to be bumped for it.
   and a `/tmp/kestra-wd` working-dir volume mounted at the *same path* on both sides
   (sibling bind mounts resolve through the host daemon), with
   `kestra.tasks.tmp-dir.path` to match.
+- **`HOP_OPTIONS` in the compiled flow starts with `-XX:+AggressiveHeap`**: that is the
+  Hop image's stock `HOP_OPTIONS` value, preserved deliberately — setting the variable
+  (which the runner must, to inject the `HOP_MINIO_*` system properties) replaces it
+  wholesale. Not tuning we chose; do not read significance into it.
 - **The count task feeds on a jq-built name→uri map**, not the staging pull's `objects`
   array — Kestra 1.3.28 rejects the array itself as a task input. Capture of
   `deliveredFiles` is part of the poller's transition into SUCCEEDED, so a failed

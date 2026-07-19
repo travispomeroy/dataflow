@@ -5,8 +5,6 @@ import dev.pomeroy.dataflow.controlplane.compiler.Engine;
 import dev.pomeroy.dataflow.controlplane.compiler.ExecutionModel;
 import dev.pomeroy.dataflow.controlplane.compiler.ExecutionPlan;
 import dev.pomeroy.dataflow.controlplane.compiler.Schedule;
-import dev.pomeroy.dataflow.controlplane.compilerhop.HopArtifact;
-import dev.pomeroy.dataflow.controlplane.compilerhop.HopPipelineCompiler;
 import dev.pomeroy.dataflow.controlplane.compilerkestra.KestraFlowCompiler;
 import java.time.LocalTime;
 import java.util.Locale;
@@ -22,56 +20,17 @@ import org.springframework.stereotype.Component;
  * <p>Platform conventions live here, not in the plan: the Staging store (the compose
  * MinIO, bucket {@code staging}, credentials as Kestra secrets), the hidden-upload
  * name shape ({@code .name.part} → {@code name}, ADR-0001), the cron translation
- * of the structured daily Schedule, and the engine-runner shape per engine matrix
- * cell — for {@code hop × batch} the pinned Hop image as an ephemeral sibling
- * container carrying the embedded engine artifact (M2.5).
+ * of the structured daily Schedule, and the engine-runner dispatch per engine
+ * matrix cell — each real cell's task shape lives in its own Runner class
+ * ({@link HopBatchRunner} since M2.5), keeping this compiler a pure flow shape.
  */
 @Component
 public class DeterministicFlowYamlCompiler implements KestraFlowCompiler {
 
-	/** The pinned engine image (docs/versions.md) — bump only via that registry. */
-	static final String HOP_IMAGE = "apache/hop:2.18.1";
+	private final HopBatchRunner hopBatchRunner;
 
-	/**
-	 * The compose network the sibling engine container joins: the compose project
-	 * name is pinned ({@code name: dataflow} in infra/docker-compose.yml), so the
-	 * default network name is deterministic.
-	 */
-	static final String COMPOSE_NETWORK = "dataflow_default";
-
-	/**
-	 * Where the shipped {@code MinioConnectionDefinition} must land inside the Hop
-	 * container: the image's active project is {@code default}, and only an object in
-	 * the project's metadata folder registers the {@code minio://} VFS scheme (#22).
-	 */
-	static final String HOP_MINIO_METADATA_FOLDER =
-			"/opt/hop/config/projects/default/metadata/MinioConnectionDefinition";
-
-	/**
-	 * The MinIO connection metadata shipped to the engine container (spike #22
-	 * reference JSON): the object's {@code name} registers the scheme; credential
-	 * fields are {@code ${HOP_MINIO_*}} expressions late-bound from JVM system
-	 * properties, so the artifact carries no secret material (ADR-0002).
-	 */
-	static final String MINIO_CONNECTION_DEFINITION = """
-			{
-			  "accessKey": "${HOP_MINIO_ACCESS_KEY}",
-			  "cacheTtlSeconds": "5",
-			  "description": "Platform Staging store (ADR-0001); credentials late-bound from HOP_MINIO_* system properties (ADR-0002)",
-			  "endPointHostname": "${HOP_MINIO_ENDPOINT_HOSTNAME}",
-			  "endPointPort": "${HOP_MINIO_ENDPOINT_PORT}",
-			  "endPointSecure": false,
-			  "name": "minio",
-			  "partSize": "5242880",
-			  "region": "us-east-1",
-			  "secretKey": "${HOP_MINIO_SECRET_KEY}"
-			}
-			""";
-
-	private final HopPipelineCompiler hopCompiler;
-
-	public DeterministicFlowYamlCompiler(HopPipelineCompiler hopCompiler) {
-		this.hopCompiler = hopCompiler;
+	public DeterministicFlowYamlCompiler(HopBatchRunner hopBatchRunner) {
+		this.hopBatchRunner = hopBatchRunner;
 	}
 
 	@Override
@@ -110,81 +69,13 @@ public class DeterministicFlowYamlCompiler implements KestraFlowCompiler {
 	 */
 	private String engineRunner(ExecutionPlan plan) {
 		if (plan.engine() == Engine.HOP && plan.executionModel() == ExecutionModel.BATCH) {
-			return hopBatchRunner(plan);
+			return hopBatchRunner.task(plan);
 		}
 		return """
 				  - id: engine_runner
 				    type: io.kestra.plugin.core.log.Log
 				    message: Engine runner placeholder (engine %s, execution model %s) — stages nothing, so the staging pull fails until this engine matrix cell lands its real runner
 				""".formatted(lower(plan.engine()), lower(plan.executionModel()));
-	}
-
-	/**
-	 * The {@code hop × batch} Runner (M2.5): a script task on the Docker task runner
-	 * launches the pinned Hop image as an ephemeral sibling container on the compose
-	 * network — per-Run freshness by construction, no registry pull at run time. The
-	 * compiled artifact pair rides as {@code inputFiles} so the flow pushed to Kestra
-	 * stays the single self-contained Deployment artifact, and the workflow resolves
-	 * the pipeline from the same folder.
-	 *
-	 * <p>The MinIO VFS scaffold is the spike's finding (#22): the {@code minio://}
-	 * scheme registers only through a {@code MinioConnectionDefinition} object named
-	 * {@code minio} in the active project's metadata folder ({@code --metadata-export}
-	 * silently resolves such paths as local files), so the runner copies the shipped
-	 * definition into place before {@code hop-run}. Its credential fields are
-	 * {@code ${HOP_MINIO_*}} expressions resolved from JVM system properties, injected
-	 * via {@code HOP_OPTIONS} from Kestra secrets — the flow names secrets, never
-	 * values (ADR-0002). {@code -XX:+AggressiveHeap} is the image's stock
-	 * {@code HOP_OPTIONS} value, preserved because setting the variable replaces it.
-	 *
-	 * <p>{@code BUSINESS_DATE} is the flow's optional {@code businessDate} input when
-	 * the trigger provided one, else the run date in the Schedule's timezone — UTC for
-	 * a manual-only Dataflow, which has no Schedule to borrow a timezone from (#25).
-	 * "Run date" is {@code execution.startDate}, the execution's creation time: a Run
-	 * queued behind another (concurrency QUEUE) keeps the date it was triggered on
-	 * even if it starts executing after midnight — the as-of date the trigger meant.
-	 */
-	private String hopBatchRunner(ExecutionPlan plan) {
-		HopArtifact artifact = hopCompiler.compile(plan);
-		return """
-				  - id: engine_runner
-				    type: io.kestra.plugin.scripts.shell.Commands
-				    taskRunner:
-				      type: io.kestra.plugin.scripts.runner.docker.Docker
-				      networkMode: %s
-				      pullPolicy: IF_NOT_PRESENT
-				    containerImage: %s
-				    env:
-				      RUN_ID: "{{ execution.id }}"
-				      BUSINESS_DATE: "{{ inputs.businessDate ?? (execution.startDate | date('yyyy-MM-dd', timeZone='%s')) }}"
-				      HOP_OPTIONS: "-XX:+AggressiveHeap -DHOP_MINIO_ENDPOINT_HOSTNAME=minio -DHOP_MINIO_ENDPOINT_PORT=9000 -DHOP_MINIO_ACCESS_KEY={{ secret('MINIO_ACCESS_KEY') }} -DHOP_MINIO_SECRET_KEY={{ secret('MINIO_SECRET_KEY') }}"
-				    inputFiles:
-				""".formatted(COMPOSE_NETWORK, HOP_IMAGE, businessDateTimezone(plan))
-				+ inputFile(artifact.pipelineFileName(), artifact.pipelineXml())
-				+ inputFile(artifact.workflowFileName(), artifact.workflowXml())
-				+ inputFile("minio.json", MINIO_CONNECTION_DEFINITION)
-				+ """
-				    commands:
-				      - mkdir -p %1$s
-				      - cp minio.json %1$s/minio.json
-				      - WORKDIR="$PWD" && cd /opt/hop && ./hop-run.sh --file="$WORKDIR/%2$s" --runconfig=local --level=Basic --parameters=RUN_ID="$RUN_ID",BUSINESS_DATE="$BUSINESS_DATE"
-				""".formatted(HOP_MINIO_METADATA_FOLDER, artifact.workflowFileName());
-	}
-
-	/** The timezone the run-date default resolves Business Date in (#25). */
-	private String businessDateTimezone(ExecutionPlan plan) {
-		return plan.schedule() != null ? plan.schedule().timezone() : "UTC";
-	}
-
-	/**
-	 * One embedded input file as a literal block scalar — content lines indented
-	 * under the key, empty lines left empty so no line ever carries trailing spaces.
-	 */
-	private String inputFile(String name, String content) {
-		StringBuilder yaml = new StringBuilder("      ").append(name).append(": |\n");
-		content.lines().forEach(
-				line -> yaml.append(line.isEmpty() ? "" : "        " + line).append('\n'));
-		return yaml.toString();
 	}
 
 	/**
