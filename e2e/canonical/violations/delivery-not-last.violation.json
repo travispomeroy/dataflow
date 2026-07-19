@@ -1,0 +1,23 @@
+{
+  "description": "The Delivery in the middle of the path with a Transform after it: every path terminates at the Delivery, so the trailing Transform also ends a path it shouldn't.",
+  "rules": ["dangling-path", "delivery-mid-path"],
+  "config": {
+    "nodes": [
+      { "id": "positions-source", "type": "source", "sourceId": "positions" },
+      { "id": "pomeroy-delivery", "type": "destination", "destinationId": "pomeroy-provider" },
+      {
+        "id": "client-filter",
+        "type": "transform",
+        "kind": "clientFilter",
+        "clientIds": ["INV-001"]
+      }
+    ],
+    "edges": [
+      { "from": "positions-source", "to": "pomeroy-delivery" },
+      { "from": "pomeroy-delivery", "to": "client-filter" }
+    ],
+    "schedule": null,
+    "engine": "hop",
+    "executionModel": "batch"
+  }
+}

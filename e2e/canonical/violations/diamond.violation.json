@@ -1,0 +1,31 @@
+{
+  "description": "A diamond: the Source fans out to two Transforms that converge on the Delivery. Connected, acyclic, one Delivery — rejected only because non-linear Dataflows cannot compile until M7. The example the linearity relaxation must flip.",
+  "rules": ["non-linear"],
+  "config": {
+    "nodes": [
+      { "id": "positions-source", "type": "source", "sourceId": "positions" },
+      {
+        "id": "left-filter",
+        "type": "transform",
+        "kind": "clientFilter",
+        "clientIds": ["INV-001"]
+      },
+      {
+        "id": "right-filter",
+        "type": "transform",
+        "kind": "clientFilter",
+        "clientIds": ["INV-002"]
+      },
+      { "id": "pomeroy-delivery", "type": "destination", "destinationId": "pomeroy-provider" }
+    ],
+    "edges": [
+      { "from": "positions-source", "to": "left-filter" },
+      { "from": "positions-source", "to": "right-filter" },
+      { "from": "left-filter", "to": "pomeroy-delivery" },
+      { "from": "right-filter", "to": "pomeroy-delivery" }
+    ],
+    "schedule": null,
+    "engine": "hop",
+    "executionModel": "batch"
+  }
+}

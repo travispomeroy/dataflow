@@ -1,0 +1,30 @@
+{
+  "description": "A two-Transform loop off to the side of a straight Source-to-Delivery line: data cannot flow in a circle, and the loop is disconnected from the main path. Every loop node has in- and out-degree 1, so the cycle is caught by the cycle rule alone, not as a linearity side effect.",
+  "rules": ["cycle", "disconnected"],
+  "config": {
+    "nodes": [
+      { "id": "positions-source", "type": "source", "sourceId": "positions" },
+      { "id": "pomeroy-delivery", "type": "destination", "destinationId": "pomeroy-provider" },
+      {
+        "id": "loop-filter",
+        "type": "transform",
+        "kind": "clientFilter",
+        "clientIds": ["INV-001"]
+      },
+      {
+        "id": "loop-filter-2",
+        "type": "transform",
+        "kind": "clientFilter",
+        "clientIds": ["INV-002"]
+      }
+    ],
+    "edges": [
+      { "from": "positions-source", "to": "pomeroy-delivery" },
+      { "from": "loop-filter", "to": "loop-filter-2" },
+      { "from": "loop-filter-2", "to": "loop-filter" }
+    ],
+    "schedule": null,
+    "engine": "hop",
+    "executionModel": "batch"
+  }
+}

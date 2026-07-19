@@ -8,6 +8,9 @@
     },
     {
       "path": "./tsconfig.check.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
     }
   ]
 }

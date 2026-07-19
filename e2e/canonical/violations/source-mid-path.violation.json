@@ -1,0 +1,18 @@
+{
+  "description": "A Source in the middle of a path, fed by another Source: Sources start paths, they never receive data. Otherwise a clean straight line — the source-mid-path rule alone.",
+  "rules": ["source-mid-path"],
+  "config": {
+    "nodes": [
+      { "id": "positions-source", "type": "source", "sourceId": "positions" },
+      { "id": "mid-source", "type": "source", "sourceId": "positions" },
+      { "id": "pomeroy-delivery", "type": "destination", "destinationId": "pomeroy-provider" }
+    ],
+    "edges": [
+      { "from": "positions-source", "to": "mid-source" },
+      { "from": "mid-source", "to": "pomeroy-delivery" }
+    ],
+    "schedule": null,
+    "engine": "hop",
+    "executionModel": "batch"
+  }
+}

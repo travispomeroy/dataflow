@@ -2,7 +2,7 @@
   "name": "dataflow-config",
   "version": "0.0.1",
   "private": true,
-  "description": "Hand-written TS mirror of the Dataflow Config schema (control-plane dataflow module records). Types only — held honest by the canonical examples in e2e/canonical/, which tsc type-checks against these types.",
+  "description": "Hand-written TS mirror of the Dataflow Config schema (control-plane dataflow module records) and of the deploy-time semantic rule set (SemanticValidator) — held honest by the canonical examples in e2e/canonical/: tsc type-checks the valid ones against the types, vitest asserts the violation examples' exact rule ids against the mirror.",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
@@ -15,7 +15,7 @@
     "namedInputs": {
       "canonicalContract": [
         "{workspaceRoot}/tsconfig.base.json",
-        { "runtime": "cat ../e2e/canonical/*.json" }
+        { "runtime": "cat ../e2e/canonical/*.json ../e2e/canonical/violations/*.violation.json" }
       ]
     },
     "targets": {
@@ -24,6 +24,12 @@
       },
       "build": {
         "inputs": ["production", "^production", "canonicalContract"]
+      },
+      "test": {
+        "command": "vitest run",
+        "options": { "cwd": "{projectRoot}" },
+        "cache": true,
+        "inputs": ["default", "^default", "canonicalContract"]
       }
     }
   }

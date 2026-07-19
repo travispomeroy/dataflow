@@ -1,0 +1,25 @@
+{
+  "description": "Two Destinations: a Dataflow delivers to exactly one, and the fan-out feeding them is non-linear until M7.",
+  "rules": ["delivery-count", "non-linear"],
+  "config": {
+    "nodes": [
+      { "id": "positions-source", "type": "source", "sourceId": "positions" },
+      {
+        "id": "client-filter",
+        "type": "transform",
+        "kind": "clientFilter",
+        "clientIds": ["INV-001"]
+      },
+      { "id": "pomeroy-delivery", "type": "destination", "destinationId": "pomeroy-provider" },
+      { "id": "second-delivery", "type": "destination", "destinationId": "pomeroy-provider" }
+    ],
+    "edges": [
+      { "from": "positions-source", "to": "client-filter" },
+      { "from": "client-filter", "to": "pomeroy-delivery" },
+      { "from": "client-filter", "to": "second-delivery" }
+    ],
+    "schedule": null,
+    "engine": "hop",
+    "executionModel": "batch"
+  }
+}

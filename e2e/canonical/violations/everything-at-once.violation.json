@@ -1,0 +1,31 @@
+{
+  "description": "A half-built Draft the moment before Deploy: no Delivery, a stray Transform, dangling ends, operator fields unset. Five rules at once — all rules run, first-fail would lie.",
+  "rules": [
+    "dangling-path",
+    "delivery-count",
+    "disconnected",
+    "headless-path",
+    "missing-operator-fields"
+  ],
+  "config": {
+    "nodes": [
+      { "id": "positions-source", "type": "source", "sourceId": "positions" },
+      {
+        "id": "client-filter",
+        "type": "transform",
+        "kind": "clientFilter",
+        "clientIds": ["INV-001"]
+      },
+      {
+        "id": "stray-filter",
+        "type": "transform",
+        "kind": "clientFilter",
+        "clientIds": []
+      }
+    ],
+    "edges": [{ "from": "positions-source", "to": "client-filter" }],
+    "schedule": null,
+    "engine": null,
+    "executionModel": null
+  }
+}

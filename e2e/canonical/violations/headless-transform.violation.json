@@ -1,0 +1,30 @@
+{
+  "description": "A Transform starting a path of its own into the main line: paths start at Sources, and the convergence it causes is non-linear until M7.",
+  "rules": ["headless-path", "non-linear"],
+  "config": {
+    "nodes": [
+      { "id": "positions-source", "type": "source", "sourceId": "positions" },
+      {
+        "id": "client-filter",
+        "type": "transform",
+        "kind": "clientFilter",
+        "clientIds": ["INV-001"]
+      },
+      {
+        "id": "headless-filter",
+        "type": "transform",
+        "kind": "clientFilter",
+        "clientIds": ["INV-002"]
+      },
+      { "id": "pomeroy-delivery", "type": "destination", "destinationId": "pomeroy-provider" }
+    ],
+    "edges": [
+      { "from": "positions-source", "to": "client-filter" },
+      { "from": "client-filter", "to": "pomeroy-delivery" },
+      { "from": "headless-filter", "to": "client-filter" }
+    ],
+    "schedule": null,
+    "engine": "hop",
+    "executionModel": "batch"
+  }
+}

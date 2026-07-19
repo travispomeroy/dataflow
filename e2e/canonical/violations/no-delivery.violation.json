@@ -1,0 +1,19 @@
+{
+  "description": "A path that never reaches a Delivery: no Destination node at all, so the Transform ends the path.",
+  "rules": ["dangling-path", "delivery-count"],
+  "config": {
+    "nodes": [
+      { "id": "positions-source", "type": "source", "sourceId": "positions" },
+      {
+        "id": "client-filter",
+        "type": "transform",
+        "kind": "clientFilter",
+        "clientIds": ["INV-001"]
+      }
+    ],
+    "edges": [{ "from": "positions-source", "to": "client-filter" }],
+    "schedule": null,
+    "engine": "hop",
+    "executionModel": "batch"
+  }
+}

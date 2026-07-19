@@ -1,0 +1,23 @@
+{
+  "description": "The Delivery's edge drawn backwards, into the Transform: the Delivery now starts a path and flows onward, the Transform ends one, and the convergence is non-linear. One wrong edge, four rules — proof the violations list is a complete fix-it list.",
+  "rules": ["dangling-path", "delivery-mid-path", "headless-path", "non-linear"],
+  "config": {
+    "nodes": [
+      { "id": "positions-source", "type": "source", "sourceId": "positions" },
+      {
+        "id": "client-filter",
+        "type": "transform",
+        "kind": "clientFilter",
+        "clientIds": ["INV-001"]
+      },
+      { "id": "pomeroy-delivery", "type": "destination", "destinationId": "pomeroy-provider" }
+    ],
+    "edges": [
+      { "from": "positions-source", "to": "client-filter" },
+      { "from": "pomeroy-delivery", "to": "client-filter" }
+    ],
+    "schedule": null,
+    "engine": "hop",
+    "executionModel": "batch"
+  }
+}

@@ -25,6 +25,7 @@ Digest pinning is deferred to a productionization note, with one exception below
 | Nx | `23.1.0` | `ui/package.json` (M0.7, applied) | 2026-07-18 |
 | Vite | `8.1.5` | `ui/package.json` (M0.7, applied) | 2026-07-18 |
 | React / react-dom | `19.2.7` | `ui/package.json` (M0.7, applied) | 2026-07-18 |
+| Vitest | `4.1.10` | `ui/package.json` (M3.2, applied) — latest stable at research date; its dependency range accepts the pinned Vite 8.1.5 (`^6.0.0 \|\| ^7.0.0 \|\| ^8.0.0`) | 2026-07-19 |
 | MUI (`@mui/material`) | `9.2.0` | **pinned in M0, installed in M3** — enters `ui/package.json` only in M3 | 2026-07-18 |
 | React Flow (`@xyflow/react`) | `12.11.2` | **pinned in M0, installed in M3** — enters `ui/package.json` only in M3 | 2026-07-18 |
 | JDK | Temurin `25.0.3+9` (compiler release `25`) | `control-plane/pom.xml` `<maven.compiler.release>25</maven.compiler.release>` (M0.8, applied) | 2026-07-18 |

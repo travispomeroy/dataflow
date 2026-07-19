@@ -1,0 +1,29 @@
+{
+  "description": "The canonical Positions Feed plus a stray Transform nothing connects to: the graph is not one connected whole, and the stray both starts and ends a path it shouldn't.",
+  "rules": ["dangling-path", "disconnected", "headless-path"],
+  "config": {
+    "nodes": [
+      { "id": "positions-source", "type": "source", "sourceId": "positions" },
+      {
+        "id": "client-filter",
+        "type": "transform",
+        "kind": "clientFilter",
+        "clientIds": ["INV-001"]
+      },
+      { "id": "pomeroy-delivery", "type": "destination", "destinationId": "pomeroy-provider" },
+      {
+        "id": "stray-filter",
+        "type": "transform",
+        "kind": "clientFilter",
+        "clientIds": []
+      }
+    ],
+    "edges": [
+      { "from": "positions-source", "to": "client-filter" },
+      { "from": "client-filter", "to": "pomeroy-delivery" }
+    ],
+    "schedule": null,
+    "engine": "hop",
+    "executionModel": "batch"
+  }
+}
