@@ -19,8 +19,9 @@ delivers CSVs over SFTP. Full pitch and architecture: `docs/PLAN.md`.
 ## Current status
 
 - **Completed**: planning (glossary, plan, ADRs, engine survey); M0 — Scaffold;
-  M1 — Domain core; M2 — Hop batch path: first end-to-end feed
-- **Next**: M3 — UI: the non-technical experience
+  M1 — Domain core; M2 — Hop batch path: first end-to-end feed; M3 — UI: the
+  non-technical experience
+- **Next**: M4 — NiFi server path: the engine swap
 - Update this section at every milestone close-out.
 
 ## Standing rules

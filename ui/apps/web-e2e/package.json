@@ -1,0 +1,15 @@
+{
+  "name": "web-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "nx": {
+    "implicitDependencies": ["web"],
+    "targets": {
+      "e2e": {
+        "command": "playwright test",
+        "options": { "cwd": "{projectRoot}" }
+      }
+    }
+  }
+}

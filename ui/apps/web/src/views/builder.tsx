@@ -217,6 +217,7 @@ function BuilderEditor({ draft }: { draft: DataflowDraft }) {
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
             onAddNode={addNode}
+            fitInitialView={initial.nodes.length > 0}
           />
         </ReactFlowProvider>
         <PropertyPanel
@@ -240,6 +241,12 @@ interface BuilderCanvasProps {
   onEdgesChange: ReturnType<typeof useEdgesState<FlowEdge>>[2];
   onConnect: (connection: Connection) => void;
   onAddNode: (payload: NodePayload, position: XYPosition) => void;
+  /**
+   * Fit the viewport to the Draft's nodes on open. Only when it opens with
+   * some: on a blank canvas React Flow defers fitView until the first nodes
+   * measure — the first *drop* would yank the viewport to max zoom.
+   */
+  fitInitialView: boolean;
 }
 
 function BuilderCanvas({
@@ -249,6 +256,7 @@ function BuilderCanvas({
   onEdgesChange,
   onConnect,
   onAddNode,
+  fitInitialView,
 }: BuilderCanvasProps) {
   const { screenToFlowPosition } = useReactFlow();
 
@@ -282,7 +290,7 @@ function BuilderCanvas({
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
-        fitView
+        fitView={fitInitialView}
       >
         <Background />
         <Controls />

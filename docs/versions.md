@@ -30,6 +30,7 @@ Digest pinning is deferred to a productionization note, with one exception below
 | React Flow (`@xyflow/react`) | `12.11.2` | pinned in M0; `ui/package.json` (M3.3, applied) | 2026-07-18 |
 | React Router (`react-router`) | `7.18.1` | `ui/package.json` (M3.3, applied) — newest release on the v7 line the M3 spec settled on (see selection notes) | 2026-07-19 |
 | TanStack Query (`@tanstack/react-query`) | `5.101.2` | `ui/package.json` (M3.3, applied) — latest stable; the v5 line is still `latest` | 2026-07-19 |
+| Playwright (`@playwright/test`) | `1.61.1` | `ui/package.json` (M3.8, applied) — the package pins the exact Chromium build it drives; the gate installs it with `npx playwright install chromium` (idempotent) | 2026-07-19 |
 | JDK | Temurin `25.0.3+9` (compiler release `25`) | `control-plane/pom.xml` `<maven.compiler.release>25</maven.compiler.release>` (M0.8, applied) | 2026-07-18 |
 | Maven | `3.9.16` | `control-plane/` Maven wrapper `distributionUrl` (M0.8, applied) | 2026-07-18 |
 | Maven wrapper | `3.3.4` (`only-script` type) | `control-plane/.mvn/wrapper/maven-wrapper.properties` `wrapperVersion` (M0.8, applied) | 2026-07-18 |
@@ -77,6 +78,11 @@ index, the Adoptium release API, and context7 for the NiFi docker documentation.
 - **TanStack Query** (applied in M3.3): `5.101.2` is the `latest` dist-tag (the
   registry's alpha/beta/rc dist-tags point at historic `5.0.0-*` pre-releases; no v6
   line exists at research date), matching the spec's "v5, pinned at install".
+- **Playwright** (applied in M3.8): `1.61.1` is the `latest` dist-tag at research date
+  (the `rc` tag points at a historic `1.18.0-rc1`; no newer line exists). Chromium-only
+  per the M3 spec — the browser build is locked by the package itself, so the pin row
+  covers both. `npx playwright install chromium` in the gate is a no-op once the
+  version-matched browser is cached.
 - **MUI styling engine** (applied in M3.3): `@mui/material` 9.2.0 supports two optional
   peer engines — emotion or Pigment CSS. Emotion is MUI's default documented engine, so
   `@emotion/react` `11.14.0` and `@emotion/styled` `11.14.1` (latest at research date)
