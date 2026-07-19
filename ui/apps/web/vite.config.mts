@@ -1,3 +1,4 @@
+import { defaultClientConditions } from 'vite';
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 
@@ -20,6 +21,12 @@ export default defineConfig(() => ({
     proxy: apiProxy,
   },
   plugins: [react()],
+  // Workspace libs export their TS source under the "ui" condition (see
+  // tsconfig.base.json customConditions) — without it Vite falls back to the
+  // "default" export, a type-declaration file it cannot bundle.
+  resolve: {
+    conditions: ['ui', ...defaultClientConditions],
+  },
   build: {
     outDir: './dist',
     emptyOutDir: true,

@@ -1,17 +1,52 @@
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Chip from '@mui/material/Chip';
+import LinearProgress from '@mui/material/LinearProgress';
 import Link from '@mui/material/Link';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  Background,
+  Controls,
+  ReactFlow,
+  ReactFlowProvider,
+  useEdgesState,
+  useNodesState,
+  useReactFlow,
+} from '@xyflow/react';
+import type { Connection, Edge as FlowEdge, XYPosition } from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
+import { validate } from 'dataflow-config';
+import { useCallback, useMemo, useState } from 'react';
+import type { DragEvent } from 'react';
 import { Link as RouterLink, useParams } from 'react-router';
-import { listSources } from '../api/catalog';
-import { dataflowKeys, getDataflow } from '../api/dataflows';
+import {
+  dataflowKeys,
+  deployDataflow,
+  getDataflow,
+  listDeployments,
+  saveDataflow,
+} from '../api/dataflows';
+import type { DataflowDraft } from '../api/dataflows';
+import { nodeTypes } from '../builder/canvas-nodes';
+import {
+  builderEdge,
+  builderNode,
+  configEquals,
+  fromConfig,
+  mintNodeId,
+  toConfig,
+} from '../builder/graph';
+import type { BuilderNode, NodePayload } from '../builder/graph';
+import { JsonPreview } from '../builder/json-preview';
+import { Palette, PALETTE_NODE_MIME } from '../builder/palette';
+import { PropertyPanel } from '../builder/property-panel';
 
 /**
- * Placeholder builder view (the M3.5 canvas grows here): loads the Draft it
- * will edit and the Catalog Sources the palette will offer.
+ * The builder (issue #33): a React Flow canvas editing the persisted Draft,
+ * palette on the left, property panel on the right, explicit Save and a Deploy
+ * gated by the courtesy validation mirror, live JSON preview below.
  */
 export function BuilderView() {
   const { id } = useParams<'id'>();
@@ -20,27 +55,204 @@ export function BuilderView() {
     queryKey: dataflowKeys.detail(id as string),
     queryFn: () => getDataflow(id as string),
   });
-  const sources = useQuery({ queryKey: ['catalog', 'sources'], queryFn: listSources });
+
+  if (dataflow.data === undefined) {
+    return <LinearProgress />;
+  }
+  // Keyed by id so canvas state initializes exactly once per Draft.
+  return <BuilderEditor key={dataflow.data.id} draft={dataflow.data} />;
+}
+
+function BuilderEditor({ draft }: { draft: DataflowDraft }) {
+  const queryClient = useQueryClient();
+
+  const [initial] = useState(() => fromConfig(draft.config));
+  const [nodes, setNodes, onNodesChange] = useNodesState<BuilderNode>(initial.nodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<FlowEdge>(initial.edges);
+  const [settings, setSettings] = useState(initial.settings);
+  const [savedConfig, setSavedConfig] = useState(draft.config);
+
+  // The live in-memory config: what Save would persist, what the JSON preview
+  // shows, and what the courtesy validation judges.
+  const config = useMemo(() => toConfig(nodes, edges, settings), [nodes, edges, settings]);
+  const dirty = !configEquals(config, savedConfig);
+  const violations = useMemo(() => validate(config), [config]);
+
+  const deployments = useQuery({
+    queryKey: dataflowKeys.deployments(draft.id),
+    queryFn: () => listDeployments(draft.id),
+  });
+
+  const save = useMutation({
+    mutationFn: () => saveDataflow(draft.id, draft.name, config),
+    onSuccess: async (response) => {
+      // The control plane's canonical form of what was just saved — the dirty
+      // flag now compares against exactly what is persisted.
+      setSavedConfig(response.config);
+      queryClient.setQueryData(dataflowKeys.detail(draft.id), response);
+      await queryClient.invalidateQueries({ queryKey: dataflowKeys.list });
+    },
+  });
+
+  const deploy = useMutation({
+    mutationFn: () => deployDataflow(draft.id),
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: dataflowKeys.deployments(draft.id) }),
+        queryClient.invalidateQueries({ queryKey: dataflowKeys.list }),
+      ]),
+  });
+
+  // The deploy response is the freshest fact — the deployments refetch merely
+  // keeps it honest afterwards.
+  const activeVersion =
+    deploy.data?.version ??
+    deployments.data?.find((deployment) => deployment.active)?.version;
+
+  const selected = nodes.find((node) => node.selected);
+
+  const addNode = useCallback(
+    (payload: NodePayload, position: XYPosition) =>
+      setNodes((existing) => [
+        ...existing,
+        builderNode(mintNodeId(payload, existing.map((node) => node.id)), payload, position),
+      ]),
+    [setNodes],
+  );
+
+  const changePayload = useCallback(
+    (nodeId: string, payload: NodePayload) =>
+      setNodes((existing) =>
+        existing.map((node) =>
+          node.id === nodeId ? ({ ...node, data: { payload } } as BuilderNode) : node,
+        ),
+      ),
+    [setNodes],
+  );
+
+  const onConnect = useCallback(
+    (connection: Connection) =>
+      setEdges((existing) =>
+        existing.some(
+          (edge) => edge.source === connection.source && edge.target === connection.target,
+        )
+          ? existing
+          : [...existing, builderEdge(connection.source, connection.target)],
+      ),
+    [setEdges],
+  );
 
   return (
-    <Stack spacing={3}>
-      <Typography variant="h4" component="h1">
-        {dataflow.data?.name ?? 'Builder'}
-      </Typography>
-      <Typography color="text.secondary">
-        The canvas arrives with M3.5 — this Draft has {dataflow.data?.config.nodes.length ?? 0}{' '}
-        nodes. <Link component={RouterLink} to={`/dataflows/${id}/runs`}>Run history</Link>
-      </Typography>
-      <Typography variant="h6" component="h2">
-        Catalog Sources
-      </Typography>
-      <List dense>
-        {sources.data?.map((source) => (
-          <ListItem key={source.id}>
-            <ListItemText primary={source.name} secondary={source.description} />
-          </ListItem>
-        ))}
-      </List>
+    <Stack spacing={2}>
+      <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
+        <Typography variant="h4" component="h1">
+          {draft.name}
+        </Typography>
+        <Chip
+          size="small"
+          label={activeVersion === undefined ? 'Draft — not deployed' : `Deployed v${activeVersion}`}
+          color={activeVersion === undefined ? 'default' : 'success'}
+        />
+        <Box sx={{ flex: 1 }} />
+        {dirty && <Chip size="small" label="Unsaved changes" color="warning" />}
+        <Button
+          variant="outlined"
+          disabled={!dirty || save.isPending}
+          onClick={() => save.mutate()}
+        >
+          Save
+        </Button>
+        <Button
+          variant="contained"
+          disabled={dirty || violations.length > 0 || save.isPending || deploy.isPending}
+          onClick={() => deploy.mutate()}
+        >
+          Deploy
+        </Button>
+        <Link component={RouterLink} to={`/dataflows/${draft.id}/runs`}>
+          Run history
+        </Link>
+      </Stack>
+      <Stack direction="row" spacing={2} sx={{ height: 560 }}>
+        <Palette />
+        <ReactFlowProvider>
+          <BuilderCanvas
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            onAddNode={addNode}
+          />
+        </ReactFlowProvider>
+        <PropertyPanel
+          selected={selected}
+          settings={settings}
+          onSettingsChange={setSettings}
+          onPayloadChange={changePayload}
+          violations={violations}
+          dirty={dirty}
+        />
+      </Stack>
+      <JsonPreview config={config} />
     </Stack>
+  );
+}
+
+interface BuilderCanvasProps {
+  nodes: BuilderNode[];
+  edges: FlowEdge[];
+  onNodesChange: ReturnType<typeof useNodesState<BuilderNode>>[2];
+  onEdgesChange: ReturnType<typeof useEdgesState<FlowEdge>>[2];
+  onConnect: (connection: Connection) => void;
+  onAddNode: (payload: NodePayload, position: XYPosition) => void;
+}
+
+function BuilderCanvas({
+  nodes,
+  edges,
+  onNodesChange,
+  onEdgesChange,
+  onConnect,
+  onAddNode,
+}: BuilderCanvasProps) {
+  const { screenToFlowPosition } = useReactFlow();
+
+  const onDragOver = (event: DragEvent) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  };
+
+  const onDrop = (event: DragEvent) => {
+    const data = event.dataTransfer.getData(PALETTE_NODE_MIME);
+    if (data === '') {
+      return;
+    }
+    event.preventDefault();
+    onAddNode(
+      JSON.parse(data) as NodePayload,
+      screenToFlowPosition({ x: event.clientX, y: event.clientY }),
+    );
+  };
+
+  return (
+    <Box
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+      sx={{ flex: 1, border: 1, borderColor: 'divider', borderRadius: 1 }}
+    >
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        nodeTypes={nodeTypes}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        fitView
+      >
+        <Background />
+        <Controls />
+      </ReactFlow>
+    </Box>
   );
 }

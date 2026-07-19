@@ -38,10 +38,18 @@ export const EMPTY_CONFIG: DataflowConfig = {
   executionModel: null,
 };
 
+/** One frozen Deployment of a Dataflow (`GET /api/dataflows/{id}/deployments`). */
+export interface DeploymentSummary {
+  version: number;
+  deployedAt: string;
+  active: boolean;
+}
+
 /** Query keys, shared so invalidation can never drift from the queries. */
 export const dataflowKeys = {
   list: ['dataflows'] as const,
   detail: (id: string) => ['dataflows', id] as const,
+  deployments: (id: string) => ['dataflows', id, 'deployments'] as const,
 };
 
 export function listDataflows() {
@@ -57,4 +65,21 @@ export function createDataflow(name: string) {
     method: 'POST',
     body: { name, config: EMPTY_CONFIG },
   });
+}
+
+/** Explicit Save: persists the Draft as it stands. Structural 422 → ApiError. */
+export function saveDataflow(id: string, name: string, config: DataflowConfig) {
+  return apiFetch<DataflowDraft>(`/api/dataflows/${id}`, {
+    method: 'PUT',
+    body: { name, config },
+  });
+}
+
+/** Deploys the Draft as it stands; the response carries the new frozen version. */
+export function deployDataflow(id: string) {
+  return apiFetch<DeploymentSummary>(`/api/dataflows/${id}/deploy`, { method: 'POST' });
+}
+
+export function listDeployments(id: string) {
+  return apiFetch<DeploymentSummary[]>(`/api/dataflows/${id}/deployments`);
 }

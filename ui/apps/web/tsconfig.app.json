@@ -5,7 +5,8 @@
     "tsBuildInfoFile": "dist/tsconfig.app.tsbuildinfo",
     "jsx": "react-jsx",
     "lib": [
-      "dom"
+      "dom",
+      "es2022"
     ],
     "types": [
       "node",
