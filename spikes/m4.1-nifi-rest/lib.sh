@@ -12,11 +12,13 @@ source "$REPO_ROOT/infra/.env" 2>/dev/null || true
 TOKEN_FILE="${TMPDIR:-/tmp}/m4.1-nifi-token"
 
 fetch_token() {
-  curl -skf -X POST "$NIFI_API/access/token" \
+  local status
+  status=$(curl -sk -o "$TOKEN_FILE" -w '%{http_code}' -X POST "$NIFI_API/access/token" \
     -H 'Content-Type: application/x-www-form-urlencoded' \
     --data-urlencode "username=$NIFI_USER" \
-    --data-urlencode "password=$NIFI_PASSWORD" >"$TOKEN_FILE"
-  echo "token: $(wc -c <"$TOKEN_FILE" | tr -d ' ') chars cached to $TOKEN_FILE" >&2
+    --data-urlencode "password=$NIFI_PASSWORD")
+  echo "token: HTTP $status, $(wc -c <"$TOKEN_FILE" | tr -d ' ') chars cached to $TOKEN_FILE" >&2
+  [ "$status" = "201" ]
 }
 
 token() { cat "$TOKEN_FILE"; }
@@ -25,14 +27,6 @@ token() { cat "$TOKEN_FILE"; }
 nifi() {
   local method="$1" path="$2"; shift 2
   curl -sk -X "$method" "$NIFI_API$path" \
-    -H "Authorization: Bearer $(token)" \
-    -H 'Content-Type: application/json' "$@"
-}
-
-# nifi_status <method> <path> [curl args...] — prints HTTP status then body
-nifi_status() {
-  local method="$1" path="$2"; shift 2
-  curl -sk -o /dev/stderr -w '\nHTTP %{http_code}\n' -X "$method" "$NIFI_API$path" \
     -H "Authorization: Bearer $(token)" \
     -H 'Content-Type: application/json' "$@"
 }

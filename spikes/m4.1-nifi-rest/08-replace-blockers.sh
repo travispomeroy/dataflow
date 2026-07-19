@@ -20,6 +20,8 @@ nifi PUT "/processors/$GEN/run-status" -d "{\"revision\":{\"version\":$REV},\"st
 sleep 2
 REV=$(nifi GET "/processors/$GEN" | jq -r '.revision.version')
 nifi PUT "/processors/$GEN/run-status" -d "{\"revision\":{\"version\":$REV},\"state\":\"RUNNING\"}" >/dev/null
+# queued=2 here, not 1: despite the 1-min schedule, a timer processor fires
+# IMMEDIATELY on start — the race that makes RUN_ONCE the right run trigger
 echo "queued: $(nifi GET "/flow/process-groups/$PG/status" | jq -r '.processGroupStatus.aggregateSnapshot.flowFilesQueued'), seed RUNNING, reader ENABLED"
 
 attempt_delete "running processor + queued data + enabled service"
