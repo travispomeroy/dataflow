@@ -3,8 +3,10 @@ package dev.pomeroy.dataflow.controlplane.runs.internal;
 import dev.pomeroy.dataflow.controlplane.compilerkestra.KestraClient;
 import dev.pomeroy.dataflow.controlplane.compilerkestra.KestraExecution;
 import dev.pomeroy.dataflow.controlplane.compilerkestra.KestraFlowCompiler;
+import dev.pomeroy.dataflow.controlplane.dataflow.Dataflows.DataflowRef;
 import dev.pomeroy.dataflow.controlplane.runs.RunStatus;
-import java.util.UUID;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
@@ -14,6 +16,12 @@ import tools.jackson.databind.ObjectMapper;
  * eager first record, the poller's discovery of scheduled runs, and the poller's
  * refresh of known ones all land here. Kestra's view of state and timing always wins —
  * there is no merge logic to disagree with it.
+ *
+ * <p>Business Date is resolved at discovery (issue #29) by the same rule the compiled
+ * flow itself uses (#25): the execution's explicit {@code businessDate} input when the
+ * trigger carried one, else the run date — the execution's start — in the Dataflow's
+ * business-date timezone. The record keeps that resolution; only an explicit input
+ * seen later can replace it.
  *
  * <p>Crossing into terminal SUCCEEDED additionally captures what was shipped (M2.7):
  * the count task's {@code deliveredFiles} output, read back from the execution and
@@ -37,10 +45,10 @@ class RunRecorder {
 		this.mapper = mapper;
 	}
 
-	RunEntity upsert(UUID dataflowId, KestraExecution execution) {
+	RunEntity upsert(DataflowRef dataflow, KestraExecution execution) {
 		return runs.findByKestraExecutionId(execution.id())
 				.map(known -> refresh(known, execution))
-				.orElseGet(() -> discover(dataflowId, execution));
+				.orElseGet(() -> discover(dataflow, execution));
 	}
 
 	/** Saves only when Kestra reports something new — a settled Run stops writing. */
@@ -52,8 +60,8 @@ class RunRecorder {
 		return updated.equals(known) ? known : runs.save(updated);
 	}
 
-	private RunEntity discover(UUID dataflowId, KestraExecution execution) {
-		RunEntity fresh = RunEntity.of(dataflowId, execution);
+	private RunEntity discover(DataflowRef dataflow, KestraExecution execution) {
+		RunEntity fresh = RunEntity.of(dataflow.id(), execution, businessDate(dataflow, execution));
 		if (fresh.status() == RunStatus.SUCCEEDED) {
 			// Already terminal when first seen — a scheduled run that finished
 			// before discovery still gets its delivered files.
@@ -68,6 +76,18 @@ class RunRecorder {
 			// the row the winner wrote.
 			return refresh(runs.findByKestraExecutionId(execution.id()).orElseThrow(), execution);
 		}
+	}
+
+	/**
+	 * The flow's own resolution rule (#25), mirrored: explicit input, else the run date
+	 * in the Dataflow's business-date timezone. "Run date" is the execution's start —
+	 * its creation time — so a Run queued past midnight keeps the date it was
+	 * triggered on.
+	 */
+	private LocalDate businessDate(DataflowRef dataflow, KestraExecution execution) {
+		return execution.businessDate() != null ? execution.businessDate()
+				: LocalDate.ofInstant(execution.startDate(),
+						ZoneId.of(dataflow.businessDateTimezone()));
 	}
 
 	private DeliveredFiles capturedDeliveredFiles(KestraExecution execution) {

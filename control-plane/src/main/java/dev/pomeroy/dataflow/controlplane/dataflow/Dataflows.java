@@ -16,6 +16,12 @@ public interface Dataflows {
 	/** Kestra flow IDs are Dataflow slugs — the poller's way home. */
 	Optional<DataflowRef> findBySlug(String slug);
 
-	record DataflowRef(UUID id, String slug, boolean deployed) {
+	/**
+	 * {@code businessDateTimezone} is the timezone the compiled flow's run-date default
+	 * resolves Business Date in (issue #25): the active Deployment's frozen Schedule
+	 * timezone, UTC when that Deployment is manual-only — and UTC when undeployed, where
+	 * only stale Orchestrator history can still surface executions.
+	 */
+	record DataflowRef(UUID id, String slug, boolean deployed, String businessDateTimezone) {
 	}
 }

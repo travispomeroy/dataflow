@@ -254,6 +254,12 @@ await step('the Run reaches terminal SUCCEEDED with timing and execution id', as
   assert(run.status === 'SUCCEEDED', `run ended ${run.status}, but M2's engine must deliver`);
   assert(run.kestraExecutionId, 'expected a Kestra execution id');
   assert(run.detail, 'expected the raw Kestra state in detail');
+  // The Run record keeps the as-of date it generated (issue #29): the override
+  // travels Kestra's execution document and survives every poller refresh.
+  assert(
+    run.businessDate === businessDate,
+    `run businessDate is ${run.businessDate}, expected the ${businessDate} override`,
+  );
   assert(run.startedAt && run.endedAt, `expected timing, got ${run.startedAt}..${run.endedAt}`);
   assert(
     new Date(run.endedAt) >= new Date(run.startedAt),
@@ -271,6 +277,26 @@ await step('run history shows the Run with the delivered files and record counts
   assert(
     canonical(run.deliveredFiles) === canonical(goldenDeliveredFiles),
     `deliveredFiles ${JSON.stringify(run.deliveredFiles)} differ from the golden ${JSON.stringify(goldenDeliveredFiles)}`,
+  );
+});
+
+await step('the list serves the card-ready summary: deployment fact, no drift, last run', async () => {
+  // Issue #29: one request answers the status board — no config documents, the
+  // deployment fact, the drift flag, and the latest Run as the runs API tells it.
+  const res = await call('GET', `${api}/dataflows`);
+  expectStatus(res, 200);
+  const card = res.body.find((d) => d.id === dataflowId);
+  assert(card, 'the Dataflow is missing from the list');
+  assert(!('config' in card), 'the list summary must not carry config documents');
+  assert(
+    card.activeDeploymentVersion === 1,
+    `activeDeploymentVersion is ${card.activeDeploymentVersion}, expected 1`,
+  );
+  assert(card.draftDrifted === false, 'the Draft was never edited past deploy — no drift');
+  assert(card.lastRun?.status === 'SUCCEEDED', `lastRun is ${JSON.stringify(card.lastRun)}`);
+  assert(
+    card.lastRun.businessDate === businessDate,
+    `lastRun businessDate is ${card.lastRun.businessDate}, expected ${businessDate}`,
   );
 });
 

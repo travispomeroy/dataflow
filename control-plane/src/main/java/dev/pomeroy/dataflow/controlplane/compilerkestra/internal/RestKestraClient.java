@@ -6,6 +6,8 @@ import dev.pomeroy.dataflow.controlplane.compilerkestra.KestraFlowCompiler;
 import java.net.http.HttpClient;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -130,11 +132,30 @@ class RestKestraClient implements KestraClient {
 	}
 
 	/** The slice of Kestra's execution document the control plane reads. */
-	record ExecutionDocument(String id, String flowId, ExecutionState state) {
+	record ExecutionDocument(String id, String flowId, ExecutionState state,
+			Map<String, Object> inputs) {
 
 		KestraExecution toExecution() {
 			return new KestraExecution(id, flowId, state.current(), state.startDate(),
-					state.endDate());
+					state.endDate(), businessDateInput());
+		}
+
+		/**
+		 * The explicit {@code businessDate} input, when the trigger carried one. The
+		 * flow's input is DATE-typed, so anything Kestra echoes back parses; a value it
+		 * somehow cannot parse is treated as absent rather than wedging the poll loop.
+		 */
+		private LocalDate businessDateInput() {
+			Object value = inputs == null ? null : inputs.get("businessDate");
+			if (value == null) {
+				return null;
+			}
+			try {
+				return LocalDate.parse(String.valueOf(value));
+			}
+			catch (DateTimeParseException e) {
+				return null;
+			}
 		}
 	}
 

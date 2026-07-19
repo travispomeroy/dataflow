@@ -59,7 +59,7 @@ class RunRestController {
 					"Dataflow '%s' is not deployed — run-now executes the active Deployment"
 							.formatted(dataflow.slug()));
 		}
-		RunEntity run = recorder.upsert(dataflow.id(),
+		RunEntity run = recorder.upsert(dataflow,
 				execute(dataflow.slug(), businessDateInput(request)));
 		return ResponseEntity.accepted()
 				.location(URI.create("/api/dataflows/" + dataflowId + "/runs/" + run.id()))
@@ -88,7 +88,7 @@ class RunRestController {
 
 	@GetMapping("/runs")
 	List<RunResponse> history(@PathVariable UUID dataflowId) {
-		return runs.findByDataflowIdOrderByStartedAtDesc(find(dataflowId).id()).stream()
+		return runs.findByDataflowIdOrderByStartedAtDescIdDesc(find(dataflowId).id()).stream()
 				.map(this::response).toList();
 	}
 
@@ -123,13 +123,14 @@ class RunRestController {
 
 	private RunResponse response(RunEntity run) {
 		return new RunResponse(run.id(), run.status(), run.detail(), run.kestraExecutionId(),
-				run.startedAt(), run.endedAt(), run.deliveredFiles().files());
+				run.startedAt(), run.endedAt(), run.businessDate(), run.deliveredFiles().files());
 	}
 
 	record RunNowRequest(String businessDate) {
 	}
 
 	record RunResponse(UUID id, RunStatus status, String detail, String kestraExecutionId,
-			Instant startedAt, Instant endedAt, List<DeliveredFiles.DeliveredFile> deliveredFiles) {
+			Instant startedAt, Instant endedAt, LocalDate businessDate,
+			List<DeliveredFiles.DeliveredFile> deliveredFiles) {
 	}
 }

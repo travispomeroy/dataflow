@@ -16,6 +16,7 @@ import dev.pomeroy.dataflow.controlplane.compilerkestra.KestraExecution;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -127,29 +128,36 @@ class RunApiTests {
 
 	/**
 	 * Business Date is real API surface (issue #25): an explicit override travels to
-	 * the Orchestrator as the flow's {@code businessDate} input, verbatim.
+	 * the Orchestrator as the flow's {@code businessDate} input, verbatim — and the Run
+	 * record keeps it (issue #29), so history answers "which as-of date did this Run
+	 * generate?".
 	 */
 	@Test
-	void runNowWithABusinessDatePassesItToTheOrchestratorAsAnInput() throws Exception {
+	void runNowWithABusinessDatePassesItToTheOrchestratorAndRecordsIt() throws Exception {
 		String id = createDeployed("Backdated Feed");
 
 		mvc.perform(post("/api/dataflows/" + id + "/run-now")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content("{\"businessDate\": \"2026-07-17\"}"))
-				.andExpect(status().isAccepted());
+				.andExpect(status().isAccepted())
+				.andExpect(jsonPath("$.businessDate").value("2026-07-17"));
 
 		assertThat(kestra.lastInputs).containsExactly(Map.entry("businessDate", "2026-07-17"));
 	}
 
 	/**
 	 * No override means no input at all — the flow's own run-date default resolves
-	 * Business Date, exactly as a scheduled trigger would.
+	 * Business Date, exactly as a scheduled trigger would. The Run record mirrors that
+	 * rule (issue #29): the run date in the Schedule's timezone — 06:30Z is 02:30 in
+	 * the canonical config's America/New_York.
 	 */
 	@Test
-	void runNowWithoutABusinessDatePassesNoInputs() throws Exception {
+	void runNowWithoutABusinessDatePassesNoInputsAndRecordsTheRunDateDefault() throws Exception {
 		String id = createDeployed("Defaulting Feed");
 
-		mvc.perform(post("/api/dataflows/" + id + "/run-now")).andExpect(status().isAccepted());
+		mvc.perform(post("/api/dataflows/" + id + "/run-now"))
+				.andExpect(status().isAccepted())
+				.andExpect(jsonPath("$.businessDate").value("2026-07-18"));
 
 		assertThat(kestra.lastInputs).isEmpty();
 	}
@@ -305,8 +313,12 @@ class RunApiTests {
 			lastInputs = Map.copyOf(inputs);
 			int sequence = SEQUENCE.incrementAndGet();
 			lastExecutionId = "exec-" + sequence;
+			// Live Kestra echoes the execution's inputs back in the created document;
+			// the fake does too, so the recorder's Business Date capture is exercised.
 			return new KestraExecution(lastExecutionId, flowId, "CREATED",
-					Instant.parse("2026-07-18T06:30:00Z").plusSeconds(sequence), null);
+					Instant.parse("2026-07-18T06:30:00Z").plusSeconds(sequence), null,
+					inputs.containsKey("businessDate")
+							? LocalDate.parse(inputs.get("businessDate")) : null);
 		}
 
 		@Override

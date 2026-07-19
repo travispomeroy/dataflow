@@ -53,7 +53,7 @@ class KestraExecutionPoller {
 		}
 		for (KestraExecution execution : executions) {
 			dataflows.findBySlug(execution.flowId())
-					.ifPresent(dataflow -> recorder.upsert(dataflow.id(), execution));
+					.ifPresent(dataflow -> recorder.upsert(dataflow, execution));
 		}
 	}
 }

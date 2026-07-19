@@ -69,9 +69,14 @@ class DataflowRestController {
 				.body(DataflowResponse.of(saved));
 	}
 
+	/**
+	 * The list is a card-ready summary projection (issue #29), not the config
+	 * documents: deployment fact, drift flag, latest Run — the builder fetches the full
+	 * Draft from {@code GET /{id}}.
+	 */
 	@GetMapping
-	List<DataflowResponse> list() {
-		return repository.findAll().stream().map(DataflowResponse::of).toList();
+	List<DataflowSummary> list() {
+		return repository.summaries();
 	}
 
 	@GetMapping("/{id}")

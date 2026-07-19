@@ -32,7 +32,17 @@ class SpineDataflows implements Dataflows {
 	}
 
 	private DataflowRef ref(DataflowEntity dataflow) {
-		return new DataflowRef(dataflow.id(), dataflow.slug(),
-				deployments.findByDataflowIdAndActiveTrue(dataflow.id()).isPresent());
+		return deployments.findByDataflowIdAndActiveTrue(dataflow.id())
+				.map(active -> new DataflowRef(dataflow.id(), dataflow.slug(), true,
+						businessDateTimezone(active)))
+				.orElseGet(() -> new DataflowRef(dataflow.id(), dataflow.slug(), false, "UTC"));
+	}
+
+	/**
+	 * The frozen config's Schedule timezone — the one the deployed flow's run-date
+	 * default resolves Business Date in (#25) — UTC when manual-only.
+	 */
+	private String businessDateTimezone(DeploymentEntity active) {
+		return active.config().schedule() != null ? active.config().schedule().timezone() : "UTC";
 	}
 }

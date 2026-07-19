@@ -11,9 +11,11 @@ import dev.pomeroy.dataflow.controlplane.TestcontainersConfiguration;
 import dev.pomeroy.dataflow.controlplane.compilerkestra.KestraClient;
 import dev.pomeroy.dataflow.controlplane.compilerkestra.KestraExecution;
 import dev.pomeroy.dataflow.controlplane.compilerkestra.KestraFlowCompiler;
+import dev.pomeroy.dataflow.controlplane.dataflow.Dataflows.DataflowRef;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -72,15 +74,44 @@ class RunRecorderTests {
 		dataflowId = UUID.fromString(mapper.readTree(response).path("id").stringValue());
 	}
 
+	/** The recorder's view of the polled Dataflow — deployed, canonical NY schedule. */
+	private DataflowRef ref() {
+		return new DataflowRef(dataflowId, "positions-feed", true, "America/New_York");
+	}
+
 	private KestraExecution execution(String id, String state) {
 		return new KestraExecution(id, "positions-feed", state,
 				Instant.parse("2026-07-17T06:30:00Z"),
 				state.equals("SUCCESS") || state.equals("FAILED")
-						? Instant.parse("2026-07-17T06:31:00Z") : null);
+						? Instant.parse("2026-07-17T06:31:00Z") : null,
+				null);
 	}
 
 	private String freshExecutionId() {
 		return "recorder-exec-" + SEQUENCE.incrementAndGet();
+	}
+
+	/**
+	 * Business Date resolution (issue #29) mirrors the compiled flow's rule (#25): no
+	 * explicit input means the run date in the Schedule's timezone — 06:30Z is still
+	 * 2026-07-17 in America/New_York — and an explicit input seen on a later poll
+	 * replaces the resolved default (the poller may first-record a run-now execution).
+	 */
+	@Test
+	void businessDateResolvesToTheRunDateDefaultUntilAnExplicitInputAppears() throws Exception {
+		String executionId = freshExecutionId();
+		UUID runId = recorder.upsert(ref(), execution(executionId, "RUNNING")).id();
+
+		mvc.perform(get("/api/dataflows/" + dataflowId + "/runs/" + runId))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.businessDate").value("2026-07-17"));
+
+		recorder.upsert(ref(), new KestraExecution(executionId, "positions-feed", "RUNNING",
+				Instant.parse("2026-07-17T06:30:00Z"), null, LocalDate.parse("2026-07-15")));
+
+		mvc.perform(get("/api/dataflows/" + dataflowId + "/runs/" + runId))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.businessDate").value("2026-07-15"));
 	}
 
 	@Test
@@ -90,8 +121,8 @@ class RunRecorderTests {
 				Map.of("name", "positions_other_2026-07-17.csv", "records", 12),
 				Map.of("name", "positions_cash_2026-07-17.csv", "records", 5)));
 
-		UUID runId = recorder.upsert(dataflowId, execution(executionId, "CREATED")).id();
-		recorder.upsert(dataflowId, execution(executionId, "SUCCESS"));
+		UUID runId = recorder.upsert(ref(), execution(executionId, "CREATED")).id();
+		recorder.upsert(ref(), execution(executionId, "SUCCESS"));
 
 		mvc.perform(get("/api/dataflows/" + dataflowId + "/runs/" + runId))
 				.andExpect(status().isOk())
@@ -112,7 +143,7 @@ class RunRecorderTests {
 		kestra.vars = Map.of(KestraFlowCompiler.DELIVERED_FILES_VAR,
 				List.of(Map.of("name", "positions_equity_2026-07-17.csv", "records", 25)));
 
-		UUID runId = recorder.upsert(dataflowId, execution(executionId, "SUCCESS")).id();
+		UUID runId = recorder.upsert(ref(), execution(executionId, "SUCCESS")).id();
 
 		mvc.perform(get("/api/dataflows/" + dataflowId + "/runs/" + runId))
 				.andExpect(status().isOk())
@@ -126,8 +157,8 @@ class RunRecorderTests {
 		kestra.vars = Map.of(KestraFlowCompiler.DELIVERED_FILES_VAR,
 				List.of(Map.of("name", "should-not-appear.csv", "records", 1)));
 
-		UUID runId = recorder.upsert(dataflowId, execution(executionId, "CREATED")).id();
-		recorder.upsert(dataflowId, execution(executionId, "FAILED"));
+		UUID runId = recorder.upsert(ref(), execution(executionId, "CREATED")).id();
+		recorder.upsert(ref(), execution(executionId, "FAILED"));
 
 		mvc.perform(get("/api/dataflows/" + dataflowId + "/runs/" + runId))
 				.andExpect(status().isOk())
@@ -141,9 +172,9 @@ class RunRecorderTests {
 		String executionId = freshExecutionId();
 		kestra.vars = Map.of(KestraFlowCompiler.DELIVERED_FILES_VAR, List.of());
 
-		recorder.upsert(dataflowId, execution(executionId, "SUCCESS"));
-		recorder.upsert(dataflowId, execution(executionId, "SUCCESS"));
-		recorder.upsert(dataflowId, execution(executionId, "SUCCESS"));
+		recorder.upsert(ref(), execution(executionId, "SUCCESS"));
+		recorder.upsert(ref(), execution(executionId, "SUCCESS"));
+		recorder.upsert(ref(), execution(executionId, "SUCCESS"));
 
 		assertThat(kestra.outputFetches.get()).isEqualTo(1);
 	}
@@ -153,7 +184,7 @@ class RunRecorderTests {
 		String executionId = freshExecutionId();
 		kestra.vars = Map.of();
 
-		UUID runId = recorder.upsert(dataflowId, execution(executionId, "SUCCESS")).id();
+		UUID runId = recorder.upsert(ref(), execution(executionId, "SUCCESS")).id();
 
 		mvc.perform(get("/api/dataflows/" + dataflowId + "/runs/" + runId))
 				.andExpect(status().isOk())
@@ -169,19 +200,19 @@ class RunRecorderTests {
 	@Test
 	void aFailedOutputsFetchLeavesTheTransitionForTheNextPoll() throws Exception {
 		String executionId = freshExecutionId();
-		UUID runId = recorder.upsert(dataflowId, execution(executionId, "RUNNING")).id();
+		UUID runId = recorder.upsert(ref(), execution(executionId, "RUNNING")).id();
 		kestra.failNextOutputFetch = new IllegalStateException("Kestra hiccup");
 		kestra.vars = Map.of(KestraFlowCompiler.DELIVERED_FILES_VAR,
 				List.of(Map.of("name", "positions_cash_2026-07-17.csv", "records", 5)));
 
 		assertThatIllegalStateException()
-				.isThrownBy(() -> recorder.upsert(dataflowId, execution(executionId, "SUCCESS")));
+				.isThrownBy(() -> recorder.upsert(ref(), execution(executionId, "SUCCESS")));
 		mvc.perform(get("/api/dataflows/" + dataflowId + "/runs/" + runId))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.status").value("RUNNING"))
 				.andExpect(jsonPath("$.deliveredFiles.length()").value(0));
 
-		recorder.upsert(dataflowId, execution(executionId, "SUCCESS"));
+		recorder.upsert(ref(), execution(executionId, "SUCCESS"));
 
 		mvc.perform(get("/api/dataflows/" + dataflowId + "/runs/" + runId))
 				.andExpect(status().isOk())
