@@ -19,8 +19,8 @@ delivers CSVs over SFTP. Full pitch and architecture: `docs/PLAN.md`.
 ## Current status
 
 - **Completed**: planning (glossary, plan, ADRs, engine survey); M0 — Scaffold;
-  M1 — Domain core
-- **Next**: M2 — Hop batch path: first end-to-end feed
+  M1 — Domain core; M2 — Hop batch path: first end-to-end feed
+- **Next**: M3 — UI: the non-technical experience
 - Update this section at every milestone close-out.
 
 ## Standing rules
