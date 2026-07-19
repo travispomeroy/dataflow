@@ -2,7 +2,6 @@ package dev.pomeroy.dataflow.controlplane.dataflow.internal;
 
 import dev.pomeroy.dataflow.controlplane.dataflow.DataflowConfig;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.UUID;
 import org.postgresql.util.PGobject;
 import org.springframework.context.annotation.Bean;
@@ -10,23 +9,37 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.ReadingConverter;
 import org.springframework.data.convert.WritingConverter;
-import org.springframework.data.jdbc.core.convert.JdbcCustomConversions;
 import org.springframework.data.relational.core.mapping.event.BeforeConvertCallback;
 import tools.jackson.databind.ObjectMapper;
 
 /**
  * The jsonb document mapping: a {@link DataflowConfig} is one {@code jsonb} column,
  * (de)serialized by the application's shared mapper so the stored document is exactly
- * the API document. Ids are server-generated here, never client-supplied.
+ * the API document. The converters are contributed as beans for the application's
+ * single conversions registry to collect. Ids are server-generated here, never
+ * client-supplied.
  */
 @Configuration(proxyBeanMethods = false)
 class DataflowPersistenceConfiguration {
 
 	@Bean
-	JdbcCustomConversions jdbcCustomConversions(ObjectMapper mapper) {
-		return new JdbcCustomConversions(List.of(
-				new DataflowConfigToJsonb(mapper), new JsonbToDataflowConfig(mapper),
-				new PlanSnapshotToJsonb(), new JsonbToPlanSnapshot()));
+	DataflowConfigToJsonb dataflowConfigToJsonb(ObjectMapper mapper) {
+		return new DataflowConfigToJsonb(mapper);
+	}
+
+	@Bean
+	JsonbToDataflowConfig jsonbToDataflowConfig(ObjectMapper mapper) {
+		return new JsonbToDataflowConfig(mapper);
+	}
+
+	@Bean
+	PlanSnapshotToJsonb planSnapshotToJsonb() {
+		return new PlanSnapshotToJsonb();
+	}
+
+	@Bean
+	JsonbToPlanSnapshot jsonbToPlanSnapshot() {
+		return new JsonbToPlanSnapshot();
 	}
 
 	@Bean

@@ -114,6 +114,21 @@ class RestKestraClient implements KestraClient {
 		}
 	}
 
+	@Override
+	public Map<String, Object> taskOutputVars(String executionId, String taskId) {
+		ExecutionDetail detail;
+		try {
+			detail = client.get()
+					.uri("/api/v1/main/executions/{executionId}", executionId)
+					.retrieve().body(ExecutionDetail.class);
+		}
+		catch (HttpClientErrorException.NotFound e) {
+			// An execution Kestra no longer knows captured nothing knowable.
+			return Map.of();
+		}
+		return detail.capturedVars(taskId);
+	}
+
 	/** The slice of Kestra's execution document the control plane reads. */
 	record ExecutionDocument(String id, String flowId, ExecutionState state) {
 
@@ -127,5 +142,34 @@ class RestKestraClient implements KestraClient {
 	}
 
 	record ExecutionPage(long total, List<ExecutionDocument> results) {
+	}
+
+	/**
+	 * The task-run slice of a full execution document: script-task captured outputs
+	 * nest under {@code outputs.vars}. A retried task appears once per run — the last
+	 * run's capture is the one that counts, matching Kestra's own outputs view.
+	 */
+	record ExecutionDetail(List<TaskRunDocument> taskRunList) {
+
+		Map<String, Object> capturedVars(String taskId) {
+			if (taskRunList == null) {
+				return Map.of();
+			}
+			return taskRunList.stream()
+					.filter(taskRun -> taskId.equals(taskRun.taskId()))
+					.reduce((first, last) -> last)
+					.map(TaskRunDocument::capturedVars)
+					.orElse(Map.of());
+		}
+	}
+
+	record TaskRunDocument(String taskId, Map<String, Object> outputs) {
+
+		@SuppressWarnings("unchecked")
+		Map<String, Object> capturedVars() {
+			return outputs != null && outputs.get("vars") instanceof Map<?, ?> vars
+					? (Map<String, Object>) vars
+					: Map.of();
+		}
 	}
 }

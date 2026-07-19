@@ -41,4 +41,12 @@ public interface KestraClient {
 	 * runs poller's single discovery path for triggered and scheduled runs alike.
 	 */
 	List<KestraExecution> listExecutions();
+
+	/**
+	 * The output variables the given task captured during the execution — a script
+	 * task's {@code ::{"outputs": …}::} markers (M2.7: the count task's delivered
+	 * files). Empty when the execution or task run does not exist or captured nothing;
+	 * a wedged Kestra still surfaces as a runtime exception.
+	 */
+	Map<String, Object> taskOutputVars(String executionId, String taskId);
 }

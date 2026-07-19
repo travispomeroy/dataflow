@@ -90,7 +90,8 @@ class RunApiTests {
 				.andExpect(jsonPath("$.detail").value("CREATED"))
 				.andExpect(jsonPath("$.startedAt").isNotEmpty())
 				.andExpect(jsonPath("$.endedAt").doesNotExist())
-				// Delivered-files fields exist but stay empty until M2.
+				// Delivered files are captured only at terminal SUCCEEDED (M2.7) —
+				// a freshly queued Run truthfully reports none.
 				.andExpect(jsonPath("$.deliveredFiles").isArray())
 				.andExpect(jsonPath("$.deliveredFiles", hasSize(0)))
 				.andReturn().getResponse().getContentAsString();
@@ -311,6 +312,13 @@ class RunApiTests {
 		@Override
 		public List<KestraExecution> listExecutions() {
 			return List.of();
+		}
+
+		@Override
+		public Map<String, Object> taskOutputVars(String executionId, String taskId) {
+			// Run-now records are never terminal, so these tests fetch no outputs;
+			// the capture path is RunRecorderTests' seam.
+			return Map.of();
 		}
 
 		void reset() {

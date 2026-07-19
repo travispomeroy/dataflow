@@ -6,7 +6,7 @@
 // so the first failure aborts the walk (unlike smoke.mjs's independent checks).
 // Node built-ins only; Kestra credentials come from infra/.env via --env-file.
 
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 
 const env = (name) => {
@@ -94,6 +94,26 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const canonicalConfig = await readJson('canonical', 'positions-feed.config.json');
 const goldenPlan = await readJson('golden', 'positions-feed.plan.json');
+
+// The Business Date the run is pinned to (spec #19): inside the fixtures'
+// trade-date window, so the delivered file names — and with them the run
+// record's delivered-files array — are fully golden.
+const businessDate = '2026-07-17';
+
+// What the Run record must say was shipped (M2.7): name + data-row count per
+// delivered file, sorted by name, computed here from the committed golden CSVs —
+// the same independent-oracle provenance the delivered bytes have. Lines minus
+// header; the CSV contract guarantees a trailing newline, hence the extra -1.
+const goldenDeliveredFiles = await (async () => {
+  const dir = join(import.meta.dirname, 'golden', 'delivered');
+  const names = (await readdir(dir)).sort();
+  return Promise.all(
+    names.map(async (name) => ({
+      name,
+      records: (await readFile(join(dir, name), 'utf8')).split('\n').length - 2,
+    })),
+  );
+})();
 
 // Structurally fine, semantically undeployable: one node, no edges, no
 // Destination, no operator fields — the canvas's legitimate work-in-progress
@@ -198,8 +218,10 @@ await step('deployment history exposes the frozen Execution Plan (matches the go
   );
 });
 
-const runId = await step('run-now answers synchronously with a Run (202)', async () => {
-  const res = await call('POST', `${api}/dataflows/${dataflowId}/run-now`);
+const runId = await step('run-now (with a Business Date override) answers synchronously with a Run (202)', async () => {
+  const res = await call('POST', `${api}/dataflows/${dataflowId}/run-now`, {
+    body: { businessDate },
+  });
   expectStatus(res, 202);
   assert(res.body.id, 'expected a run id');
   // eagerly QUEUED; the 5s poller may already have advanced it
@@ -239,12 +261,16 @@ await step('the Run reaches terminal SUCCEEDED with timing and execution id', as
   );
 });
 
-await step('run history shows the Run', async () => {
+await step('run history shows the Run with the delivered files and record counts', async () => {
   const res = await call('GET', `${api}/dataflows/${dataflowId}/runs`);
   expectStatus(res, 200);
+  const run = res.body.find((r) => r.id === runId && r.status === 'SUCCEEDED');
+  assert(run, 'the SUCCEEDED run is missing from history');
+  // M2.7: the record answers "what did we ship?" — the five golden names with
+  // per-file data-row counts, sorted by name, no SFTP access needed.
   assert(
-    res.body.some((r) => r.id === runId && r.status === 'SUCCEEDED'),
-    'the SUCCEEDED run is missing from history',
+    canonical(run.deliveredFiles) === canonical(goldenDeliveredFiles),
+    `deliveredFiles ${JSON.stringify(run.deliveredFiles)} differ from the golden ${JSON.stringify(goldenDeliveredFiles)}`,
   );
 });
 

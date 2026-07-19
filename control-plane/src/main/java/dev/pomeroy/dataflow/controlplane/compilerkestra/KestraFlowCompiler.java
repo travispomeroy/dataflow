@@ -22,5 +22,18 @@ public interface KestraFlowCompiler {
 	 */
 	String NAMESPACE = "dataflow";
 
+	/**
+	 * The generated count task's id (M2.7): after the atomic rename, it counts data
+	 * rows per delivered file and captures the result as a task output — the runs
+	 * poller reads it back from the execution by this id.
+	 */
+	String COUNT_TASK_ID = "count_records";
+
+	/**
+	 * The output variable the count task captures: {@code [{name, records}, …]} — one
+	 * entry per delivered file, data rows only (header excluded).
+	 */
+	String DELIVERED_FILES_VAR = "deliveredFiles";
+
 	String compile(ExecutionPlan plan, int deploymentVersion);
 }

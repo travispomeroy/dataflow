@@ -22,8 +22,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * Run-now and run history (issue #17). Run-now executes the active Deployment's
@@ -44,15 +42,12 @@ class RunRestController {
 
 	private final RunRepository runs;
 
-	private final ObjectMapper mapper;
-
 	RunRestController(Dataflows dataflows, KestraClient kestra, RunRecorder recorder,
-			RunRepository runs, ObjectMapper mapper) {
+			RunRepository runs) {
 		this.dataflows = dataflows;
 		this.kestra = kestra;
 		this.recorder = recorder;
 		this.runs = runs;
-		this.mapper = mapper;
 	}
 
 	@PostMapping("/run-now")
@@ -128,13 +123,13 @@ class RunRestController {
 
 	private RunResponse response(RunEntity run) {
 		return new RunResponse(run.id(), run.status(), run.detail(), run.kestraExecutionId(),
-				run.startedAt(), run.endedAt(), mapper.readTree(run.deliveredFiles()));
+				run.startedAt(), run.endedAt(), run.deliveredFiles().files());
 	}
 
 	record RunNowRequest(String businessDate) {
 	}
 
 	record RunResponse(UUID id, RunStatus status, String detail, String kestraExecutionId,
-			Instant startedAt, Instant endedAt, JsonNode deliveredFiles) {
+			Instant startedAt, Instant endedAt, List<DeliveredFiles.DeliveredFile> deliveredFiles) {
 	}
 }

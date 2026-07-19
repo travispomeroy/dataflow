@@ -2916,6 +2916,13 @@ tasks:
         password: "{{ secret('SFTP_POMEROY') }}"
         from: "/upload/pomeroy/.{{ fromJson(taskrun.value).key | substringAfterLast('/') }}.part"
         to: "/upload/pomeroy/{{ fromJson(taskrun.value).key | substringAfterLast('/') }}"
+  - id: count_records
+    type: io.kestra.plugin.scripts.shell.Commands
+    taskRunner:
+      type: io.kestra.plugin.core.runner.Process
+    inputFiles: "{{ outputs.staging_pull.objects | jq('map({key: .key, value: .uri}) | from_entries') | first | toJson }}"
+    commands:
+      - cd "positions-feed/{{ execution.id }}/" && files="" && for f in *; do [ -f "$f" ] || continue; files="${files:+$files,}{\"name\":\"$f\",\"records\":$(( $(wc -l < "$f") - 1 ))}"; done && printf '::%s::\n' "{\"outputs\":{\"deliveredFiles\":[$files]}}"
 triggers:
   - id: schedule
     type: io.kestra.plugin.core.trigger.Schedule

@@ -98,7 +98,8 @@ public class DeterministicFlowYamlCompiler implements KestraFlowCompiler {
 	}
 
 	private String tasks(ExecutionPlan plan) {
-		return "tasks:\n" + engineRunner(plan) + stagingPull(plan) + delivery(plan.delivery());
+		return "tasks:\n" + engineRunner(plan) + stagingPull(plan) + delivery(plan.delivery())
+				+ countRecords(plan);
 	}
 
 	/**
@@ -202,8 +203,12 @@ public class DeterministicFlowYamlCompiler implements KestraFlowCompiler {
 				    bucket: staging
 				    prefix: "%s"
 				    action: NONE
-				""".formatted(plan.staging().pathConvention().replace("{runId}",
-				"{{ execution.id }}"));
+				""".formatted(stagingPrefix(plan));
+	}
+
+	/** The per-Run staging prefix, with the plan's {@code {runId}} token late-bound. */
+	private String stagingPrefix(ExecutionPlan plan) {
+		return plan.staging().pathConvention().replace("{runId}", "{{ execution.id }}");
 	}
 
 	/**
@@ -242,6 +247,39 @@ public class DeterministicFlowYamlCompiler implements KestraFlowCompiler {
 				        to: "/%5$s/%6$s"
 				""".formatted(delivery.host(), delivery.port(), delivery.username(),
 				delivery.credentialsRef(), delivery.basePath(), fileName);
+	}
+
+	/**
+	 * The Run record's audit point (M2.7): what did we ship? Only after the atomic
+	 * rename — never before, so the record cannot claim delivery that did not happen —
+	 * a count task tallies data rows (lines minus header; the CSV contract guarantees
+	 * a header row and trailing newline, so {@code wc -l} minus one is exact) per
+	 * delivered file, from the same downloaded objects the delivery loops iterated.
+	 * Kestra lays those objects out under their staging keys, so the tally walks the
+	 * per-Run prefix. The {@code [{name, records}, …]} array is captured as the
+	 * {@code deliveredFiles} output variable the runs poller reads on terminal SUCCESS
+	 * — in glob order, on which the run record never depends: the runs module sorts by
+	 * name on capture. The Process runner keeps the tally on the Orchestrator itself:
+	 * no container, no registry, nothing that can fail after the feed is already
+	 * delivered.
+	 *
+	 * <p>{@code inputFiles} wants a name→uri map, not the objects array the staging
+	 * pull outputs (Kestra 1.3.28 rejects the array outright), so the jq expression
+	 * rebuilds the map from each object's key and internal-storage uri — keys keep
+	 * their full staging paths, which is what lays the files out under the per-Run
+	 * prefix the tally walks.
+	 */
+	private String countRecords(ExecutionPlan plan) {
+		return """
+				  - id: %s
+				    type: io.kestra.plugin.scripts.shell.Commands
+				    taskRunner:
+				      type: io.kestra.plugin.core.runner.Process
+				    inputFiles: "{{ outputs.staging_pull.objects | jq('map({key: .key, value: .uri}) | from_entries') | first | toJson }}"
+				    commands:
+				      - cd "%s" && files="" && for f in *; do [ -f "$f" ] || continue; files="${files:+$files,}{\\"name\\":\\"$f\\",\\"records\\":$(( $(wc -l < "$f") - 1 ))}"; done && printf '::%%s::\\n' "{\\"outputs\\":{\\"%s\\":[$files]}}"
+				""".formatted(KestraFlowCompiler.COUNT_TASK_ID, stagingPrefix(plan),
+				KestraFlowCompiler.DELIVERED_FILES_VAR);
 	}
 
 	/**

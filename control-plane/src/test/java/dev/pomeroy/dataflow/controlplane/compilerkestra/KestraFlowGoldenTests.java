@@ -126,6 +126,32 @@ class KestraFlowGoldenTests {
 				.isLessThan(yaml.indexOf("- id: delivery_hidden_upload"));
 		assertThat(yaml.indexOf("- id: delivery_hidden_upload"))
 				.isLessThan(yaml.indexOf("- id: delivery_rename"));
+		assertThat(yaml.indexOf("- id: delivery_rename"))
+				.isLessThan(yaml.indexOf("- id: " + KestraFlowCompiler.COUNT_TASK_ID));
+	}
+
+	/**
+	 * The Run record's audit point (M2.7, spec #19): only after the atomic rename does
+	 * a count task tally data rows (lines minus header) per delivered file, from the
+	 * same downloaded objects the delivery loops iterated — and captures the
+	 * {@code [{name, records}, …]} array as the task output the runs poller reads.
+	 */
+	@Test
+	void theCountTaskTalliesTheStagedFilesAndCapturesDeliveredFiles() throws Exception {
+		String yaml = compiler.compile(canonicalPlan(), VERSION);
+
+		assertThat(yaml).contains("""
+				  - id: count_records
+				    type: io.kestra.plugin.scripts.shell.Commands
+				    taskRunner:
+				      type: io.kestra.plugin.core.runner.Process
+				    inputFiles: "{{ outputs.staging_pull.objects | jq('map({key: .key, value: .uri}) | from_entries') | first | toJson }}"
+				""");
+		// The downloaded objects land under their staging keys, so the tally walks
+		// the same per-Run prefix the staging pull downloaded.
+		assertThat(yaml).contains("cd \"positions-feed/{{ execution.id }}/\"")
+				.contains("$(wc -l < \"$f\") - 1")
+				.contains("\\\"deliveredFiles\\\":");
 	}
 
 	/**
