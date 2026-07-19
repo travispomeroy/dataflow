@@ -84,3 +84,13 @@ export function deployDataflow(id: string) {
 export function listDeployments(id: string) {
   return apiFetch<DeploymentSummary[]>(`/api/dataflows/${id}/deployments`);
 }
+
+/** Stops the feed: the compiled Kestra flow is removed, the Deployment deactivated. */
+export function undeployDataflow(id: string) {
+  return apiFetch<void>(`/api/dataflows/${id}/undeploy`, { method: 'POST' });
+}
+
+/** Deletes an undeployed Dataflow; the control plane answers 409 while deployed. */
+export function deleteDataflow(id: string) {
+  return apiFetch<void>(`/api/dataflows/${id}`, { method: 'DELETE' });
+}
