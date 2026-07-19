@@ -127,7 +127,7 @@ public class DeterministicFlowDefinitionCompiler implements NiFiFlowCompiler {
 
 		Map<String, Object> document() {
 			List<ApiExtraction> apis = plan.extraction().apis();
-			List<ApiExtraction> joiners = apis.subList(1, apis.size());
+			List<ApiExtraction> mergers = apis.subList(1, apis.size());
 
 			// -- record services: per-API readers/writers, per-merge, per-file ----
 			List<Ref> pageReaders = new ArrayList<>();
@@ -156,24 +156,24 @@ public class DeterministicFlowDefinitionCompiler implements NiFiFlowCompiler {
 			for (int i = 0; i < baseLogical.size(); i++) {
 				atStage.put(baseLogical.get(i), baseUpstream.get(i));
 			}
-			for (ApiExtraction api : joiners) {
-				stageSqls.add(joinSql(api, accumulated, atStage, nullable));
-				String schema = recordSchema("merge_" + avro(api.name()) + "_row",
+			for (ApiExtraction api : mergers) {
+				stageSqls.add(mergeSql(api, accumulated, atStage, nullable));
+				String schema = recordSchema("merge_" + avroName(api.name()) + "_row",
 						accumulated, nullable);
 				stageWriters.add(jsonWriter("merge/" + api.name() + "/json-writer",
 						"merge-" + api.name() + "-json-writer", schema));
 				stageFlatReaders.add(jsonTreeReader("merge/" + api.name() + "/flat-reader",
 						"merge-" + api.name() + "-flat-reader", schema, false));
 			}
-			Ref feedFlatReader = joiners.isEmpty() ? flatReaders.getFirst()
+			Ref feedFlatReader = mergers.isEmpty() ? flatReaders.getFirst()
 					: stageFlatReaders.getLast();
-			Ref feedJsonWriter = joiners.isEmpty() ? jsonWriters.getFirst()
+			Ref feedJsonWriter = mergers.isEmpty() ? jsonWriters.getFirst()
 					: stageWriters.getLast();
 
 			List<Ref> csvWriters = new ArrayList<>();
 			for (OutputFile file : plan.files()) {
 				csvWriters.add(csvWriter(file, recordSchema(
-						avro(file.fileDefinitionId()) + "_row", file.columns(), nullable)));
+						avroName(file.fileDefinitionId()) + "_row", file.columns(), nullable)));
 			}
 
 			Ref credentials = service("minio-credentials", "minio-credentials",
@@ -190,8 +190,8 @@ public class DeterministicFlowDefinitionCompiler implements NiFiFlowCompiler {
 
 			// -- the merge chain: tag pairs feeding chained JoinEnrichments -------
 			Out current = datasets.getFirst();
-			for (int k = 1; k <= joiners.size(); k++) {
-				ApiExtraction api = joiners.get(k - 1);
+			for (int k = 1; k <= mergers.size(); k++) {
+				ApiExtraction api = mergers.get(k - 1);
 				String stage = "merge " + api.name();
 				Ref originalReader = k == 1 ? flatReaders.getFirst()
 						: stageFlatReaders.get(k - 2);
@@ -201,7 +201,7 @@ public class DeterministicFlowDefinitionCompiler implements NiFiFlowCompiler {
 				Ref tagEnrichment = tag("merge/" + api.name() + "/tag-enrichment",
 						stage + ": tag enrichment", api.name(), "ENRICHMENT",
 						500 * k, 900 + 150 * (k - 1));
-				Ref join = processor("merge/" + api.name() + "/join", stage,
+				Ref merge = processor("merge/" + api.name() + "/join", stage,
 						"JoinEnrichment", 250 + 350 * (k - 1), 1050 + 300 * (k - 1),
 						orderedMap("Original Record Reader", originalReader.id(),
 								"Enrichment Record Reader", flatReaders.get(apis.indexOf(api)).id(),
@@ -212,19 +212,23 @@ public class DeterministicFlowDefinitionCompiler implements NiFiFlowCompiler {
 				connect(current.ref(), List.of(current.relationship()), tagOriginal);
 				Out enrichment = datasets.get(apis.indexOf(api));
 				connect(enrichment.ref(), List.of(enrichment.relationship()), tagEnrichment);
-				connect(tagOriginal, List.of("success"), join);
-				connect(tagEnrichment, List.of("success"), join);
-				toFunnel(join, List.of("failure", "timeout"));
-				current = new Out(join, "joined");
+				connect(tagOriginal, List.of("success"), merge);
+				connect(tagEnrichment, List.of("success"), merge);
+				toFunnel(merge, List.of("failure", "timeout"));
+				current = new Out(merge, "joined");
 			}
 
 			// -- transforms, the structural split, file naming, staging -----------
-			int stages = joiners.size();
+			int stages = mergers.size();
 			int x = stages > 0 ? 250 + 350 * (stages - 1) : 0;
 			int y = stages > 0 ? 1050 + 300 * (stages - 1) : 900;
 			List<TransformStep> transforms = plan.transforms();
 			for (int t = 0; t < transforms.size(); t++) {
-				ClientFilterStep step = (ClientFilterStep) transforms.get(t);
+				// exhaustive over the sealed TransformStep: a new kind refuses to
+				// compile here instead of failing at runtime
+				ClientFilterStep step = switch (transforms.get(t)) {
+					case ClientFilterStep filter -> filter;
+				};
 				y += 150;
 				Ref filter = processor("transform/" + t,
 						t == 0 ? "client filter" : "client filter " + (t + 1),
@@ -373,7 +377,7 @@ public class DeterministicFlowDefinitionCompiler implements NiFiFlowCompiler {
 		 * never left to the SQL engine's discretion. Mutates the bookkeeping to the
 		 * stage's output.
 		 */
-		private String joinSql(ApiExtraction api, List<String> accumulated,
+		private String mergeSql(ApiExtraction api, List<String> accumulated,
 				Map<String, String> atStage, LinkedHashSet<String> nullable) {
 			List<String> select = new ArrayList<>();
 			for (String column : accumulated) {
@@ -423,9 +427,8 @@ public class DeterministicFlowDefinitionCompiler implements NiFiFlowCompiler {
 		private String collapseSql(ApiExtraction api) {
 			String columns = quoted(upstreamColumns(api));
 			String partition = quoted(api.joinOn());
-			String latest = api.collapse().latestBy().stream()
-					.map(field -> "\"%s\" DESC".formatted(field))
-					.reduce((a, b) -> a + ", " + b).orElseThrow();
+			String latest = commaJoined(api.collapse().latestBy().stream()
+					.map(field -> "\"%s\" DESC".formatted(field)).toList());
 			return """
 					SELECT %s
 					FROM (
@@ -436,25 +439,32 @@ public class DeterministicFlowDefinitionCompiler implements NiFiFlowCompiler {
 		}
 
 		private String filterSql(ClientFilterStep step) {
-			String values = step.clientIds().stream()
-					.map(id -> "'" + id.replace("'", "''") + "'")
-					.reduce((a, b) -> a + ", " + b).orElseThrow();
+			String values = commaJoined(step.clientIds().stream()
+					.map(id -> "'" + id.replace("'", "''") + "'").toList());
 			return "SELECT * FROM FLOWFILE WHERE \"%s\" IN (%s)"
 					.formatted(step.field(), values);
 		}
 
 		private String splitSql(OutputFile file, String value, List<String> sortKeys) {
-			String orderBy = sortKeys.stream().filter(file.columns()::contains)
-					.map("\"%s\""::formatted)
-					.reduce((a, b) -> a + ", " + b).orElseThrow();
+			String orderBy = commaJoined(sortKeys.stream()
+					.filter(file.columns()::contains).map("\"%s\""::formatted).toList());
 			return "SELECT %s FROM FLOWFILE WHERE \"%s\" = '%s' ORDER BY %s".formatted(
 					quoted(file.columns()), file.splitBy(),
 					value.replace("'", "''"), orderBy);
 		}
 
 		private String quoted(List<String> identifiers) {
-			return identifiers.stream().map("\"%s\""::formatted)
-					.reduce((a, b) -> a + ", " + b).orElseThrow();
+			return commaJoined(identifiers.stream().map("\"%s\""::formatted).toList());
+		}
+
+		/** An empty SQL fragment is never valid — refuse instead of serializing one. */
+		private String commaJoined(List<String> parts) {
+			if (parts.isEmpty()) {
+				throw new IllegalArgumentException(
+						"a SQL fragment of plan '%s' resolved to nothing"
+								.formatted(plan.slug()));
+			}
+			return String.join(", ", parts);
 		}
 
 		// -- column vocabulary ---------------------------------------------------
@@ -507,7 +517,7 @@ public class DeterministicFlowDefinitionCompiler implements NiFiFlowCompiler {
 		// -- schemas (all-string, explicit everywhere) ---------------------------
 
 		private String apiSchema(ApiExtraction api) {
-			return recordSchema(avro(api.name()) + "_row", upstreamColumns(api),
+			return recordSchema(avroName(api.name()) + "_row", upstreamColumns(api),
 					new LinkedHashSet<>());
 		}
 
@@ -533,7 +543,7 @@ public class DeterministicFlowDefinitionCompiler implements NiFiFlowCompiler {
 			return MAPPER.writeValueAsString(record);
 		}
 
-		private String avro(String name) {
+		private String avroName(String name) {
 			String sanitized = name.replaceAll("[^A-Za-z0-9_]", "_");
 			return sanitized.isEmpty() || Character.isDigit(sanitized.charAt(0))
 					? "_" + sanitized : sanitized;
