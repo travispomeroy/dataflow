@@ -1,0 +1,20 @@
+{
+  "type": "org.apache.nifi.processors.standard.RouteOnAttribute",
+  "bundle": {
+    "group": "org.apache.nifi",
+    "artifact": "nifi-standard-nar",
+    "version": "2.10.0"
+  },
+  "properties": {
+    "Routing Strategy": "Route to Property name"
+  },
+  "propertyDescriptors": {
+    "Routing Strategy": {
+      "name": "Routing Strategy",
+      "displayName": "Routing Strategy",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    }
+  }
+}

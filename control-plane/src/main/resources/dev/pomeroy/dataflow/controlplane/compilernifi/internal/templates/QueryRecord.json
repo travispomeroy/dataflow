@@ -1,0 +1,50 @@
+{
+  "type": "org.apache.nifi.processors.standard.QueryRecord",
+  "bundle": {
+    "group": "org.apache.nifi",
+    "artifact": "nifi-standard-nar",
+    "version": "2.10.0"
+  },
+  "properties": {
+    "Default Decimal Precision": "10",
+    "Default Decimal Scale": "0",
+    "Include Zero Record FlowFiles": "true"
+  },
+  "propertyDescriptors": {
+    "Default Decimal Precision": {
+      "name": "Default Decimal Precision",
+      "displayName": "Default Decimal Precision",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Default Decimal Scale": {
+      "name": "Default Decimal Scale",
+      "displayName": "Default Decimal Scale",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Include Zero Record FlowFiles": {
+      "name": "Include Zero Record FlowFiles",
+      "displayName": "Include Zero Record FlowFiles",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Record Reader": {
+      "name": "Record Reader",
+      "displayName": "Record Reader",
+      "identifiesControllerService": true,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Record Writer": {
+      "name": "Record Writer",
+      "displayName": "Record Writer",
+      "identifiesControllerService": true,
+      "sensitive": false,
+      "dynamic": false
+    }
+  }
+}

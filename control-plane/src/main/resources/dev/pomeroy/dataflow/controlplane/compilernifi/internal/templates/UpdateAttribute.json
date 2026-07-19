@@ -1,0 +1,44 @@
+{
+  "type": "org.apache.nifi.processors.attributes.UpdateAttribute",
+  "bundle": {
+    "group": "org.apache.nifi",
+    "artifact": "nifi-update-attribute-nar",
+    "version": "2.10.0"
+  },
+  "properties": {
+    "Cache Value Lookup Cache Size": "100",
+    "Delete Attributes Expression": null,
+    "Stateful Variables Initial Value": null,
+    "Store State": "Do not store state"
+  },
+  "propertyDescriptors": {
+    "Cache Value Lookup Cache Size": {
+      "name": "Cache Value Lookup Cache Size",
+      "displayName": "Cache Value Lookup Cache Size",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Delete Attributes Expression": {
+      "name": "Delete Attributes Expression",
+      "displayName": "Delete Attributes Expression",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Stateful Variables Initial Value": {
+      "name": "Stateful Variables Initial Value",
+      "displayName": "Stateful Variables Initial Value",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Store State": {
+      "name": "Store State",
+      "displayName": "Store State",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    }
+  }
+}

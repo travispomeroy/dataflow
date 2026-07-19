@@ -83,6 +83,28 @@ class CatalogSeedConsistencyTests {
 	}
 
 	/**
+	 * The Asset Class domain the seed declares must be the one the fixture world
+	 * actually exhibits: {@code splitValues} is exactly the distinct values the split
+	 * field takes across the fixture positions — no phantom class, no missing one.
+	 */
+	@Test
+	void fileDefinitionSplitValuesAreTheFixturesDistinctSplitFieldValues() throws Exception {
+		List<Map<String, Object>> positions = mapper.readValue(
+				Files.readString(REPO_ROOT.resolve("infra/fixtures/data/positions.json")),
+				new TypeReference<>() {
+				});
+		List<String> fixtureClasses = positions.stream()
+				.map(position -> (String) position.get("assetClass"))
+				.distinct().sorted().toList();
+
+		FileDefinition definition = catalog.fileDefinitions().stream()
+				.filter(candidate -> candidate.id().equals("positions-by-asset-class"))
+				.findFirst().orElseThrow();
+
+		assertThat(definition.splitValues()).isEqualTo(fixtureClasses);
+	}
+
+	/**
 	 * The mock world's one SFTP secret is committed in infra/.env; the catalog must
 	 * reference it by name (a Kestra secret ref) and never carry its value — not in a
 	 * seed resource, not in a response (issue #11; ADR-0002 as amended).

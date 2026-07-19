@@ -5,6 +5,13 @@
     "sourceId": "positions",
     "namePattern": "positions_{assetClass}_{businessDate}.csv",
     "splitBy": "assetClass",
+    "splitValues": [
+      "cash",
+      "derivatives",
+      "equity",
+      "fixed_income",
+      "other"
+    ],
     "columns": [
       "clientId",
       "clientName",

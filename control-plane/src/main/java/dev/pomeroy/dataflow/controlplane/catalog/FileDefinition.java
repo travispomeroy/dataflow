@@ -6,8 +6,11 @@ import java.util.List;
  * The specification of one output file a Dataflow produces from a Source: a token-based
  * name pattern, split by a field so one definition can yield one file per value (e.g.
  * one file per Asset Class), and the {@code columns} projection — the Source's logical
- * fields the file carries, in delivered order.
+ * fields the file carries, in delivered order. {@code splitValues} is the closed set of
+ * values the split field takes (the Asset Class domain) — Catalog knowledge that makes
+ * the one-file-per-value rule structural: every value yields a file even when no row
+ * carries it, never a data-dependent surprise.
  */
 public record FileDefinition(String id, String name, String sourceId, String namePattern,
-		String splitBy, List<String> columns) {
+		String splitBy, List<String> splitValues, List<String> columns) {
 }

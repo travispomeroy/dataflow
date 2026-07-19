@@ -1,0 +1,87 @@
+{
+  "type": "org.apache.nifi.processors.standard.JoinEnrichment",
+  "bundle": {
+    "group": "org.apache.nifi",
+    "artifact": "nifi-standard-nar",
+    "version": "2.10.0"
+  },
+  "properties": {
+    "Default Decimal Precision": "10",
+    "Default Decimal Scale": "0",
+    "Insertion Record Path": "/",
+    "Maximum Number of Bins": "10000",
+    "Timeout": "10 min"
+  },
+  "propertyDescriptors": {
+    "Default Decimal Precision": {
+      "name": "Default Decimal Precision",
+      "displayName": "Default Decimal Precision",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Default Decimal Scale": {
+      "name": "Default Decimal Scale",
+      "displayName": "Default Decimal Scale",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Enrichment Record Reader": {
+      "name": "Enrichment Record Reader",
+      "displayName": "Enrichment Record Reader",
+      "identifiesControllerService": true,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Insertion Record Path": {
+      "name": "Insertion Record Path",
+      "displayName": "Insertion Record Path",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Join Strategy": {
+      "name": "Join Strategy",
+      "displayName": "Join Strategy",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Maximum Number of Bins": {
+      "name": "Maximum Number of Bins",
+      "displayName": "Maximum Number of Bins",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Original Record Reader": {
+      "name": "Original Record Reader",
+      "displayName": "Original Record Reader",
+      "identifiesControllerService": true,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Record Writer": {
+      "name": "Record Writer",
+      "displayName": "Record Writer",
+      "identifiesControllerService": true,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "SQL": {
+      "name": "SQL",
+      "displayName": "SQL",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Timeout": {
+      "name": "Timeout",
+      "displayName": "Timeout",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    }
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "type": "org.apache.nifi.processors.standard.EvaluateJsonPath",
+  "bundle": {
+    "group": "org.apache.nifi",
+    "artifact": "nifi-standard-nar",
+    "version": "2.10.0"
+  },
+  "properties": {
+    "Max String Length": "20 MB",
+    "Null Value Representation": "empty string",
+    "Path Not Found Behavior": "ignore",
+    "Return Type": "auto-detect"
+  },
+  "propertyDescriptors": {
+    "Destination": {
+      "name": "Destination",
+      "displayName": "Destination",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Max String Length": {
+      "name": "Max String Length",
+      "displayName": "Max String Length",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Null Value Representation": {
+      "name": "Null Value Representation",
+      "displayName": "Null Value Representation",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Path Not Found Behavior": {
+      "name": "Path Not Found Behavior",
+      "displayName": "Path Not Found Behavior",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Return Type": {
+      "name": "Return Type",
+      "displayName": "Return Type",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    }
+  }
+}

@@ -1,0 +1,146 @@
+{
+  "type": "org.apache.nifi.json.JsonTreeReader",
+  "bundle": {
+    "group": "org.apache.nifi",
+    "artifact": "nifi-record-serialization-services-nar",
+    "version": "2.10.0"
+  },
+  "properties": {
+    "Date Format": null,
+    "Max String Length": "20 MB",
+    "Parsing Strategy": "STANDARD",
+    "Schema Application Strategy": "SELECTED_PART",
+    "Schema Branch": null,
+    "Schema Inference Cache": null,
+    "Schema Name": "${schema.name}",
+    "Schema Reference Reader": null,
+    "Schema Registry": null,
+    "Schema Version": null,
+    "Time Format": null,
+    "Timestamp Format": null
+  },
+  "propertyDescriptors": {
+    "Date Format": {
+      "name": "Date Format",
+      "displayName": "Date Format",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Max String Length": {
+      "name": "Max String Length",
+      "displayName": "Max String Length",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Parsing Strategy": {
+      "name": "Parsing Strategy",
+      "displayName": "Parsing Strategy",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Schema Access Strategy": {
+      "name": "Schema Access Strategy",
+      "displayName": "Schema Access Strategy",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Schema Application Strategy": {
+      "name": "Schema Application Strategy",
+      "displayName": "Schema Application Strategy",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Schema Branch": {
+      "name": "Schema Branch",
+      "displayName": "Schema Branch",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Schema Inference Cache": {
+      "name": "Schema Inference Cache",
+      "displayName": "Schema Inference Cache",
+      "identifiesControllerService": true,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Schema Name": {
+      "name": "Schema Name",
+      "displayName": "Schema Name",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Schema Reference Reader": {
+      "name": "Schema Reference Reader",
+      "displayName": "Schema Reference Reader",
+      "identifiesControllerService": true,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Schema Registry": {
+      "name": "Schema Registry",
+      "displayName": "Schema Registry",
+      "identifiesControllerService": true,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Schema Text": {
+      "name": "Schema Text",
+      "displayName": "Schema Text",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Schema Version": {
+      "name": "Schema Version",
+      "displayName": "Schema Version",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Starting Field Name": {
+      "name": "Starting Field Name",
+      "displayName": "Starting Field Name",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Starting Field Strategy": {
+      "name": "Starting Field Strategy",
+      "displayName": "Starting Field Strategy",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Time Format": {
+      "name": "Time Format",
+      "displayName": "Time Format",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Timestamp Format": {
+      "name": "Timestamp Format",
+      "displayName": "Timestamp Format",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    }
+  },
+  "controllerServiceApis": [
+    {
+      "type": "org.apache.nifi.serialization.RecordReaderFactory",
+      "bundle": {
+        "group": "org.apache.nifi",
+        "artifact": "nifi-standard-services-api-nar",
+        "version": "2.10.0"
+      }
+    }
+  ]
+}

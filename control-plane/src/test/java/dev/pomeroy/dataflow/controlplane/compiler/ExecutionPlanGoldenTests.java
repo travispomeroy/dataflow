@@ -93,6 +93,7 @@ class ExecutionPlanGoldenTests {
 				"clientId", List.of("INV-001", "INV-002", "INV-003")));
 		assertThat(plan.files()).containsExactly(new OutputFile("positions-by-asset-class",
 				"positions_{assetClass}_{businessDate}.csv", "assetClass",
+				List.of("cash", "derivatives", "equity", "fixed_income", "other"),
 				List.of("clientId", "clientName", "advisorGroup", "symbol", "assetClass",
 						"quantity", "marketValue", "currency", "orderId", "orderSide",
 						"orderQuantity", "orderStatus", "tradeDate")));

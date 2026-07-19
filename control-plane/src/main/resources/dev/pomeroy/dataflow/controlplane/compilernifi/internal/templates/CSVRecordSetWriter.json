@@ -1,0 +1,219 @@
+{
+  "type": "org.apache.nifi.csv.CSVRecordSetWriter",
+  "bundle": {
+    "group": "org.apache.nifi",
+    "artifact": "nifi-record-serialization-services-nar",
+    "version": "2.10.0"
+  },
+  "properties": {
+    "Comment Marker": null,
+    "Date Format": null,
+    "Escape Character": "\\",
+    "Null String": null,
+    "Quote Character": "\"",
+    "Schema Branch": null,
+    "Schema Cache": null,
+    "Schema Name": "${schema.name}",
+    "Schema Reference Reader": null,
+    "Schema Reference Writer": null,
+    "Schema Registry": null,
+    "Schema Version": null,
+    "Time Format": null,
+    "Timestamp Format": null,
+    "Trim Fields": "true"
+  },
+  "propertyDescriptors": {
+    "CSV Format": {
+      "name": "CSV Format",
+      "displayName": "CSV Format",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "CSV Writer": {
+      "name": "CSV Writer",
+      "displayName": "CSV Writer",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Character Set": {
+      "name": "Character Set",
+      "displayName": "Character Set",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Comment Marker": {
+      "name": "Comment Marker",
+      "displayName": "Comment Marker",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Date Format": {
+      "name": "Date Format",
+      "displayName": "Date Format",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Escape Character": {
+      "name": "Escape Character",
+      "displayName": "Escape Character",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Include Header Line": {
+      "name": "Include Header Line",
+      "displayName": "Include Header Line",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Include Trailing Delimiter": {
+      "name": "Include Trailing Delimiter",
+      "displayName": "Include Trailing Delimiter",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Null String": {
+      "name": "Null String",
+      "displayName": "Null String",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Quote Character": {
+      "name": "Quote Character",
+      "displayName": "Quote Character",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Quote Mode": {
+      "name": "Quote Mode",
+      "displayName": "Quote Mode",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Record Separator": {
+      "name": "Record Separator",
+      "displayName": "Record Separator",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Schema Access Strategy": {
+      "name": "Schema Access Strategy",
+      "displayName": "Schema Access Strategy",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Schema Branch": {
+      "name": "Schema Branch",
+      "displayName": "Schema Branch",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Schema Cache": {
+      "name": "Schema Cache",
+      "displayName": "Schema Cache",
+      "identifiesControllerService": true,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Schema Name": {
+      "name": "Schema Name",
+      "displayName": "Schema Name",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Schema Reference Reader": {
+      "name": "Schema Reference Reader",
+      "displayName": "Schema Reference Reader",
+      "identifiesControllerService": true,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Schema Reference Writer": {
+      "name": "Schema Reference Writer",
+      "displayName": "Schema Reference Writer",
+      "identifiesControllerService": true,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Schema Registry": {
+      "name": "Schema Registry",
+      "displayName": "Schema Registry",
+      "identifiesControllerService": true,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Schema Text": {
+      "name": "Schema Text",
+      "displayName": "Schema Text",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Schema Version": {
+      "name": "Schema Version",
+      "displayName": "Schema Version",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Schema Write Strategy": {
+      "name": "Schema Write Strategy",
+      "displayName": "Schema Write Strategy",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Time Format": {
+      "name": "Time Format",
+      "displayName": "Time Format",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Timestamp Format": {
+      "name": "Timestamp Format",
+      "displayName": "Timestamp Format",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Trim Fields": {
+      "name": "Trim Fields",
+      "displayName": "Trim Fields",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Value Separator": {
+      "name": "Value Separator",
+      "displayName": "Value Separator",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    }
+  },
+  "controllerServiceApis": [
+    {
+      "type": "org.apache.nifi.serialization.RecordSetWriterFactory",
+      "bundle": {
+        "group": "org.apache.nifi",
+        "artifact": "nifi-standard-services-api-nar",
+        "version": "2.10.0"
+      }
+    }
+  ]
+}

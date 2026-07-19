@@ -93,7 +93,7 @@ public class CatalogResolvingCompiler implements DataflowCompiler {
 						.filter(definition -> definition.sourceId().equals(source.id()))
 						.map(definition -> new OutputFile(definition.id(),
 								definition.namePattern(), definition.splitBy(),
-								definition.columns()))
+								definition.splitValues(), definition.columns()))
 						.toList(),
 				new Staging(slug + "/{runId}/"),
 				delivery(destination));

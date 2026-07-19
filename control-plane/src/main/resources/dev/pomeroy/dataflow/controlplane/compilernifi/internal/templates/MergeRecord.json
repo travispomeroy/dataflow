@@ -1,0 +1,96 @@
+{
+  "type": "org.apache.nifi.processors.standard.MergeRecord",
+  "bundle": {
+    "group": "org.apache.nifi",
+    "artifact": "nifi-standard-nar",
+    "version": "2.10.0"
+  },
+  "properties": {
+    "Attribute Strategy": "Keep Only Common Attributes",
+    "Correlation Attribute Name": null,
+    "Max Bin Age": null,
+    "Maximum Bin Size": null,
+    "Maximum Number of Bins": "10",
+    "Minimum Bin Size": "0 B",
+    "Minimum Number of Records": "1"
+  },
+  "propertyDescriptors": {
+    "Attribute Strategy": {
+      "name": "Attribute Strategy",
+      "displayName": "Attribute Strategy",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Correlation Attribute Name": {
+      "name": "Correlation Attribute Name",
+      "displayName": "Correlation Attribute Name",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Max Bin Age": {
+      "name": "Max Bin Age",
+      "displayName": "Max Bin Age",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Maximum Bin Size": {
+      "name": "Maximum Bin Size",
+      "displayName": "Maximum Bin Size",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Maximum Number of Bins": {
+      "name": "Maximum Number of Bins",
+      "displayName": "Maximum Number of Bins",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Maximum Number of Records": {
+      "name": "Maximum Number of Records",
+      "displayName": "Maximum Number of Records",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Merge Strategy": {
+      "name": "Merge Strategy",
+      "displayName": "Merge Strategy",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Minimum Bin Size": {
+      "name": "Minimum Bin Size",
+      "displayName": "Minimum Bin Size",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Minimum Number of Records": {
+      "name": "Minimum Number of Records",
+      "displayName": "Minimum Number of Records",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Record Reader": {
+      "name": "Record Reader",
+      "displayName": "Record Reader",
+      "identifiesControllerService": true,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Record Writer": {
+      "name": "Record Writer",
+      "displayName": "Record Writer",
+      "identifiesControllerService": true,
+      "sensitive": false,
+      "dynamic": false
+    }
+  }
+}

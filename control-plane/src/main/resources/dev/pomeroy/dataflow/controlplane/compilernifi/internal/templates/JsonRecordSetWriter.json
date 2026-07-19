@@ -1,0 +1,177 @@
+{
+  "type": "org.apache.nifi.json.JsonRecordSetWriter",
+  "bundle": {
+    "group": "org.apache.nifi",
+    "artifact": "nifi-record-serialization-services-nar",
+    "version": "2.10.0"
+  },
+  "properties": {
+    "Allow Scientific Notation": "false",
+    "Compression Format": "none",
+    "Compression Level": "1",
+    "Date Format": null,
+    "Schema Branch": null,
+    "Schema Cache": null,
+    "Schema Name": "${schema.name}",
+    "Schema Reference Reader": null,
+    "Schema Reference Writer": null,
+    "Schema Registry": null,
+    "Schema Version": null,
+    "Serialized JSON Input Handling": "ENABLED",
+    "Suppress Null Values": "never-suppress",
+    "Time Format": null,
+    "Timestamp Format": null
+  },
+  "propertyDescriptors": {
+    "Allow Scientific Notation": {
+      "name": "Allow Scientific Notation",
+      "displayName": "Allow Scientific Notation",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Compression Format": {
+      "name": "Compression Format",
+      "displayName": "Compression Format",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Compression Level": {
+      "name": "Compression Level",
+      "displayName": "Compression Level",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Date Format": {
+      "name": "Date Format",
+      "displayName": "Date Format",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Output Grouping": {
+      "name": "Output Grouping",
+      "displayName": "Output Grouping",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Pretty Print JSON": {
+      "name": "Pretty Print JSON",
+      "displayName": "Pretty Print JSON",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Schema Access Strategy": {
+      "name": "Schema Access Strategy",
+      "displayName": "Schema Access Strategy",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Schema Branch": {
+      "name": "Schema Branch",
+      "displayName": "Schema Branch",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Schema Cache": {
+      "name": "Schema Cache",
+      "displayName": "Schema Cache",
+      "identifiesControllerService": true,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Schema Name": {
+      "name": "Schema Name",
+      "displayName": "Schema Name",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Schema Reference Reader": {
+      "name": "Schema Reference Reader",
+      "displayName": "Schema Reference Reader",
+      "identifiesControllerService": true,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Schema Reference Writer": {
+      "name": "Schema Reference Writer",
+      "displayName": "Schema Reference Writer",
+      "identifiesControllerService": true,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Schema Registry": {
+      "name": "Schema Registry",
+      "displayName": "Schema Registry",
+      "identifiesControllerService": true,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Schema Text": {
+      "name": "Schema Text",
+      "displayName": "Schema Text",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Schema Version": {
+      "name": "Schema Version",
+      "displayName": "Schema Version",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Schema Write Strategy": {
+      "name": "Schema Write Strategy",
+      "displayName": "Schema Write Strategy",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Serialized JSON Input Handling": {
+      "name": "Serialized JSON Input Handling",
+      "displayName": "Serialized JSON Input Handling",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Suppress Null Values": {
+      "name": "Suppress Null Values",
+      "displayName": "Suppress Null Values",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Time Format": {
+      "name": "Time Format",
+      "displayName": "Time Format",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    },
+    "Timestamp Format": {
+      "name": "Timestamp Format",
+      "displayName": "Timestamp Format",
+      "identifiesControllerService": false,
+      "sensitive": false,
+      "dynamic": false
+    }
+  },
+  "controllerServiceApis": [
+    {
+      "type": "org.apache.nifi.serialization.RecordSetWriterFactory",
+      "bundle": {
+        "group": "org.apache.nifi",
+        "artifact": "nifi-standard-services-api-nar",
+        "version": "2.10.0"
+      }
+    }
+  ]
+}
