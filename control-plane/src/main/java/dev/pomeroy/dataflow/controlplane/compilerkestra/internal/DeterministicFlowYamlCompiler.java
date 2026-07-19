@@ -85,6 +85,10 @@ public class DeterministicFlowYamlCompiler implements KestraFlowCompiler {
 				concurrency:
 				  behavior: QUEUE
 				  limit: 1
+				inputs:
+				  - id: businessDate
+				    type: DATE
+				    required: false
 				""".formatted(plan.slug(), NAMESPACE, deploymentVersion));
 		yaml.append(tasks(plan));
 		if (plan.schedule() != null) {
@@ -132,8 +136,12 @@ public class DeterministicFlowYamlCompiler implements KestraFlowCompiler {
 	 * values (ADR-0002). {@code -XX:+AggressiveHeap} is the image's stock
 	 * {@code HOP_OPTIONS} value, preserved because setting the variable replaces it.
 	 *
-	 * <p>{@code BUSINESS_DATE} is the run date (UTC) for now; the Schedule-timezone
-	 * default and the run-now override are M2.6.
+	 * <p>{@code BUSINESS_DATE} is the flow's optional {@code businessDate} input when
+	 * the trigger provided one, else the run date in the Schedule's timezone — UTC for
+	 * a manual-only Dataflow, which has no Schedule to borrow a timezone from (#25).
+	 * "Run date" is {@code execution.startDate}, the execution's creation time: a Run
+	 * queued behind another (concurrency QUEUE) keeps the date it was triggered on
+	 * even if it starts executing after midnight — the as-of date the trigger meant.
 	 */
 	private String hopBatchRunner(ExecutionPlan plan) {
 		HopArtifact artifact = hopCompiler.compile(plan);
@@ -147,10 +155,10 @@ public class DeterministicFlowYamlCompiler implements KestraFlowCompiler {
 				    containerImage: %s
 				    env:
 				      RUN_ID: "{{ execution.id }}"
-				      BUSINESS_DATE: "{{ execution.startDate | date('yyyy-MM-dd') }}"
+				      BUSINESS_DATE: "{{ inputs.businessDate ?? (execution.startDate | date('yyyy-MM-dd', timeZone='%s')) }}"
 				      HOP_OPTIONS: "-XX:+AggressiveHeap -DHOP_MINIO_ENDPOINT_HOSTNAME=minio -DHOP_MINIO_ENDPOINT_PORT=9000 -DHOP_MINIO_ACCESS_KEY={{ secret('MINIO_ACCESS_KEY') }} -DHOP_MINIO_SECRET_KEY={{ secret('MINIO_SECRET_KEY') }}"
 				    inputFiles:
-				""".formatted(COMPOSE_NETWORK, HOP_IMAGE)
+				""".formatted(COMPOSE_NETWORK, HOP_IMAGE, businessDateTimezone(plan))
 				+ inputFile(artifact.pipelineFileName(), artifact.pipelineXml())
 				+ inputFile(artifact.workflowFileName(), artifact.workflowXml())
 				+ inputFile("minio.json", MINIO_CONNECTION_DEFINITION)
@@ -160,6 +168,11 @@ public class DeterministicFlowYamlCompiler implements KestraFlowCompiler {
 				      - cp minio.json %1$s/minio.json
 				      - WORKDIR="$PWD" && cd /opt/hop && ./hop-run.sh --file="$WORKDIR/%2$s" --runconfig=local --level=Basic --parameters=RUN_ID="$RUN_ID",BUSINESS_DATE="$BUSINESS_DATE"
 				""".formatted(HOP_MINIO_METADATA_FOLDER, artifact.workflowFileName());
+	}
+
+	/** The timezone the run-date default resolves Business Date in (#25). */
+	private String businessDateTimezone(ExecutionPlan plan) {
+		return plan.schedule() != null ? plan.schedule().timezone() : "UTC";
 	}
 
 	/**

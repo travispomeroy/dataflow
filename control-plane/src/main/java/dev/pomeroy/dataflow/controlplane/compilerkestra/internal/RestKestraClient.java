@@ -8,10 +8,13 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
@@ -82,13 +85,18 @@ class RestKestraClient implements KestraClient {
 	}
 
 	@Override
-	public KestraExecution createExecution(String flowId) {
-		// A bodiless POST: the compiled flows take no inputs, and Kestra accepts the
-		// trigger without a multipart form.
-		return client.post()
-				.uri("/api/v1/main/executions/{namespace}/{id}", KestraFlowCompiler.NAMESPACE, flowId)
-				.retrieve().body(ExecutionDocument.class)
-				.toExecution();
+	public KestraExecution createExecution(String flowId, Map<String, String> inputs) {
+		// Execution inputs travel as multipart form fields; with none to send, the
+		// POST stays bodiless — Kestra accepts the trigger without a form and the
+		// flow's own input defaults resolve.
+		RestClient.RequestBodySpec request = client.post()
+				.uri("/api/v1/main/executions/{namespace}/{id}", KestraFlowCompiler.NAMESPACE, flowId);
+		if (!inputs.isEmpty()) {
+			MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+			inputs.forEach(form::add);
+			request.contentType(MediaType.MULTIPART_FORM_DATA).body(form);
+		}
+		return request.retrieve().body(ExecutionDocument.class).toExecution();
 	}
 
 	@Override

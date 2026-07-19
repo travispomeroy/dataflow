@@ -5,6 +5,10 @@ labels:
 concurrency:
   behavior: QUEUE
   limit: 1
+inputs:
+  - id: businessDate
+    type: DATE
+    required: false
 tasks:
   - id: engine_runner
     type: io.kestra.plugin.scripts.shell.Commands
@@ -15,7 +19,7 @@ tasks:
     containerImage: apache/hop:2.18.1
     env:
       RUN_ID: "{{ execution.id }}"
-      BUSINESS_DATE: "{{ execution.startDate | date('yyyy-MM-dd') }}"
+      BUSINESS_DATE: "{{ inputs.businessDate ?? (execution.startDate | date('yyyy-MM-dd', timeZone='America/New_York')) }}"
       HOP_OPTIONS: "-XX:+AggressiveHeap -DHOP_MINIO_ENDPOINT_HOSTNAME=minio -DHOP_MINIO_ENDPOINT_PORT=9000 -DHOP_MINIO_ACCESS_KEY={{ secret('MINIO_ACCESS_KEY') }} -DHOP_MINIO_SECRET_KEY={{ secret('MINIO_SECRET_KEY') }}"
     inputFiles:
       positions-feed.hpl: |

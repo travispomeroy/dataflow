@@ -1,6 +1,7 @@
 package dev.pomeroy.dataflow.controlplane.compilerkestra;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * The Kestra API client (issue #16): flow registration in the one {@code dataflow}
@@ -27,11 +28,13 @@ public interface KestraClient {
 	void deleteFlow(String flowId);
 
 	/**
-	 * Starts an execution of the flow right now — run-now (issue #17). Returns the
-	 * freshly created execution (raw state {@code CREATED}), so the caller can record
-	 * it synchronously.
+	 * Starts an execution of the flow right now — run-now (issue #17). {@code inputs}
+	 * carries the flow's execution inputs (issue #25: the optional
+	 * {@code businessDate} override); empty means the flow's own defaults resolve.
+	 * Returns the freshly created execution (raw state {@code CREATED}), so the
+	 * caller can record it synchronously.
 	 */
-	KestraExecution createExecution(String flowId);
+	KestraExecution createExecution(String flowId, Map<String, String> inputs);
 
 	/**
 	 * Every execution in the one dataflow namespace, paged through exhaustively — the

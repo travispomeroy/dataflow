@@ -18,6 +18,7 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
@@ -121,6 +122,51 @@ class RunApiTests {
 		mvc.perform(post("/api/dataflows/" + id + "/run-now"))
 				.andExpect(header().string("Location",
 						not("/api/dataflows/" + id + "/runs/" + runId)));
+	}
+
+	/**
+	 * Business Date is real API surface (issue #25): an explicit override travels to
+	 * the Orchestrator as the flow's {@code businessDate} input, verbatim.
+	 */
+	@Test
+	void runNowWithABusinessDatePassesItToTheOrchestratorAsAnInput() throws Exception {
+		String id = createDeployed("Backdated Feed");
+
+		mvc.perform(post("/api/dataflows/" + id + "/run-now")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("{\"businessDate\": \"2026-07-17\"}"))
+				.andExpect(status().isAccepted());
+
+		assertThat(kestra.lastInputs).containsExactly(Map.entry("businessDate", "2026-07-17"));
+	}
+
+	/**
+	 * No override means no input at all — the flow's own run-date default resolves
+	 * Business Date, exactly as a scheduled trigger would.
+	 */
+	@Test
+	void runNowWithoutABusinessDatePassesNoInputs() throws Exception {
+		String id = createDeployed("Defaulting Feed");
+
+		mvc.perform(post("/api/dataflows/" + id + "/run-now")).andExpect(status().isAccepted());
+
+		assertThat(kestra.lastInputs).isEmpty();
+	}
+
+	@Test
+	void runNowWithAnInvalidBusinessDateIsRejectedWithAProblemDetail() throws Exception {
+		String id = createDeployed("Misdated Feed");
+
+		for (String invalid : new String[] { "17/07/2026", "2026-13-01", "yesterday", "" }) {
+			mvc.perform(post("/api/dataflows/" + id + "/run-now")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("{\"businessDate\": " + mapper.writeValueAsString(invalid) + "}"))
+					.andExpect(status().isBadRequest())
+					.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+					.andExpect(jsonPath("$.status").value(400));
+		}
+
+		assertThat(kestra.executionCreates).isEmpty();
 	}
 
 	@Test
@@ -232,6 +278,8 @@ class RunApiTests {
 
 		String lastExecutionId;
 
+		Map<String, String> lastInputs = Map.of();
+
 		// Kestra execution IDs are globally unique; the run upsert is keyed by them,
 		// so the fake must never mint the same ID twice across tests.
 		private static final AtomicInteger SEQUENCE = new AtomicInteger();
@@ -246,13 +294,14 @@ class RunApiTests {
 		}
 
 		@Override
-		public KestraExecution createExecution(String flowId) {
+		public KestraExecution createExecution(String flowId, Map<String, String> inputs) {
 			if (failNextCreate != null) {
 				RuntimeException failure = failNextCreate;
 				failNextCreate = null;
 				throw failure;
 			}
 			executionCreates.add(flowId);
+			lastInputs = Map.copyOf(inputs);
 			int sequence = SEQUENCE.incrementAndGet();
 			lastExecutionId = "exec-" + sequence;
 			return new KestraExecution(lastExecutionId, flowId, "CREATED",
@@ -268,6 +317,7 @@ class RunApiTests {
 			executionCreates.clear();
 			failNextCreate = null;
 			lastExecutionId = null;
+			lastInputs = Map.of();
 		}
 	}
 }

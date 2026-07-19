@@ -80,14 +80,40 @@ class KestraFlowGoldenTests {
 
 	@Test
 	void aManualOnlyPlanCompilesWithNoScheduleTrigger() throws Exception {
-		ExecutionPlan scheduled = canonicalPlan();
-		ExecutionPlan manualOnly = new ExecutionPlan(scheduled.slug(), scheduled.engine(),
-				scheduled.executionModel(), null, scheduled.extraction(),
-				scheduled.transforms(), scheduled.files(), scheduled.staging(),
-				scheduled.delivery());
-
-		assertThat(compiler.compile(manualOnly, VERSION)).doesNotContain("triggers:")
+		assertThat(compiler.compile(manualOnly(), VERSION)).doesNotContain("triggers:")
 				.doesNotContain("io.kestra.plugin.core.trigger.Schedule");
+	}
+
+	/**
+	 * Business Date is real API surface (issue #25): every compiled flow declares the
+	 * optional {@code businessDate} input, so a run-now override and a no-input
+	 * scheduled trigger both work against the same flow.
+	 */
+	@Test
+	void theFlowDeclaresAnOptionalBusinessDateInput() throws Exception {
+		assertThat(compiler.compile(canonicalPlan(), VERSION)).contains("""
+				inputs:
+				  - id: businessDate
+				    type: DATE
+				    required: false
+				""");
+	}
+
+	/**
+	 * Absent an override, Business Date is the run date in the Schedule's timezone
+	 * (issue #25) — the canonical plan schedules in America/New_York.
+	 */
+	@Test
+	void businessDateDefaultsToTheRunDateInTheSchedulesTimezone() throws Exception {
+		assertThat(compiler.compile(canonicalPlan(), VERSION)).contains(
+				"BUSINESS_DATE: \"{{ inputs.businessDate ?? (execution.startDate | date('yyyy-MM-dd', timeZone='America/New_York')) }}\"");
+	}
+
+	/** A manual-only Dataflow has no Schedule to borrow a timezone from: UTC. */
+	@Test
+	void aManualOnlyPlanDefaultsBusinessDateInUtc() throws Exception {
+		assertThat(compiler.compile(manualOnly(), VERSION)).contains(
+				"BUSINESS_DATE: \"{{ inputs.businessDate ?? (execution.startDate | date('yyyy-MM-dd', timeZone='UTC')) }}\"");
 	}
 
 	@Test
@@ -189,8 +215,8 @@ class KestraFlowGoldenTests {
 
 	/**
 	 * The artifact's runtime contract: {@code RUN_ID} is the Kestra execution id
-	 * (Run maps 1:1), {@code BUSINESS_DATE} the run date for now (the M2.6 override
-	 * arrives later), and MinIO credentials late-bind as {@code HOP_MINIO_*} system
+	 * (Run maps 1:1), {@code BUSINESS_DATE} the override-or-run-date resolution
+	 * (issue #25), and MinIO credentials late-bind as {@code HOP_MINIO_*} system
 	 * properties from Kestra secrets.
 	 */
 	@Test
@@ -198,7 +224,7 @@ class KestraFlowGoldenTests {
 		String yaml = compiler.compile(canonicalPlan(), VERSION);
 
 		assertThat(yaml).contains("RUN_ID: \"{{ execution.id }}\"")
-				.contains("BUSINESS_DATE: \"{{ execution.startDate | date('yyyy-MM-dd') }}\"")
+				.contains("BUSINESS_DATE: \"{{ inputs.businessDate ?? ")
 				.contains("-DHOP_MINIO_ACCESS_KEY={{ secret('MINIO_ACCESS_KEY') }}")
 				.contains("-DHOP_MINIO_SECRET_KEY={{ secret('MINIO_SECRET_KEY') }}")
 				.contains("--parameters=RUN_ID=\"$RUN_ID\",BUSINESS_DATE=\"$BUSINESS_DATE\"");
@@ -221,6 +247,14 @@ class KestraFlowGoldenTests {
 		assertThat(yaml).contains("- id: engine_runner")
 				.contains("type: io.kestra.plugin.core.log.Log").contains("placeholder")
 				.doesNotContain("io.kestra.plugin.scripts.runner.docker.Docker");
+	}
+
+	private ExecutionPlan manualOnly() throws Exception {
+		ExecutionPlan scheduled = canonicalPlan();
+		return new ExecutionPlan(scheduled.slug(), scheduled.engine(),
+				scheduled.executionModel(), null, scheduled.extraction(),
+				scheduled.transforms(), scheduled.files(), scheduled.staging(),
+				scheduled.delivery());
 	}
 
 	/** The YAML block-scalar shape the compiler embeds file content with. */

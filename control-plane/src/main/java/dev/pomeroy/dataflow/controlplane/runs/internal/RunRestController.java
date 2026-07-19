@@ -7,7 +7,10 @@ import dev.pomeroy.dataflow.controlplane.dataflow.Dataflows.DataflowRef;
 import dev.pomeroy.dataflow.controlplane.runs.RunStatus;
 import java.net.URI;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -16,6 +19,7 @@ import org.springframework.web.ErrorResponseException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import tools.jackson.databind.JsonNode;
@@ -52,17 +56,39 @@ class RunRestController {
 	}
 
 	@PostMapping("/run-now")
-	ResponseEntity<RunResponse> runNow(@PathVariable UUID dataflowId) {
+	ResponseEntity<RunResponse> runNow(@PathVariable UUID dataflowId,
+			@RequestBody(required = false) RunNowRequest request) {
 		DataflowRef dataflow = find(dataflowId);
 		if (!dataflow.deployed()) {
 			throw problem(HttpStatus.CONFLICT,
 					"Dataflow '%s' is not deployed — run-now executes the active Deployment"
 							.formatted(dataflow.slug()));
 		}
-		RunEntity run = recorder.upsert(dataflow.id(), execute(dataflow.slug()));
+		RunEntity run = recorder.upsert(dataflow.id(),
+				execute(dataflow.slug(), businessDateInput(request)));
 		return ResponseEntity.accepted()
 				.location(URI.create("/api/dataflows/" + dataflowId + "/runs/" + run.id()))
 				.body(response(run));
+	}
+
+	/**
+	 * The optional Business Date override (issue #25): absent means the Orchestrator
+	 * receives no input at all — the compiled flow's own run-date default resolves
+	 * it. Anything present must be an ISO date, rejected as a 400 problem detail
+	 * otherwise.
+	 */
+	private Map<String, String> businessDateInput(RunNowRequest request) {
+		if (request == null || request.businessDate() == null) {
+			return Map.of();
+		}
+		try {
+			return Map.of("businessDate", LocalDate.parse(request.businessDate()).toString());
+		}
+		catch (DateTimeParseException e) {
+			throw problem(HttpStatus.BAD_REQUEST,
+					"businessDate '%s' is not an ISO date (yyyy-MM-dd)"
+							.formatted(request.businessDate()));
+		}
 	}
 
 	@GetMapping("/runs")
@@ -80,9 +106,9 @@ class RunRestController {
 	}
 
 	/** A wedged Kestra becomes a 502 problem detail, same as a failed deploy push. */
-	private KestraExecution execute(String slug) {
+	private KestraExecution execute(String slug, Map<String, String> inputs) {
 		try {
-			return kestra.createExecution(slug);
+			return kestra.createExecution(slug, inputs);
 		}
 		catch (RuntimeException e) {
 			throw problem(HttpStatus.BAD_GATEWAY,
@@ -103,6 +129,9 @@ class RunRestController {
 	private RunResponse response(RunEntity run) {
 		return new RunResponse(run.id(), run.status(), run.detail(), run.kestraExecutionId(),
 				run.startedAt(), run.endedAt(), mapper.readTree(run.deliveredFiles()));
+	}
+
+	record RunNowRequest(String businessDate) {
 	}
 
 	record RunResponse(UUID id, RunStatus status, String detail, String kestraExecutionId,
