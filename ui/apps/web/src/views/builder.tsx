@@ -20,7 +20,7 @@ import '@xyflow/react/dist/style.css';
 import { validate } from 'dataflow-config';
 import { useCallback, useMemo, useState } from 'react';
 import type { DragEvent } from 'react';
-import { Link as RouterLink, useParams } from 'react-router';
+import { Link as RouterLink, useNavigate, useParams } from 'react-router';
 import {
   dataflowKeys,
   deployDataflow,
@@ -29,6 +29,7 @@ import {
   saveDataflow,
 } from '../api/dataflows';
 import type { DataflowDraft } from '../api/dataflows';
+import { runNow } from '../api/runs';
 import { nodeTypes } from '../builder/canvas-nodes';
 import {
   builderEdge,
@@ -42,6 +43,7 @@ import type { BuilderNode, NodePayload } from '../builder/graph';
 import { JsonPreview } from '../builder/json-preview';
 import { Palette, PALETTE_NODE_MIME } from '../builder/palette';
 import { PropertyPanel } from '../builder/property-panel';
+import { RunNowDialog } from '../builder/run-now-dialog';
 
 /**
  * The builder (issue #33): a React Flow canvas editing the persisted Draft,
@@ -99,8 +101,27 @@ function BuilderEditor({ draft }: { draft: DataflowDraft }) {
     onSuccess: () =>
       Promise.all([
         queryClient.invalidateQueries({ queryKey: dataflowKeys.deployments(draft.id) }),
+        queryClient.invalidateQueries({ queryKey: dataflowKeys.runs(draft.id) }),
         queryClient.invalidateQueries({ queryKey: dataflowKeys.list }),
       ]),
+  });
+
+  const [runNowOpen, setRunNowOpen] = useState(false);
+  const navigate = useNavigate();
+
+  // Run Now executes the active Deployment's frozen plan, never the Draft — the
+  // button therefore follows the deployment fact, not the canvas.
+  const triggerRun = useMutation({
+    mutationFn: (businessDate?: string) => runNow(draft.id, businessDate),
+    onSuccess: async () => {
+      setRunNowOpen(false);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: dataflowKeys.runs(draft.id) }),
+        queryClient.invalidateQueries({ queryKey: dataflowKeys.list }),
+      ]);
+      // The watching half starts immediately: land on the history, poll live.
+      await navigate(`/dataflows/${draft.id}/runs`);
+    },
   });
 
   // The deploy response is the freshest fact — the deployments refetch merely
@@ -169,10 +190,23 @@ function BuilderEditor({ draft }: { draft: DataflowDraft }) {
         >
           Deploy
         </Button>
+        <Button
+          variant="outlined"
+          disabled={activeVersion === undefined}
+          onClick={() => setRunNowOpen(true)}
+        >
+          Run Now
+        </Button>
         <Link component={RouterLink} to={`/dataflows/${draft.id}/runs`}>
           Run history
         </Link>
       </Stack>
+      <RunNowDialog
+        open={runNowOpen}
+        pending={triggerRun.isPending}
+        onCancel={() => setRunNowOpen(false)}
+        onConfirm={(businessDate) => triggerRun.mutate(businessDate)}
+      />
       <Stack direction="row" spacing={2} sx={{ height: 560 }}>
         <Palette />
         <ReactFlowProvider>

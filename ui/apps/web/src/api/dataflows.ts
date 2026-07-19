@@ -50,6 +50,7 @@ export const dataflowKeys = {
   list: ['dataflows'] as const,
   detail: (id: string) => ['dataflows', id] as const,
   deployments: (id: string) => ['dataflows', id, 'deployments'] as const,
+  runs: (id: string) => ['dataflows', id, 'runs'] as const,
 };
 
 export function listDataflows() {
