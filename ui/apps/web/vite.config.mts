@@ -1,5 +1,10 @@
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
+
+// The bundle fetches relative /api/... only — dev and preview proxy to the
+// control plane, so no CORS and no base-URL env ever enter the bundle
+// (control-plane-served static UI is an M8 productionization note).
+const apiProxy = { '/api': 'http://localhost:8085' };
 
 export default defineConfig(() => ({
   root: import.meta.dirname,
@@ -7,10 +12,12 @@ export default defineConfig(() => ({
   server:{
     port: 4200,
     host: 'localhost',
+    proxy: apiProxy,
   },
   preview:{
     port: 4200,
     host: 'localhost',
+    proxy: apiProxy,
   },
   plugins: [react()],
   build: {
@@ -20,5 +27,10 @@ export default defineConfig(() => ({
     commonjsOptions: {
       transformMixedEsModules: true,
     },
+  },
+  test: {
+    watch: false,
+    environment: 'node',
+    include: ['src/**/*.spec.ts', 'src/**/*.spec.tsx'],
   },
 }));

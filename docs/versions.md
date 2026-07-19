@@ -26,8 +26,10 @@ Digest pinning is deferred to a productionization note, with one exception below
 | Vite | `8.1.5` | `ui/package.json` (M0.7, applied) | 2026-07-18 |
 | React / react-dom | `19.2.7` | `ui/package.json` (M0.7, applied) | 2026-07-18 |
 | Vitest | `4.1.10` | `ui/package.json` (M3.2, applied) — latest stable at research date; its dependency range accepts the pinned Vite 8.1.5 (`^6.0.0 \|\| ^7.0.0 \|\| ^8.0.0`) | 2026-07-19 |
-| MUI (`@mui/material`) | `9.2.0` | **pinned in M0, installed in M3** — enters `ui/package.json` only in M3 | 2026-07-18 |
-| React Flow (`@xyflow/react`) | `12.11.2` | **pinned in M0, installed in M3** — enters `ui/package.json` only in M3 | 2026-07-18 |
+| MUI (`@mui/material`) | `9.2.0` | pinned in M0; `ui/package.json` (M3.3, applied), with its emotion styling engine pinned exact there too (see selection notes) | 2026-07-18 |
+| React Flow (`@xyflow/react`) | `12.11.2` | pinned in M0; `ui/package.json` (M3.3, applied) | 2026-07-18 |
+| React Router (`react-router`) | `7.18.1` | `ui/package.json` (M3.3, applied) — newest release on the v7 line the M3 spec settled on (see selection notes) | 2026-07-19 |
+| TanStack Query (`@tanstack/react-query`) | `5.101.2` | `ui/package.json` (M3.3, applied) — latest stable; the v5 line is still `latest` | 2026-07-19 |
 | JDK | Temurin `25.0.3+9` (compiler release `25`) | `control-plane/pom.xml` `<maven.compiler.release>25</maven.compiler.release>` (M0.8, applied) | 2026-07-18 |
 | Maven | `3.9.16` | `control-plane/` Maven wrapper `distributionUrl` (M0.8, applied) | 2026-07-18 |
 | Maven wrapper | `3.3.4` (`only-script` type) | `control-plane/.mvn/wrapper/maven-wrapper.properties` `wrapperVersion` (M0.8, applied) | 2026-07-18 |
@@ -67,6 +69,18 @@ index, the Adoptium release API, and context7 for the NiFi docker documentation.
   contributors never need a system Maven.
 - **Spring**: Boot `4.1.0` is the `<release>` in Maven Central metadata (no 4.1.x patch
   yet at research date); Modulith `2.1.0` is the matching GA line for Boot 4.1.
+- **React Router** (applied in M3.3): the M3 spec (issue #28, settled 2026-07-19) pins
+  the **v7 line, library mode**. At research date npm's `latest` dist-tag is `8.2.0` —
+  v8 shipped after the spec was settled and adopting it would re-litigate a settled
+  decision mid-milestone; `7.18.1` is the `version-7` dist-tag (newest 7.x). The v7
+  package is unified `react-router` — `react-router-dom` is a legacy alias, not needed.
+- **TanStack Query** (applied in M3.3): `5.101.2` is the `latest` dist-tag (the
+  registry's alpha/beta/rc dist-tags point at historic `5.0.0-*` pre-releases; no v6
+  line exists at research date), matching the spec's "v5, pinned at install".
+- **MUI styling engine** (applied in M3.3): `@mui/material` 9.2.0 supports two optional
+  peer engines — emotion or Pigment CSS. Emotion is MUI's default documented engine, so
+  `@emotion/react` `11.14.0` and `@emotion/styled` `11.14.1` (latest at research date)
+  are pinned exact in `ui/package.json`. Support pins, not headline rows.
 - **Testcontainers** (applied in M1.2): `2.0.5` is exactly what
   `spring-boot-testcontainers` 4.1.0 is built against (read from its published pom) —
   Boot 4 no longer manages Testcontainers versions itself. Note the 2.x module renames:

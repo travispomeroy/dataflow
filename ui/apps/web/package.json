@@ -1,5 +1,15 @@
 {
   "name": "web",
   "version": "0.0.1",
-  "private": true
+  "private": true,
+  "nx": {
+    "targets": {
+      "test": {
+        "command": "vitest run",
+        "options": { "cwd": "{projectRoot}" },
+        "cache": true,
+        "inputs": ["default", "^default"]
+      }
+    }
+  }
 }
