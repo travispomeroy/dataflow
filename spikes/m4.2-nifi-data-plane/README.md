@@ -22,10 +22,12 @@ Sequence for a fresh proof: `01 → 02 run1 → 03 run1 → 02 run2 → 03 run2 
 `schemas.mjs` holds the explicit all-string Avro schemas (the M2 verbatim-numerics
 lesson); `lib.mjs` is the minimal REST client.
 
-`artifacts/m42-flow-definition.json` is the exported reference flow — reference
-material for M4.3's compiler goldens, explicitly not a production artifact. NiFi
-omits the MinIO credential properties on export; `01-build.mjs` sets them from
-`infra/.env`.
+`artifacts/m42-flow-definition.json` is the exported reference flow — a *shape*
+reference for M4.3, explicitly not a production artifact and **not byte-stable**:
+it is a raw live export carrying instance identifiers, so re-exporting yields
+different bytes (M4.1's identifier verdict). M4.3's compiler goldens will be
+minted-deterministic, never exports. NiFi omits the MinIO credential properties
+on export; `01-build.mjs` sets them from `infra/.env`.
 
 End state after `05-teardown.mjs`: NiFi has zero child process groups and zero
 parameter contexts; no `m42-positions-feed/` prefix in the staging bucket.

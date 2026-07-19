@@ -48,14 +48,6 @@ export async function rootPgId() {
   return (await nifi('GET', '/flow/process-groups/root')).processGroupFlow.id;
 }
 
-// Revision helpers: NiFi mutations need the current revision of the component.
-export async function processorRevision(id) {
-  return (await nifi('GET', `/processors/${id}`)).revision;
-}
-export async function pgRevision(id) {
-  return (await nifi('GET', `/process-groups/${id}`)).revision;
-}
-
 export const REV0 = { version: 0 }; // creation revision
 
 export async function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }

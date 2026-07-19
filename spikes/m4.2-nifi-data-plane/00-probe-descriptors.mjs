@@ -62,8 +62,7 @@ for (const type of SERVICES) {
 
 console.log(JSON.stringify(report, null, 2));
 
-// cleanup: never-started PG with services merely created (disabled) deletes directly,
-// but services must be removed? M4.1 finding: never-started PG deletes directly.
+// cleanup: a never-started PG with never-enabled services deletes directly (M4.1 §3)
 const rev = (await nifi('GET', `/process-groups/${pgId}`)).revision;
 await nifi('DELETE', `/process-groups/${pgId}?version=${rev.version}&clientId=${rev.clientId ?? 'm42'}`);
 console.error('probe PG deleted');
