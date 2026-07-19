@@ -97,6 +97,12 @@ The fully *resolved* form of a Dataflow Config — catalog references expanded i
 extraction, merge, transform, and file-production steps. Engine-agnostic but physically
 complete.
 
+**Draft**:
+The single mutable working copy of a Dataflow Config. Always exists, however half-built;
+saving it never requires semantic validity. Deploying freezes a copy — the Draft may then
+drift ahead of the active Deployment. Runs always execute a Deployment's frozen plan,
+never the Draft.
+
 **Deployment**:
 The act of publishing a compiled Dataflow version so it can run. Each Deployment stores its
 Execution Plan as an immutable snapshot — the audit record of exactly what it will do.
