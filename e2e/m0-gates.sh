@@ -95,6 +95,18 @@ if ! grep -qx "$hop_pin" <<<"$hop_reported"; then
   exit 1
 fi
 
+stage "Stage 3: NiFi run-driver image answers with curl and jq (throwaway container)"
+# M4.4: the compiled NiFi run driver executes in this digest-pinned curl+jq
+# image, and Kestra 1.3.28's docker runner cannot *pull* a tag@digest reference
+# (docs/versions.md) — this throwaway run proves the pin AND pre-pulls it, so
+# the flow's pullPolicy IF_NOT_PRESENT never needs the broken pull path.
+driver_image='badouralix/curl-jq:alpine@sha256:e1f1e84c4c23c24d665cd9243dcf7fa531965a0b37b89a64cabca847d834dd62'
+driver_reported=$(docker run --rm "$driver_image" sh -c 'curl --version >/dev/null && jq --version' 2>&1 | tr -d '\r') || true
+if ! grep -q '^jq-' <<<"$driver_reported"; then
+  echo "FAIL: expected curl+jq from $driver_image, got: ${driver_reported:-<no output>}" >&2
+  exit 1
+fi
+
 stage "Stage 3: Kestra secret encodings in infra/.env match the plain values they derive from"
 # Kestra OSS reads secrets as base64-encoded SECRET_* env vars; compose cannot
 # encode, so infra/.env commits each value twice (plain + *_B64, M2.5). Comments

@@ -86,7 +86,7 @@ class RestNiFiDeployments implements NiFiDeployments {
 	@Override
 	public void put(String slug, int deploymentVersion, String flowDefinitionJson) {
 		String token = token();
-		String rootId = json(get(token, "/flow/process-groups/root"))
+		String rootId = json(httpGet(token, "/flow/process-groups/root"))
 				.path("processGroupFlow").path("id").asString();
 		findProcessGroup(token, slug)
 				.ifPresent(existing -> deleteProcessGroup(token, existing));
@@ -111,7 +111,7 @@ class RestNiFiDeployments implements NiFiDeployments {
 
 	/** The replace half of deploy: spike #38 §3's verified ordering, then delete. */
 	private void deleteProcessGroup(String token, String groupId) {
-		put(token, "/flow/process-groups/" + groupId,
+		httpPut(token, "/flow/process-groups/" + groupId,
 				Map.of("id", groupId, "state", "STOPPED"));
 		dropAllQueues(token, groupId);
 		controllerServicesState(token, groupId, "DISABLED");
@@ -125,15 +125,15 @@ class RestNiFiDeployments implements NiFiDeployments {
 	/** Async request-object dance: create, poll finished, delete the request. */
 	private void dropAllQueues(String token, String groupId) {
 		String base = "/process-groups/" + groupId + "/empty-all-connections-requests";
-		String requestId = json(post(token, base, null)).path("dropRequest").path("id")
+		String requestId = json(httpPost(token, base, null)).path("dropRequest").path("id")
 				.asString();
-		poll("queue drop", () -> json(get(token, base + "/" + requestId))
+		poll("queue drop", () -> json(httpGet(token, base + "/" + requestId))
 				.path("dropRequest").path("finished").asBoolean());
-		delete(token, base + "/" + requestId);
+		httpDelete(token, base + "/" + requestId);
 	}
 
 	private void controllerServicesState(String token, String groupId, String state) {
-		put(token, "/flow/process-groups/" + groupId + "/controller-services",
+		httpPut(token, "/flow/process-groups/" + groupId + "/controller-services",
 				Map.of("id", groupId, "state", state));
 	}
 
@@ -141,7 +141,7 @@ class RestNiFiDeployments implements NiFiDeployments {
 	private void awaitControllerServicesState(String token, String groupId, String state) {
 		poll("controller services " + state, () -> {
 			JsonNode services = json(
-					get(token, "/flow/process-groups/" + groupId + "/controller-services"))
+					httpGet(token, "/flow/process-groups/" + groupId + "/controller-services"))
 					.path("controllerServices");
 			for (JsonNode service : services) {
 				if (!state.equals(service.path("component").path("state").asString())) {
@@ -186,7 +186,7 @@ class RestNiFiDeployments implements NiFiDeployments {
 	/** Name = slug is the identity; the version is auditable where operators look. */
 	private void recordVersionInComments(String token, String groupId, int version) {
 		long revision = revisionOf(token, "/process-groups/" + groupId);
-		put(token, "/process-groups/" + groupId,
+		httpPut(token, "/process-groups/" + groupId,
 				Map.of("revision", Map.of("version", revision),
 						"component", Map.of("id", groupId, "comments",
 								"Deployment version " + version)));
@@ -203,7 +203,7 @@ class RestNiFiDeployments implements NiFiDeployments {
 						Map.of("name", parameter.name(), "sensitive",
 								parameter.sensitive(), "value", "")))
 				.toList();
-		String response = post(token, "/parameter-contexts",
+		String response = httpPost(token, "/parameter-contexts",
 				Map.of("revision", Map.of("version", 0),
 						"component", Map.of("name", slug, "parameters", parameters)));
 		return json(response).path("id").asString();
@@ -211,19 +211,19 @@ class RestNiFiDeployments implements NiFiDeployments {
 
 	private void bind(String token, String groupId, String contextId) {
 		long revision = revisionOf(token, "/process-groups/" + groupId);
-		put(token, "/process-groups/" + groupId,
+		httpPut(token, "/process-groups/" + groupId,
 				Map.of("revision", Map.of("version", revision),
 						"component", Map.of("id", groupId,
 								"parameterContext", Map.of("id", contextId))));
 	}
 
 	private Optional<String> findProcessGroup(String token, String name) {
-		return findByName(json(get(token, "/flow/process-groups/root"))
+		return findByName(json(httpGet(token, "/flow/process-groups/root"))
 				.path("processGroupFlow").path("flow").path("processGroups"), name);
 	}
 
 	private Optional<String> findParameterContext(String token, String name) {
-		return findByName(json(get(token, "/flow/parameter-contexts"))
+		return findByName(json(httpGet(token, "/flow/parameter-contexts"))
 				.path("parameterContexts"), name);
 	}
 
@@ -237,7 +237,7 @@ class RestNiFiDeployments implements NiFiDeployments {
 	}
 
 	private long revisionOf(String token, String uri) {
-		return json(get(token, uri)).path("revision").path("version").asLong();
+		return json(httpGet(token, uri)).path("revision").path("version").asLong();
 	}
 
 	private void poll(String what, BooleanSupplier done) {
@@ -257,12 +257,12 @@ class RestNiFiDeployments implements NiFiDeployments {
 		}
 	}
 
-	private String get(String token, String uri) {
+	private String httpGet(String token, String uri) {
 		return client.get().uri(uri).header("Authorization", "Bearer " + token)
 				.retrieve().body(String.class);
 	}
 
-	private String post(String token, String uri, Map<String, Object> body) {
+	private String httpPost(String token, String uri, Map<String, Object> body) {
 		RestClient.RequestBodySpec spec = client.post().uri(uri)
 				.header("Authorization", "Bearer " + token)
 				.contentType(MediaType.APPLICATION_JSON);
@@ -272,14 +272,14 @@ class RestNiFiDeployments implements NiFiDeployments {
 		return spec.retrieve().body(String.class);
 	}
 
-	private void put(String token, String uri, Map<String, Object> body) {
+	private void httpPut(String token, String uri, Map<String, Object> body) {
 		client.put().uri(uri).header("Authorization", "Bearer " + token)
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(MAPPER.writeValueAsString(body))
 				.retrieve().toBodilessEntity();
 	}
 
-	private void delete(String token, String uri) {
+	private void httpDelete(String token, String uri) {
 		client.delete().uri(uri).header("Authorization", "Bearer " + token)
 				.retrieve().toBodilessEntity();
 	}

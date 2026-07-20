@@ -175,7 +175,10 @@ public class NiFiServerRunner {
 			  tries=0
 			  until [ "$(api GET "/processors/$seed" | jq -r .component.validationStatus)" = VALID ]; do
 			    tries=$((tries + 1))
-			    [ "$tries" -le 30 ] || fail "seed $seed never validated"
+			    if [ "$tries" -gt 30 ]; then
+			      pg_state STOPPED
+			      fail "seed $seed never validated"
+			    fi
 			    sleep 1
 			  done
 			  run_status "$seed" RUN_ONCE
