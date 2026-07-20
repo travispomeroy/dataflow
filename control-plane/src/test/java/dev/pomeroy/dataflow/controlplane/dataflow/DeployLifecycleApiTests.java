@@ -342,6 +342,92 @@ class DeployLifecycleApiTests {
 		assertThat(engine.puts).isEmpty();
 	}
 
+	// --- engine flip & supersession teardown (M4.5) ---
+
+	/**
+	 * M4.5: flipping a nifi Deployment to hop is the ordinary lifecycle — edit the
+	 * Draft's engine, redeploy — and it leaves no residue. Hop deploys nothing
+	 * engine-side, so the superseded nifi Deployment's process group and parameter
+	 * context are torn down through the {@link EngineDeployments} port before the
+	 * Orchestrator learns the hop flow.
+	 */
+	@Test
+	void flippingANifiEngineDeploymentToHopTearsDownTheEngineSideResidue() throws Exception {
+		String id = idOf(create(nifiDraft("Flipping Feed")));
+		mvc.perform(post("/api/dataflows/" + id + "/deploy"))
+				.andExpect(status().isCreated())
+				.andExpect(jsonPath("$.version").value(1));
+		// v1 published the engine-side artifacts and tore nothing down.
+		assertThat(engine.puts).hasSize(1);
+		assertThat(engine.removes).isEmpty();
+
+		mvc.perform(put("/api/dataflows/" + id).contentType(MediaType.APPLICATION_JSON)
+				.content(canonicalDraft("Flipping Feed"))).andExpect(status().isOk());
+		mvc.perform(post("/api/dataflows/" + id + "/deploy"))
+				.andExpect(status().isCreated())
+				.andExpect(jsonPath("$.version").value(2));
+
+		// The hop redeploy published no new engine artifact but tore the orphaned nifi
+		// one down — no zombie process group survives the flip.
+		assertThat(engine.puts).hasSize(1);
+		assertThat(engine.removes).containsExactly("flipping-feed");
+		// Both flows reached Kestra under the one stable slug.
+		assertThat(orchestrator.puts).hasSize(2);
+		assertThat(orchestrator.puts.getLast().slug()).isEqualTo("flipping-feed");
+	}
+
+	/**
+	 * The other flip direction: hop → nifi. nifi's {@code put} wholly replaces the
+	 * same-slug artifacts, and hop held nothing server-side to begin with, so the flip
+	 * needs no separate teardown call — deploy converges the Engine on its own.
+	 */
+	@Test
+	void flippingAHopEngineDeploymentToNifiReplacesViaPutWithNoSeparateTeardown()
+			throws Exception {
+		String id = idOf(create(canonicalDraft("Reflipping Feed")));
+		mvc.perform(post("/api/dataflows/" + id + "/deploy")).andExpect(status().isCreated());
+		assertThat(engine.puts).isEmpty();
+		assertThat(engine.removes).isEmpty();
+
+		mvc.perform(put("/api/dataflows/" + id).contentType(MediaType.APPLICATION_JSON)
+				.content(nifiDraft("Reflipping Feed"))).andExpect(status().isOk());
+		mvc.perform(post("/api/dataflows/" + id + "/deploy"))
+				.andExpect(status().isCreated())
+				.andExpect(jsonPath("$.version").value(2));
+
+		assertThat(engine.puts).hasSize(1);
+		assertThat(engine.puts.getLast().slug()).isEqualTo("reflipping-feed");
+		assertThat(engine.removes).isEmpty();
+	}
+
+	/**
+	 * Undeploy of a nifi Deployment tears down the engine-side residue and removes the
+	 * Kestra flow both — the same teardown supersession performs, plus the flow removal
+	 * undeploy already did.
+	 */
+	@Test
+	void undeployingANifiEngineDeploymentTearsDownTheEngineSideResidue() throws Exception {
+		String id = idOf(create(nifiDraft("Retiring NiFi Feed")));
+		mvc.perform(post("/api/dataflows/" + id + "/deploy")).andExpect(status().isCreated());
+
+		mvc.perform(post("/api/dataflows/" + id + "/undeploy")).andExpect(status().isNoContent());
+
+		assertThat(engine.removes).containsExactly("retiring-nifi-feed");
+		assertThat(orchestrator.removes).containsExactly("retiring-nifi-feed");
+	}
+
+	/** Undeploy of a hop Deployment forgets the flow and never reaches for NiFi. */
+	@Test
+	void undeployingAHopEngineDeploymentTouchesNoEngine() throws Exception {
+		String id = idOf(create(canonicalDraft("Retiring Hop Feed")));
+		mvc.perform(post("/api/dataflows/" + id + "/deploy")).andExpect(status().isCreated());
+
+		mvc.perform(post("/api/dataflows/" + id + "/undeploy")).andExpect(status().isNoContent());
+
+		assertThat(engine.removes).isEmpty();
+		assertThat(orchestrator.removes).containsExactly("retiring-hop-feed");
+	}
+
 	/**
 	 * Engine-side artifacts go first (M4.4): a refused NiFi upload rolls the whole
 	 * deploy back before the Orchestrator ever sees the new flow, so a
@@ -426,6 +512,8 @@ class DeployLifecycleApiTests {
 
 		final List<EnginePut> puts = new ArrayList<>();
 
+		final List<String> removes = new ArrayList<>();
+
 		RuntimeException failNextPut;
 
 		@Override
@@ -438,8 +526,14 @@ class DeployLifecycleApiTests {
 			puts.add(new EnginePut(slug, version, flowDefinitionJson));
 		}
 
+		@Override
+		public void remove(String slug) {
+			removes.add(slug);
+		}
+
 		void reset() {
 			puts.clear();
+			removes.clear();
 			failNextPut = null;
 		}
 	}

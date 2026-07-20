@@ -20,4 +20,13 @@ public interface EngineDeployments {
 	 * Orchestrator learns the new flow.
 	 */
 	void put(String slug, int version, String flowDefinitionJson);
+
+	/**
+	 * Tears down the Dataflow's engine-side artifacts — process group and parameter
+	 * context — leaving nothing behind for the slug (M4.5). Idempotent: absence is a
+	 * no-op, so the lifecycle can call it whenever a Deployment with server-side engine
+	 * state is superseded (flipped to another engine) or undeployed, without first
+	 * knowing whether the Engine still holds anything.
+	 */
+	void remove(String slug);
 }

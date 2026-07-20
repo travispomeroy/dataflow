@@ -23,4 +23,9 @@ class NiFiEngineDeployments implements EngineDeployments {
 	public void put(String slug, int version, String flowDefinitionJson) {
 		nifi.put(slug, version, flowDefinitionJson);
 	}
+
+	@Override
+	public void remove(String slug) {
+		nifi.remove(slug);
+	}
 }

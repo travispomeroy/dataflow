@@ -11,8 +11,14 @@ package dev.pomeroy.dataflow.controlplane.runner;
  *
  * <p>Run-time work never lives here — since M1 the world runs with the control plane
  * stopped, so the compiled Kestra flow's embedded driver speaks to NiFi by itself.
+ *
+ * <p>{@code remove} is the teardown half (M4.5): supersession by another engine, or
+ * undeploy, deletes the process group and parameter context so a flipped or retired
+ * Dataflow leaves no zombie behind. Idempotent — absence is a no-op.
  */
 public interface NiFiDeployments {
 
 	void put(String slug, int deploymentVersion, String flowDefinitionJson);
+
+	void remove(String slug);
 }

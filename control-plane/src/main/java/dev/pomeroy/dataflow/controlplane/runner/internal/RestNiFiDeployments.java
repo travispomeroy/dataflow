@@ -44,6 +44,11 @@ import tools.jackson.databind.json.JsonMapper;
  * empty sensitive values, so enabling is the run driver's job once real values are
  * bound (the "or the run protocol before start" half of the spike's obligation).
  *
+ * <p>{@code remove} is the same stop → drop → disable → delete teardown on its own
+ * (M4.5): supersession by another engine, or undeploy, leaves no zombie process group
+ * or parameter context. It shares {@code put}'s replace half — both are idempotent, so
+ * a slug the Engine never held is a no-op.
+ *
  * <p>TLS certificate verification is disabled against NiFi's boot-generated
  * self-signed cert — the M0 posture ({@code curl -sk} in the compose healthcheck).
  * That means the six-way no-op {@link X509ExtendedTrustManager}: the JDK wraps a
@@ -88,10 +93,7 @@ class RestNiFiDeployments implements NiFiDeployments {
 		String token = token();
 		String rootId = json(httpGet(token, "/flow/process-groups/root"))
 				.path("processGroupFlow").path("id").asString();
-		findProcessGroup(token, slug)
-				.ifPresent(existing -> deleteProcessGroup(token, existing));
-		findParameterContext(token, slug)
-				.ifPresent(existing -> deleteParameterContext(token, existing));
+		tearDown(token, slug);
 		String groupId = upload(token, rootId, slug, flowDefinitionJson);
 		recordVersionInComments(token, groupId, deploymentVersion);
 		bind(token, groupId, createParameterContext(token, slug));
@@ -99,6 +101,25 @@ class RestNiFiDeployments implements NiFiDeployments {
 		// refuses to enable against the context's empty sensitive values (found
 		// live in M4.4), so the run driver enables services after late-binding —
 		// the "or the run protocol before start" half of spike #38's obligation.
+	}
+
+	@Override
+	public void remove(String slug) {
+		tearDown(token(), slug);
+	}
+
+	/**
+	 * Delete the slug's process group and parameter context if present — the replace
+	 * half of {@code put} and the whole of {@code remove} (M4.5). Idempotent: a slug
+	 * the Engine never held (a Hop Deployment, or one already torn down) is a no-op.
+	 * The context is deleted in its own right because NiFi does not protect the binding
+	 * and deleting the group does not cascade to it.
+	 */
+	private void tearDown(String token, String slug) {
+		findProcessGroup(token, slug)
+				.ifPresent(existing -> deleteProcessGroup(token, existing));
+		findParameterContext(token, slug)
+				.ifPresent(existing -> deleteParameterContext(token, existing));
 	}
 
 	private String token() {

@@ -1,11 +1,15 @@
 package dev.pomeroy.dataflow.controlplane.dataflow.internal;
 
+import dev.pomeroy.dataflow.controlplane.dataflow.DataflowConfig;
 import dev.pomeroy.dataflow.controlplane.dataflow.DeploymentCompiler;
 import dev.pomeroy.dataflow.controlplane.dataflow.DeploymentCompiler.Compiled;
 import dev.pomeroy.dataflow.controlplane.dataflow.DeploymentCompiler.Rejected;
+import dev.pomeroy.dataflow.controlplane.dataflow.Engine;
 import dev.pomeroy.dataflow.controlplane.dataflow.EngineDeployments;
+import dev.pomeroy.dataflow.controlplane.dataflow.ExecutionModel;
 import dev.pomeroy.dataflow.controlplane.dataflow.OrchestratorFlows;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
@@ -45,8 +49,9 @@ class DeploymentService {
 		return switch (compiler.compile(dataflow.slug(), dataflow.config(), version)) {
 			case Rejected rejected -> throw new SemanticViolationsException(rejected.violations());
 			case Compiled(String planJson, String flowYaml, String engineFlowDefinition) -> {
-				deployments.findByDataflowIdAndActiveTrue(dataflow.id())
-						.ifPresent(active -> deployments.save(active.deactivated()));
+				Optional<DeploymentEntity> superseded =
+						deployments.findByDataflowIdAndActiveTrue(dataflow.id());
+				superseded.ifPresent(active -> deployments.save(active.deactivated()));
 				DeploymentEntity frozen;
 				try {
 					frozen = deployments.save(new DeploymentEntity(null, dataflow.id(), version,
@@ -65,8 +70,17 @@ class DeploymentService {
 				// whole deploy back before the Orchestrator ever sees the new flow, so
 				// the Kestra push stays deploy's final act.
 				if (engineFlowDefinition != null) {
+					// nifi: put wholly replaces the same-slug artifacts, so a nifi-over-
+					// nifi or hop-over-nifi flip needs no separate teardown.
 					push(() -> engineDeployments.put(dataflow.slug(), version,
 							engineFlowDefinition));
+				}
+				else if (superseded.map(DeploymentEntity::config)
+						.filter(DeploymentService::hasServerSideEngineState).isPresent()) {
+					// Flipping a nifi Deployment to an engine with no server-side state
+					// (M4.5): put never runs, so tear the orphaned process group and
+					// parameter context down here before the Orchestrator's new flow.
+					push(() -> engineDeployments.remove(dataflow.slug()));
 				}
 				push(() -> orchestrator.put(dataflow.slug(), flowYaml));
 				yield frozen;
@@ -86,7 +100,26 @@ class DeploymentService {
 								"Dataflow '%s' is not deployed".formatted(dataflow.slug())),
 						null));
 		deployments.save(active.deactivated());
+		// Engine-side residue goes with the flow (M4.5): a nifi Deployment's process
+		// group and parameter context are torn down, then Kestra forgets the flow. Hop
+		// held nothing server-side, so its teardown is skipped entirely — undeploy of a
+		// hop feed never reaches for NiFi.
+		if (hasServerSideEngineState(active.config())) {
+			push(() -> engineDeployments.remove(dataflow.slug()));
+		}
 		push(() -> orchestrator.remove(dataflow.slug()));
+	}
+
+	/**
+	 * Whether a Deployment's Engine holds server-side state that a supersession or
+	 * undeploy must tear down — today only the {@code nifi × server} cell (its process
+	 * group and parameter context). Mirrors the compiler's gate on emitting an engine
+	 * flow definition at all, so the two never disagree about which Deployments have
+	 * engine-side residue.
+	 */
+	private static boolean hasServerSideEngineState(DataflowConfig config) {
+		return config.engine() == Engine.NIFI
+				&& config.executionModel() == ExecutionModel.SERVER;
 	}
 
 	boolean deployed(UUID dataflowId) {
@@ -105,7 +138,7 @@ class DeploymentService {
 		catch (RuntimeException e) {
 			throw new ErrorResponseException(HttpStatus.BAD_GATEWAY,
 					ProblemDetail.forStatusAndDetail(HttpStatus.BAD_GATEWAY,
-							"The Orchestrator did not accept the change: " + e.getMessage()),
+							"A downstream system did not accept the change: " + e.getMessage()),
 					e);
 		}
 	}
