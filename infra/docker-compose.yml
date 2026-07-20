@@ -42,6 +42,10 @@ services:
       SECRET_MINIO_ACCESS_KEY: ${KESTRA_SECRET_MINIO_ACCESS_KEY_B64}
       SECRET_MINIO_SECRET_KEY: ${KESTRA_SECRET_MINIO_SECRET_KEY_B64}
       SECRET_SFTP_POMEROY: ${KESTRA_SECRET_SFTP_POMEROY_B64}
+      # the NiFi run driver's credentials (M4.4): the compiled flow late-binds them
+      # into the driver container's env at run time, control plane stopped
+      SECRET_NIFI_USERNAME: ${KESTRA_SECRET_NIFI_USERNAME_B64}
+      SECRET_NIFI_PASSWORD: ${KESTRA_SECRET_NIFI_PASSWORD_B64}
       KESTRA_CONFIGURATION: |
         # full_content: hand each request to the API only once its body has fully
         # arrived. Kestra 1.3.28's default streamed path has a fatal allocation
@@ -148,6 +152,11 @@ services:
 
   nifi:
     image: apache/nifi:2.10.0
+    # the boot-generated self-signed cert carries SAN [localhost, <hostname>], and
+    # Jetty's SNI host check 400s any other name — pin the hostname so the compiled
+    # run driver can reach https://nifi:8443 from the compose network (M4.4); host
+    # access stays https://localhost:8443
+    hostname: nifi
     environment:
       SINGLE_USER_CREDENTIALS_USERNAME: ${NIFI_USER}
       SINGLE_USER_CREDENTIALS_PASSWORD: ${NIFI_PASSWORD}

@@ -1,0 +1,243 @@
+id: positions-feed
+namespace: dataflow
+labels:
+  dataflow.version: "1"
+concurrency:
+  behavior: QUEUE
+  limit: 1
+inputs:
+  - id: businessDate
+    type: DATE
+    required: false
+tasks:
+  - id: engine_runner
+    type: io.kestra.plugin.scripts.shell.Commands
+    taskRunner:
+      type: io.kestra.plugin.scripts.runner.docker.Docker
+      networkMode: dataflow_default
+      pullPolicy: IF_NOT_PRESENT
+    containerImage: badouralix/curl-jq:alpine@sha256:e1f1e84c4c23c24d665cd9243dcf7fa531965a0b37b89a64cabca847d834dd62
+    env:
+      RUN_ID: "{{ execution.id }}"
+      BUSINESS_DATE: "{{ inputs.businessDate ?? (execution.startDate | date('yyyy-MM-dd', timeZone='America/New_York')) }}"
+      NIFI_USERNAME: "{{ secret('NIFI_USERNAME') }}"
+      NIFI_PASSWORD: "{{ secret('NIFI_PASSWORD') }}"
+      MINIO_ACCESS_KEY: "{{ secret('MINIO_ACCESS_KEY') }}"
+      MINIO_SECRET_KEY: "{{ secret('MINIO_SECRET_KEY') }}"
+    inputFiles:
+      driver.sh: |
+        #!/bin/sh
+        # Generated NiFi run driver (nifi x server): one Run of the deployed process
+        # group, driven entirely over NiFi's REST API with the control plane stopped.
+        set -eu
+
+        NIFI=https://nifi:8443/nifi-api
+        SLUG=positions-feed
+        SEED_IDS='af27d692-24bf-501d-ba83-e3779f56248f 8a6826cc-d90c-507b-b983-65cc261af461 b948e1e0-155f-5bec-a433-296e92eca663'
+        FAILURE_CONNECTION_IDS='ba00feb7-821d-5c6b-8b5c-89b1a516f927 14f6d40b-45b7-560d-8a7e-b9d0a4d5586e e2948b08-06e9-53d0-be8d-37f1acb1ccb0 90f881c1-5c4a-5569-864a-f4edb1c61d6a 943b9e46-c2b6-5a14-bd0c-a741895d1a6c 3aa1c699-2624-5a3f-9018-88937ded03e0 84b629be-9b61-59b7-89b1-6c9da325d520 47ef8b09-100a-560e-ae56-70aacc2eae70 80dabc6d-c198-5af3-b2b2-fc70e0cf93bb 26ecbdfb-9374-5842-841a-386b25a949ba f043d999-a144-5218-abf4-3090e5d01b7e 0b8d43ff-5989-569f-802b-ece8febd68d6 1fdcd9e0-0f45-5948-b7a2-b26c032f2b5f 63810c6a-c5dc-5483-8a6c-6bfbf9523c0c fd399208-e1f8-535d-9059-a63a74921fa2'
+        POLL_INTERVAL=2
+        POLL_BUDGET=90
+        DRAINED_POLLS=3
+
+        fail() { echo "FAIL: $*" >&2; exit 1; }
+
+        # authenticated JSON call; -k accepts the self-signed cert, the M0 posture
+        api() {
+          method=$1; path=$2; shift 2
+          curl -sSk --fail-with-body -X "$method" "$NIFI$path" \
+            -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' "$@"
+        }
+
+        run_status() {
+          rev=$(api GET "/processors/$1" | jq -c .revision)
+          api PUT "/processors/$1/run-status" \
+            -d "$(jq -n --argjson rev "$rev" --arg state "$2" '{revision: $rev, state: $state}')" \
+            >/dev/null
+        }
+
+        pg_state() {
+          api PUT "/flow/process-groups/$PG" \
+            -d "$(jq -n --arg id "$PG" --arg state "$1" '{id: $id, state: $state}')" >/dev/null
+        }
+
+        echo "run $RUN_ID of $SLUG, business date $BUSINESS_DATE"
+        TOKEN=$(curl -sSk --fail-with-body -X POST "$NIFI/access/token" \
+          --data-urlencode "username=$NIFI_USERNAME" \
+          --data-urlencode "password=$NIFI_PASSWORD") || fail "cannot authenticate against NiFi"
+
+        PG=$(api GET /flow/process-groups/root | jq -r --arg name "$SLUG" \
+          '.processGroupFlow.flow.processGroups[] | select(.component.name == $name) | .id')
+        [ -n "$PG" ] || fail "no process group named $SLUG"
+
+        # NiFi re-mints live ids on upload; the artifact's deterministic ids survive
+        # as versionedComponentId — resolve them once (spike #38)
+        PROCESSORS=$(api GET "/process-groups/$PG/processors")
+        CONNECTIONS=$(api GET "/process-groups/$PG/connections")
+        SEED_LIVE=''
+        for minted in $SEED_IDS; do
+          live=$(echo "$PROCESSORS" | jq -r --arg v "$minted" \
+            '.processors[] | select(.component.versionedComponentId == $v) | .id')
+          [ -n "$live" ] || fail "seed $minted not found in the live process group"
+          SEED_LIVE="$SEED_LIVE$live "
+        done
+        FAILURE_LIVE=''
+        for minted in $FAILURE_CONNECTION_IDS; do
+          live=$(echo "$CONNECTIONS" | jq -r --arg v "$minted" \
+            '.connections[] | select(.component.versionedComponentId == $v) | .id')
+          [ -n "$live" ] || fail "failure connection $minted not found in the live process group"
+          FAILURE_LIVE="$FAILURE_LIVE$live "
+        done
+
+        # clean start regardless of any previous run's corpse: stop, force-DISABLE the
+        # seeds (an enabled seed timer-fires the instant the group starts), drop queues
+        pg_state STOPPED
+        for seed in $SEED_LIVE; do run_status "$seed" DISABLED; done
+        DROP=$(api POST "/process-groups/$PG/empty-all-connections-requests" | jq -r .dropRequest.id)
+        tries=0
+        until [ "$(api GET "/process-groups/$PG/empty-all-connections-requests/$DROP" | jq -r .dropRequest.finished)" = true ]; do
+          tries=$((tries + 1))
+          [ "$tries" -le 30 ] || fail "queue drop did not finish"
+          sleep 1
+        done
+        api DELETE "/process-groups/$PG/empty-all-connections-requests/$DROP" >/dev/null
+
+        # late-bind this run's parameters; sensitive values transit only this call
+        CTX=$(api GET /flow/parameter-contexts | jq -r --arg name "$SLUG" \
+          '.parameterContexts[] | select(.component.name == $name) | .id')
+        [ -n "$CTX" ] || fail "no parameter context named $SLUG"
+        UPDATE=$(jq -n --arg id "$CTX" \
+          --argjson rev "$(api GET "/parameter-contexts/$CTX" | jq .revision.version)" \
+          --arg businessDate "$BUSINESS_DATE" --arg runId "$RUN_ID" \
+          --arg minioAccessKey "$MINIO_ACCESS_KEY" --arg minioSecretKey "$MINIO_SECRET_KEY" \
+          '{revision: {version: $rev}, id: $id, component: {id: $id, parameters: [
+            {parameter: {name: "businessDate", sensitive: false, value: $businessDate}},
+            {parameter: {name: "runId", sensitive: false, value: $runId}},
+            {parameter: {name: "minioAccessKey", sensitive: true, value: $minioAccessKey}},
+            {parameter: {name: "minioSecretKey", sensitive: true, value: $minioSecretKey}}
+          ]}}')
+        REQ=$(api POST "/parameter-contexts/$CTX/update-requests" -d "$UPDATE" | jq -r .request.requestId)
+        tries=0
+        until [ "$(api GET "/parameter-contexts/$CTX/update-requests/$REQ" | jq -r .request.complete)" = true ]; do
+          tries=$((tries + 1))
+          [ "$tries" -le 60 ] || fail "parameter update did not complete"
+          sleep 1
+        done
+        REASON=$(api GET "/parameter-contexts/$CTX/update-requests/$REQ" | jq -r .request.failureReason)
+        api DELETE "/parameter-contexts/$CTX/update-requests/$REQ" >/dev/null
+        [ "$REASON" = null ] || fail "parameter update failed: $REASON"
+
+        # enable controller services: they arrive DISABLED on upload (spike #38) and
+        # deploy leaves them that way, because the credentials service refuses to
+        # enable until the sensitive parameters hold real values - which they now do
+        api PUT "/flow/process-groups/$PG/controller-services" \
+          -d "$(jq -n --arg id "$PG" '{id: $id, state: "ENABLED"}')" >/dev/null
+        tries=0
+        until [ "$(api GET "/flow/process-groups/$PG/controller-services" \
+          | jq '[.controllerServices[] | select(.component.state != "ENABLED")] | length')" = 0 ]; do
+          tries=$((tries + 1))
+          [ "$tries" -le 30 ] || fail "controller services did not all enable"
+          sleep 1
+        done
+
+        # start (DISABLED seeds are skipped), then one run's worth of trigger, explicit.
+        # Freshly-uploaded processors arrive DISABLED and unvalidated - enabling is
+        # what kicks validation off, and RUN_ONCE on a not-yet-VALID processor is a
+        # silent no-op (spike #39) - so wait for VALID between the two.
+        pg_state RUNNING
+        for seed in $SEED_LIVE; do
+          run_status "$seed" STOPPED
+          tries=0
+          until [ "$(api GET "/processors/$seed" | jq -r .component.validationStatus)" = VALID ]; do
+            tries=$((tries + 1))
+            [ "$tries" -le 30 ] || fail "seed $seed never validated"
+            sleep 1
+          done
+          run_status "$seed" RUN_ONCE
+        done
+
+        # drained = 0 queued for DRAINED_POLLS consecutive polls, counted only after
+        # work was seen: RUN_ONCE on an invalid processor is a silent no-op (spike #39),
+        # and an untouched group polls 0 from the first sample
+        STATUS=TIMEOUT
+        SAW_WORK=0
+        ZEROES=0
+        polls=0
+        while [ "$polls" -lt "$POLL_BUDGET" ]; do
+          polls=$((polls + 1))
+          for conn in $FAILURE_LIVE; do
+            depth=$(api GET "/flow/connections/$conn/status" | jq -r .connectionStatus.aggregateSnapshot.flowFilesQueued)
+            if [ "$depth" -gt 0 ]; then
+              echo "failure funnel connection $conn holds $depth flowfile(s)" >&2
+              STATUS=FAILED
+            fi
+          done
+          if [ "$STATUS" = FAILED ]; then break; fi
+          QUEUED=$(api GET "/flow/process-groups/$PG/status?recursive=true" | jq -r .processGroupStatus.aggregateSnapshot.flowFilesQueued)
+          if [ "$QUEUED" -gt 0 ]; then
+            SAW_WORK=1
+            ZEROES=0
+          elif [ "$SAW_WORK" -eq 1 ]; then
+            ZEROES=$((ZEROES + 1))
+            if [ "$ZEROES" -ge "$DRAINED_POLLS" ]; then
+              STATUS=DRAINED
+              break
+            fi
+          fi
+          sleep "$POLL_INTERVAL"
+        done
+
+        # stop; seeds back to DISABLED so the next start cannot timer-fire them
+        pg_state STOPPED
+        for seed in $SEED_LIVE; do run_status "$seed" DISABLED; done
+
+        case "$STATUS" in
+          DRAINED) echo "run $RUN_ID drained clean" ;;
+          FAILED) fail "run $RUN_ID failed - flowfiles in the failure funnel, nothing staged" ;;
+          *) fail "run $RUN_ID did not drain within $((POLL_BUDGET * POLL_INTERVAL))s (saw work: $SAW_WORK)" ;;
+        esac
+    commands:
+      - sh driver.sh
+  - id: staging_pull
+    type: io.kestra.plugin.minio.Downloads
+    endpoint: http://minio:9000
+    accessKeyId: "{{ secret('MINIO_ACCESS_KEY') }}"
+    secretKeyId: "{{ secret('MINIO_SECRET_KEY') }}"
+    bucket: staging
+    prefix: "positions-feed/{{ execution.id }}/"
+    action: NONE
+  - id: delivery_hidden_upload
+    type: io.kestra.plugin.core.flow.ForEach
+    values: "{{ outputs.staging_pull.objects }}"
+    tasks:
+      - id: upload_hidden
+        type: io.kestra.plugin.fs.sftp.Upload
+        host: sftp
+        port: "22"
+        username: pomeroy
+        password: "{{ secret('SFTP_POMEROY') }}"
+        from: "{{ fromJson(taskrun.value).uri }}"
+        to: "/upload/pomeroy/.{{ fromJson(taskrun.value).key | substringAfterLast('/') }}.part"
+  - id: delivery_rename
+    type: io.kestra.plugin.core.flow.ForEach
+    values: "{{ outputs.staging_pull.objects }}"
+    tasks:
+      - id: rename_visible
+        type: io.kestra.plugin.fs.sftp.Move
+        host: sftp
+        port: "22"
+        username: pomeroy
+        password: "{{ secret('SFTP_POMEROY') }}"
+        from: "/upload/pomeroy/.{{ fromJson(taskrun.value).key | substringAfterLast('/') }}.part"
+        to: "/upload/pomeroy/{{ fromJson(taskrun.value).key | substringAfterLast('/') }}"
+  - id: count_records
+    type: io.kestra.plugin.scripts.shell.Commands
+    taskRunner:
+      type: io.kestra.plugin.core.runner.Process
+    inputFiles: "{{ outputs.staging_pull.objects | jq('map({key: .key, value: .uri}) | from_entries') | first | toJson }}"
+    commands:
+      - cd "positions-feed/{{ execution.id }}/" && files="" && for f in *; do [ -f "$f" ] || continue; files="${files:+$files,}{\"name\":\"$f\",\"records\":$(( $(wc -l < "$f") - 1 ))}"; done && printf '::%s::\n' "{\"outputs\":{\"deliveredFiles\":[$files]}}"
+triggers:
+  - id: schedule
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "30 6 * * *"
+    timezone: America/New_York

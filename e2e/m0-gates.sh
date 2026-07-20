@@ -103,7 +103,9 @@ env_value() { grep "^$1=" infra/.env | cut -d= -f2-; }
 for pair in \
   MINIO_ROOT_USER:KESTRA_SECRET_MINIO_ACCESS_KEY_B64 \
   MINIO_ROOT_PASSWORD:KESTRA_SECRET_MINIO_SECRET_KEY_B64 \
-  SFTP_PASSWORD:KESTRA_SECRET_SFTP_POMEROY_B64; do
+  SFTP_PASSWORD:KESTRA_SECRET_SFTP_POMEROY_B64 \
+  NIFI_USER:KESTRA_SECRET_NIFI_USERNAME_B64 \
+  NIFI_PASSWORD:KESTRA_SECRET_NIFI_PASSWORD_B64; do
   plain=${pair%%:*} b64=${pair#*:}
   if [[ "$(printf %s "$(env_value "$plain")" | base64)" != "$(env_value "$b64")" ]]; then
     echo "FAIL: $b64 is not the base64 of $plain — regenerate with: printf %s '<value>' | base64" >&2

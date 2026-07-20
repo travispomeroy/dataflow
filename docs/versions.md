@@ -20,6 +20,7 @@ Digest pinning is deferred to a productionization note, with one exception below
 | SFTP server | `atmoz/sftp:alpine@sha256:a6cb3eb29202ca7f57e73bb7e527286e66e0e822fff65609207c7e0ef2d135a3` | `infra/docker-compose.yml` (M0.5) | 2026-07-18 |
 | Apache NiFi | `apache/nifi:2.10.0` | `infra/docker-compose.yml` (M0.6) | 2026-07-18 |
 | Apache Hop | `apache/hop:2.18.1` | throwaway-container image check in `e2e/` (M0.6); `DeterministicFlowYamlCompiler` `HOP_IMAGE` — the engine-runner container image (M2.5); no compose service until M5 | 2026-07-18 |
+| curl+jq driver image | `badouralix/curl-jq:alpine@sha256:e1f1e84c4c23c24d665cd9243dcf7fa531965a0b37b89a64cabca847d834dd62` | `NiFiServerRunner` `DRIVER_IMAGE` — the container the compiled NiFi run driver executes in (M4.4) | 2026-07-19 |
 | Node.js | `24.18.0` (LTS "Krypton") | `.nvmrc` + root `package.json` `engines` (M0.1, applied); `ui/package.json` `engines` (M0.7, applied) | 2026-07-18 |
 | npm | `11.16.0` (the version bundled with Node 24.18.0) | root `package.json` `engines` (M0.1, applied); `ui/package.json` (M0.7, applied) | 2026-07-18 |
 | Nx | `23.1.0` | `ui/package.json` (M0.7, applied) | 2026-07-18 |
@@ -53,6 +54,20 @@ index, the Adoptium release API, and context7 for the NiFi docker documentation.
 - **MinIO**: `RELEASE.2025-09-07T16-13-09Z` is the last community release published to
   Docker Hub (MinIO stopped shipping newer community images). Fine for POC staging; a real
   deployment would use AWS S3 anyway (the M8 profile flip).
+- **curl+jq driver image** (applied in M4.4): the NiFi run driver is a compiler-generated
+  curl+jq shell script and spec #37 mandates a pinned image shipping both with no
+  network installs at run time. Candidates at research date (Docker Hub API):
+  `alpine/curl` and `curlimages/curl` ship curl only; `cicirello/alpine-plus-plus`
+  ships neither curl nor jq; `badouralix/curl-jq` ships exactly curl+jq but publishes
+  only rolling tags (`alpine`, `ubuntu`, `debian`) — so this is a digest pin, the
+  atmoz/sftp precedent. The digest is the `alpine` tag's *manifest-list* digest (one
+  immutable identity resolving natively on both amd64 and arm64, unlike the atmoz
+  single-arch image digest — that repo published no list). Found live in M4.4:
+  Kestra 1.3.28's Docker task runner cannot *pull* a `tag@digest` reference (it
+  splits the reference at the last colon and asks the daemon for an invalid name),
+  so the image must be pre-pulled onto the host — `pullPolicy: IF_NOT_PRESENT` then
+  skips the pull and the daemon resolves the full reference fine. The M4 gate chain
+  owns the pre-pull, exactly as it owns warming the Hop image.
 - **atmoz/sftp**: the repo publishes only rolling tags (`alpine`, `debian`) — there is no
   versioned tag to pin, so this is the one digest pin. Digest captured from the `alpine`
   tag on the research date. The digest is the linux/amd64 image; on arm64 hosts Docker

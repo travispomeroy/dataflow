@@ -3,6 +3,7 @@ package dev.pomeroy.dataflow.controlplane.dataflow.internal;
 import dev.pomeroy.dataflow.controlplane.dataflow.DeploymentCompiler;
 import dev.pomeroy.dataflow.controlplane.dataflow.DeploymentCompiler.Compiled;
 import dev.pomeroy.dataflow.controlplane.dataflow.DeploymentCompiler.Rejected;
+import dev.pomeroy.dataflow.controlplane.dataflow.EngineDeployments;
 import dev.pomeroy.dataflow.controlplane.dataflow.OrchestratorFlows;
 import java.time.Instant;
 import java.util.UUID;
@@ -28,11 +29,14 @@ class DeploymentService {
 
 	private final OrchestratorFlows orchestrator;
 
+	private final EngineDeployments engineDeployments;
+
 	DeploymentService(DeploymentRepository deployments, DeploymentCompiler compiler,
-			OrchestratorFlows orchestrator) {
+			OrchestratorFlows orchestrator, EngineDeployments engineDeployments) {
 		this.deployments = deployments;
 		this.compiler = compiler;
 		this.orchestrator = orchestrator;
+		this.engineDeployments = engineDeployments;
 	}
 
 	@Transactional
@@ -40,7 +44,7 @@ class DeploymentService {
 		int version = nextVersion(dataflow.id());
 		return switch (compiler.compile(dataflow.slug(), dataflow.config(), version)) {
 			case Rejected rejected -> throw new SemanticViolationsException(rejected.violations());
-			case Compiled(String planJson, String flowYaml) -> {
+			case Compiled(String planJson, String flowYaml, String engineFlowDefinition) -> {
 				deployments.findByDataflowIdAndActiveTrue(dataflow.id())
 						.ifPresent(active -> deployments.save(active.deactivated()));
 				DeploymentEntity frozen;
@@ -56,6 +60,13 @@ class DeploymentService {
 									"Another deploy of '%s' won version %d — retry"
 											.formatted(dataflow.slug(), version)),
 							e);
+				}
+				// Engine-side artifacts first (M4.4): a refused NiFi upload rolls the
+				// whole deploy back before the Orchestrator ever sees the new flow, so
+				// the Kestra push stays deploy's final act.
+				if (engineFlowDefinition != null) {
+					push(() -> engineDeployments.put(dataflow.slug(), version,
+							engineFlowDefinition));
 				}
 				push(() -> orchestrator.put(dataflow.slug(), flowYaml));
 				yield frozen;
@@ -83,9 +94,9 @@ class DeploymentService {
 	}
 
 	/**
-	 * The Orchestrator call runs inside the freezing transaction: a failed push
-	 * becomes a 502 problem detail and rolls the lifecycle change back, so the spine
-	 * and Kestra never disagree about what is live.
+	 * Orchestrator and Engine calls run inside the freezing transaction: a failed
+	 * push becomes a 502 problem detail and rolls the lifecycle change back, so the
+	 * spine, Kestra and the Engine never disagree about what is live.
 	 */
 	private void push(Runnable call) {
 		try {

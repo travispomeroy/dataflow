@@ -28,6 +28,19 @@ import java.util.List;
 public record NiFiArtifact(String fileName, String flowDefinitionJson,
 		List<String> seedProcessorIds, List<String> failureConnectionIds) {
 
+	/** One artifact parameter: its name and whether NiFi must treat it as sensitive. */
+	public record Parameter(String name, boolean sensitive) {
+	}
+
+	/**
+	 * The runtime contract, in declaration order: the deploy path creates the
+	 * Dataflow's parameter context with exactly these names (values empty until a
+	 * run), and the run driver's update-request late-binds all four per run.
+	 */
+	public static final List<Parameter> PARAMETERS = List.of(
+			new Parameter("businessDate", false), new Parameter("runId", false),
+			new Parameter("minioAccessKey", true), new Parameter("minioSecretKey", true));
+
 	public NiFiArtifact {
 		seedProcessorIds = seedProcessorIds == null ? List.of() : List.copyOf(seedProcessorIds);
 		failureConnectionIds = failureConnectionIds == null ? List.of()

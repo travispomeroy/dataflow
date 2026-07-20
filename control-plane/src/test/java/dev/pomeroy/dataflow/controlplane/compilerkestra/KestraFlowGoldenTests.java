@@ -10,8 +10,12 @@ import dev.pomeroy.dataflow.controlplane.compilerhop.HopArtifact;
 import dev.pomeroy.dataflow.controlplane.compilerhop.internal.DeterministicHopXmlCompiler;
 import dev.pomeroy.dataflow.controlplane.compilerkestra.internal.DeterministicFlowYamlCompiler;
 import dev.pomeroy.dataflow.controlplane.compilerkestra.internal.HopBatchRunner;
+import dev.pomeroy.dataflow.controlplane.compilerkestra.internal.NiFiServerRunner;
+import dev.pomeroy.dataflow.controlplane.compilernifi.NiFiArtifact;
+import dev.pomeroy.dataflow.controlplane.compilernifi.internal.DeterministicFlowDefinitionCompiler;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Locale;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
@@ -30,10 +34,13 @@ class KestraFlowGoldenTests {
 
 	static final Path GOLDEN_FLOW = Path.of("../e2e/golden/positions-feed.flow.yaml");
 
+	static final Path GOLDEN_NIFI_FLOW = Path.of("../e2e/golden/positions-feed.nifi.flow.yaml");
+
 	static final int VERSION = 1;
 
 	KestraFlowCompiler compiler = new DeterministicFlowYamlCompiler(
-			new HopBatchRunner(new DeterministicHopXmlCompiler()));
+			new HopBatchRunner(new DeterministicHopXmlCompiler()),
+			new NiFiServerRunner(new DeterministicFlowDefinitionCompiler()));
 
 	@Test
 	void theCanonicalPlanCompilesToTheCommittedGoldenByteForByte() throws Exception {
@@ -259,22 +266,157 @@ class KestraFlowGoldenTests {
 	}
 
 	/**
-	 * Only the {@code hop × batch} cell of the engine matrix is real (M2); every
-	 * other cell keeps the honest placeholder until its milestone lands it
-	 * (M4 nifi × server, M5 hop × server).
+	 * The {@code hop × batch} (M2) and {@code nifi × server} (M4.4) cells of the
+	 * engine matrix are real; the two remaining cells keep the honest placeholder
+	 * until M5 lands them.
 	 */
 	@Test
-	void aNonHopBatchPlanKeepsThePlaceholderEngineRunner() throws Exception {
-		ExecutionPlan hop = canonicalPlan();
-		ExecutionPlan nifi = new ExecutionPlan(hop.slug(), Engine.NIFI,
-				ExecutionModel.SERVER, hop.schedule(), hop.extraction(), hop.transforms(),
-				hop.files(), hop.staging(), hop.delivery());
+	void anUnlandedEngineMatrixCellKeepsThePlaceholderEngineRunner() throws Exception {
+		for (ExecutionPlan plan : new ExecutionPlan[] {
+				cell(Engine.HOP, ExecutionModel.SERVER),
+				cell(Engine.NIFI, ExecutionModel.BATCH) }) {
+			String yaml = compiler.compile(plan, VERSION);
 
-		String yaml = compiler.compile(nifi, VERSION);
+			assertThat(yaml).contains("- id: engine_runner")
+					.contains("type: io.kestra.plugin.core.log.Log").contains("placeholder")
+					.doesNotContain("io.kestra.plugin.scripts.runner.docker.Docker");
+		}
+	}
 
-		assertThat(yaml).contains("- id: engine_runner")
-				.contains("type: io.kestra.plugin.core.log.Log").contains("placeholder")
-				.doesNotContain("io.kestra.plugin.scripts.runner.docker.Docker");
+	/**
+	 * The nifi-variant flow's golden seam (spec #37): the canonical plan flipped to
+	 * {@code engine: nifi} compiles to flow YAML that byte-matches its own committed
+	 * golden — same regeneration ritual as the hop golden above.
+	 */
+	@Test
+	void theNifiVariantCompilesToTheCommittedGoldenByteForByte() throws Exception {
+		String yaml = compiler.compile(nifiVariant(), VERSION);
+
+		if (System.getProperty("regenerate.goldens") != null) {
+			Files.createDirectories(GOLDEN_NIFI_FLOW.getParent());
+			Files.writeString(GOLDEN_NIFI_FLOW, yaml);
+		}
+
+		assertThat(yaml).isEqualTo(Files.readString(GOLDEN_NIFI_FLOW));
+	}
+
+	@Test
+	void theNifiVariantCompilesTwiceToByteIdenticalOutput() throws Exception {
+		assertThat(compiler.compile(nifiVariant(), VERSION))
+				.isEqualTo(compiler.compile(nifiVariant(), VERSION));
+	}
+
+	/**
+	 * M4.4: the {@code nifi × server} engine runner is real — the generated driver
+	 * script runs in the pinned curl+jq image as an ephemeral sibling container on
+	 * the compose network (docs/versions.md; the digest is the manifest-list pin).
+	 */
+	@Test
+	void theNifiEngineRunnerRunsThePinnedDriverImageAsAnEphemeralSiblingContainer()
+			throws Exception {
+		String yaml = compiler.compile(nifiVariant(), VERSION);
+
+		assertThat(yaml).contains("type: io.kestra.plugin.scripts.shell.Commands")
+				.contains("type: io.kestra.plugin.scripts.runner.docker.Docker")
+				.contains("containerImage: badouralix/curl-jq:alpine@sha256:")
+				.contains("networkMode: dataflow_default")
+				.contains("pullPolicy: IF_NOT_PRESENT")
+				.contains("- sh driver.sh")
+				.doesNotContain("placeholder");
+	}
+
+	/**
+	 * The embedded driver implements the spike-#38 run protocol: token auth, clean
+	 * start (queue drop), async parameter update, start with seeds skipped, explicit
+	 * RUN_ONCE, drain/failure polling, stop. The golden pins the full text; this
+	 * pins the protocol's load-bearing calls by name.
+	 */
+	@Test
+	void theNifiDriverImplementsTheRunProtocol() throws Exception {
+		String yaml = compiler.compile(nifiVariant(), VERSION);
+
+		assertThat(yaml).contains("/access/token")
+				.contains("empty-all-connections-requests")
+				.contains("update-requests")
+				.contains("controller-services")
+				.contains("run-status")
+				.contains("RUN_ONCE")
+				.contains("versionedComponentId")
+				.contains("status?recursive=true")
+				.contains("DRAINED_POLLS=3");
+	}
+
+	/**
+	 * The driver addresses live components only through the artifact's deterministic
+	 * ids (NiFi re-mints live ids on upload, spike #38): every compiled seed
+	 * processor id and failure-connection id is spliced into the flow verbatim.
+	 */
+	@Test
+	void theNifiDriverSplicesTheArtifactsDeterministicIds() throws Exception {
+		NiFiArtifact artifact = new DeterministicFlowDefinitionCompiler()
+				.compile(nifiVariant());
+
+		String yaml = compiler.compile(nifiVariant(), VERSION);
+
+		assertThat(artifact.seedProcessorIds()).isNotEmpty();
+		assertThat(artifact.failureConnectionIds()).isNotEmpty();
+		for (String id : artifact.seedProcessorIds()) {
+			assertThat(yaml).contains(id);
+		}
+		for (String id : artifact.failureConnectionIds()) {
+			assertThat(yaml).contains(id);
+		}
+	}
+
+	/**
+	 * The driver's parameter update covers the artifact's whole runtime contract
+	 * ({@link NiFiArtifact#PARAMETERS}), with each value drawn from the matching
+	 * {@code UPPER_SNAKE} environment variable — so a contract change refuses to
+	 * pass here until the driver template learns it.
+	 */
+	@Test
+	void theNifiDriverLateBindsTheWholeParameterContract() throws Exception {
+		String yaml = compiler.compile(nifiVariant(), VERSION);
+
+		for (NiFiArtifact.Parameter parameter : NiFiArtifact.PARAMETERS) {
+			String env = parameter.name().replaceAll("([A-Z])", "_$1")
+					.toUpperCase(Locale.ROOT);
+			assertThat(yaml).contains("--arg %s \"$%s\"".formatted(parameter.name(), env));
+			assertThat(yaml).contains("{parameter: {name: \"%s\", sensitive: %s, value: $%s}}"
+					.formatted(parameter.name(), parameter.sensitive(), parameter.name()));
+		}
+	}
+
+	/**
+	 * ADR-0002 for the nifi cell: the flow names the NiFi and MinIO secrets the
+	 * driver authenticates with, never their values.
+	 */
+	@Test
+	void theNifiVariantNamesSecretsButNeverTheirValues() throws Exception {
+		String yaml = compiler.compile(nifiVariant(), VERSION);
+
+		assertThat(yaml).contains("{{ secret('NIFI_USERNAME') }}")
+				.contains("{{ secret('NIFI_PASSWORD') }}")
+				.contains("{{ secret('MINIO_ACCESS_KEY') }}")
+				.contains("{{ secret('MINIO_SECRET_KEY') }}");
+		for (String key : new String[] { "NIFI_USER", "NIFI_PASSWORD", "MINIO_ROOT_USER",
+				"MINIO_ROOT_PASSWORD" }) {
+			assertThat(yaml).doesNotContain(envValue(key));
+		}
+	}
+
+	/**
+	 * Kestra renders {@code inputFiles} content through Pebble, so two adjacent left
+	 * braces anywhere in the embedded driver would be parsed as an expression open —
+	 * the script must never contain them outside the env block's real expressions.
+	 */
+	@Test
+	void theNifiDriverScriptContainsNoPebbleExpressionOpeners() throws Exception {
+		String yaml = compiler.compile(nifiVariant(), VERSION);
+		String driver = yaml.substring(yaml.indexOf("driver.sh: |"),
+				yaml.indexOf("    commands:"));
+
+		assertThat(driver).doesNotContain("{{").doesNotContain("{%").doesNotContain("{#");
 	}
 
 	private ExecutionPlan manualOnly() throws Exception {
@@ -283,6 +425,19 @@ class KestraFlowGoldenTests {
 				scheduled.executionModel(), null, scheduled.extraction(),
 				scheduled.transforms(), scheduled.files(), scheduled.staging(),
 				scheduled.delivery());
+	}
+
+	/** The canonical plan flipped to {@code nifi × server} — the M4 engine swap. */
+	private ExecutionPlan nifiVariant() throws Exception {
+		return cell(Engine.NIFI, ExecutionModel.SERVER);
+	}
+
+	private ExecutionPlan cell(Engine engine, ExecutionModel executionModel)
+			throws Exception {
+		ExecutionPlan hop = canonicalPlan();
+		return new ExecutionPlan(hop.slug(), engine, executionModel, hop.schedule(),
+				hop.extraction(), hop.transforms(), hop.files(), hop.staging(),
+				hop.delivery());
 	}
 
 	/** The YAML block-scalar shape the compiler embeds file content with. */

@@ -29,8 +29,12 @@ public class DeterministicFlowYamlCompiler implements KestraFlowCompiler {
 
 	private final HopBatchRunner hopBatchRunner;
 
-	public DeterministicFlowYamlCompiler(HopBatchRunner hopBatchRunner) {
+	private final NiFiServerRunner nifiServerRunner;
+
+	public DeterministicFlowYamlCompiler(HopBatchRunner hopBatchRunner,
+			NiFiServerRunner nifiServerRunner) {
 		this.hopBatchRunner = hopBatchRunner;
+		this.nifiServerRunner = nifiServerRunner;
 	}
 
 	@Override
@@ -63,13 +67,16 @@ public class DeterministicFlowYamlCompiler implements KestraFlowCompiler {
 
 	/**
 	 * One engine-runner task per engine matrix cell. {@code hop × batch} is real
-	 * since M2.5; every other cell keeps the honest placeholder — it stages nothing,
-	 * so the staging pull that follows fails — until its milestone lands the runner
-	 * (M4 {@code nifi × server}, M5 {@code hop × server}).
+	 * since M2.5, {@code nifi × server} since M4.4; the remaining cells keep the
+	 * honest placeholder — it stages nothing, so the staging pull that follows
+	 * fails — until M5 lands their runners.
 	 */
 	private String engineRunner(ExecutionPlan plan) {
 		if (plan.engine() == Engine.HOP && plan.executionModel() == ExecutionModel.BATCH) {
 			return hopBatchRunner.task(plan);
+		}
+		if (plan.engine() == Engine.NIFI && plan.executionModel() == ExecutionModel.SERVER) {
+			return nifiServerRunner.task(plan);
 		}
 		return """
 				  - id: engine_runner

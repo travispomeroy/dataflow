@@ -19,8 +19,15 @@ public interface DeploymentCompiler {
 	sealed interface CompilationResult permits Compiled, Rejected {
 	}
 
-	/** The artifacts an accepted config freezes into a Deployment. */
-	record Compiled(String planJson, String flowYaml) implements CompilationResult {
+	/**
+	 * The artifacts an accepted config freezes into a Deployment.
+	 * {@code engineFlowDefinition} is the engine-side artifact deploy publishes
+	 * through {@link EngineDeployments} — the NiFi flow-definition snapshot for the
+	 * {@code nifi × server} cell, {@code null} for Engines with no server-side state
+	 * (Hop batch ships everything inside the flow YAML).
+	 */
+	record Compiled(String planJson, String flowYaml,
+			String engineFlowDefinition) implements CompilationResult {
 	}
 
 	/** The structured semantic violations a rejected config reports (ADR-0005). */

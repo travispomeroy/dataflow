@@ -31,12 +31,15 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * The Draft → Deploy lifecycle seam (issue #16): deploy freezes an immutable
- * Deployment and publishes the flow through the {@link OrchestratorFlows} port; the
- * recording fake below stands where live Kestra does, so these tests assert exactly
- * what the Orchestrator is told, byte for byte, without the compose world.
+ * Deployment and publishes the flow through the {@link OrchestratorFlows} port — and,
+ * for a nifi-engine Dataflow, the engine-side artifacts through the
+ * {@link EngineDeployments} port (M4.4); the recording fakes below stand where live
+ * Kestra and NiFi do, so these tests assert exactly what each is told, byte for byte,
+ * without the compose world.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -49,15 +52,28 @@ class DeployLifecycleApiTests {
 	@Autowired
 	RecordingOrchestratorFlows orchestrator;
 
+	@Autowired
+	RecordingEngineDeployments engine;
+
 	ObjectMapper mapper = new ObjectMapper();
 
 	@BeforeEach
-	void resetOrchestrator() {
+	void resetRecordings() {
 		orchestrator.reset();
+		engine.reset();
 	}
 
 	String canonicalDraft(String name) throws Exception {
 		return draft(name, Files.readString(Path.of("../e2e/canonical/positions-feed.config.json")));
+	}
+
+	/** The canonical config flipped to {@code nifi × server} — the M4 engine swap. */
+	String nifiDraft(String name) throws Exception {
+		ObjectNode config = (ObjectNode) mapper.readTree(
+				Files.readString(Path.of("../e2e/canonical/positions-feed.config.json")));
+		config.put("engine", "nifi");
+		config.put("executionModel", "server");
+		return draft(name, mapper.writeValueAsString(config));
 	}
 
 	String draft(String name, String configJson) {
@@ -290,6 +306,65 @@ class DeployLifecycleApiTests {
 				.andExpect(jsonPath("$.version").value(2));
 	}
 
+	/**
+	 * M4.4: a nifi-engine deploy publishes the engine-side artifacts — the compiled
+	 * flow definition, byte-identical to the committed golden — through the
+	 * {@link EngineDeployments} port, and the flow it pushes to Kestra is the nifi
+	 * variant carrying the embedded run driver. Both goldens carry the slug, so this
+	 * test must own {@code positions-feed} — it deletes its Dataflow at the end
+	 * because the canonical hop test mints the same slug.
+	 */
+	@Test
+	void deployingANifiEngineDraftPublishesTheEngineSideArtifacts() throws Exception {
+		String id = idOf(create(nifiDraft("Positions Feed")));
+
+		mvc.perform(post("/api/dataflows/" + id + "/deploy"))
+				.andExpect(status().isCreated())
+				.andExpect(jsonPath("$.version").value(1));
+
+		assertThat(engine.puts).containsExactly(new EnginePut("positions-feed", 1,
+				Files.readString(Path.of("../e2e/golden/positions-feed.flow-definition.json"))));
+		assertThat(orchestrator.puts).containsExactly(new FlowPut("positions-feed",
+				Files.readString(Path.of("../e2e/golden/positions-feed.nifi.flow.yaml"))));
+
+		mvc.perform(post("/api/dataflows/" + id + "/undeploy")).andExpect(status().isNoContent());
+		mvc.perform(delete("/api/dataflows/" + id)).andExpect(status().isNoContent());
+	}
+
+	/** Hop batch has no server-side engine state: the engine port is never told. */
+	@Test
+	void deployingAHopEngineDraftPublishesNoEngineSideArtifacts() throws Exception {
+		String id = idOf(create(canonicalDraft("Hop Feed")));
+
+		mvc.perform(post("/api/dataflows/" + id + "/deploy"))
+				.andExpect(status().isCreated());
+
+		assertThat(engine.puts).isEmpty();
+	}
+
+	/**
+	 * Engine-side artifacts go first (M4.4): a refused NiFi upload rolls the whole
+	 * deploy back before the Orchestrator ever sees the new flow, so a
+	 * half-deployment can never schedule runs of an engine that has nothing to run.
+	 */
+	@Test
+	void aFailedEngineDeployFreezesNoDeploymentAndNeverReachesTheOrchestrator() throws Exception {
+		String id = idOf(create(nifiDraft("Unlucky NiFi Feed")));
+		engine.failNextPut = new IllegalStateException("NiFi is unreachable");
+
+		mvc.perform(post("/api/dataflows/" + id + "/deploy"))
+				.andExpect(status().isBadGateway())
+				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON));
+
+		assertThat(orchestrator.puts).isEmpty();
+		mvc.perform(get("/api/dataflows/" + id + "/deployments"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$", hasSize(0)));
+		mvc.perform(post("/api/dataflows/" + id + "/deploy"))
+				.andExpect(status().isCreated())
+				.andExpect(jsonPath("$.version").value(1));
+	}
+
 	@Test
 	void aFailedOrchestratorPushFreezesNoDeployment() throws Exception {
 		String id = idOf(create(canonicalDraft("Unlucky Feed")));
@@ -344,6 +419,31 @@ class DeployLifecycleApiTests {
 		}
 	}
 
+	record EnginePut(String slug, int version, String flowDefinitionJson) {
+	}
+
+	static class RecordingEngineDeployments implements EngineDeployments {
+
+		final List<EnginePut> puts = new ArrayList<>();
+
+		RuntimeException failNextPut;
+
+		@Override
+		public void put(String slug, int version, String flowDefinitionJson) {
+			if (failNextPut != null) {
+				RuntimeException failure = failNextPut;
+				failNextPut = null;
+				throw failure;
+			}
+			puts.add(new EnginePut(slug, version, flowDefinitionJson));
+		}
+
+		void reset() {
+			puts.clear();
+			failNextPut = null;
+		}
+	}
+
 	@TestConfiguration(proxyBeanMethods = false)
 	static class OrchestratorRecording {
 
@@ -351,6 +451,12 @@ class DeployLifecycleApiTests {
 		@Primary
 		RecordingOrchestratorFlows recordingOrchestratorFlows() {
 			return new RecordingOrchestratorFlows();
+		}
+
+		@Bean
+		@Primary
+		RecordingEngineDeployments recordingEngineDeployments() {
+			return new RecordingEngineDeployments();
 		}
 	}
 }
